@@ -22,14 +22,14 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import java.util.List;
 import java.util.Optional;
 import team7111.robot.Constants;
-import team7111.robot.subsystems.VisionSubsystem;
+import team7111.robot.subsystems.Vision;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 
 public class Camera extends PhotonCamera{
     private Transform3d cameraToRobotCenter;
-    private VisionSubsystem vision;
+    private Vision vision;
     private PhotonPoseEstimator photonPoseEstimator;
     private PhotonPipelineResult latestResult = new PhotonPipelineResult();
     private PhotonTrackedTarget bestTarget;
@@ -54,7 +54,7 @@ public class Camera extends PhotonCamera{
     private final double poseAmbiguityShifter = 0.2;
     private final double poseAmbiguityMultiplier = 4;
 
-    public Camera(String cameraName, Transform3d cameraToRobotCenter, EstimatedRobotPose estRobotPose, VisionSubsystem vision) {
+    public Camera(String cameraName, Transform3d cameraToRobotCenter, EstimatedRobotPose estRobotPose, Vision vision) {
         super(cameraName);
         this.cameraToRobotCenter = cameraToRobotCenter;
         this.vision = vision;

@@ -1,4 +1,4 @@
-package team7111.robot.utils.singleaxisgyro;
+package team7111.robot.utils.gyro;
 
 import java.util.function.Supplier;
 
@@ -10,7 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 
-public class SimSwerveGyro implements GenericSwerveGyro {
+public class SimSwerveGyro extends SimGyro {
 
     private SwerveModuleState[] states;
     private Supplier<SwerveModuleState[]> statesSupplier;
@@ -31,17 +31,17 @@ public class SimSwerveGyro implements GenericSwerveGyro {
     }
 
     @Override
-    public Rotation2d getRotation() {
+    public Rotation2d getYaw() {
         return gyroRotation;
     }
 
     @Override
-    public void setRotation(Rotation2d rotation) {
+    public void setYaw(Rotation2d rotation) {
         gyroSim.setAngle(rotation.getDegrees());
     }
 
     @Override
-    public void setInverted(boolean isCCW) {
+    public void invertYaw(boolean isCCW) {
         invertValue = isCCW
             ? -1
             : 1;

@@ -14,7 +14,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,17 +24,16 @@ import team7111.lib.pathfinding.*;
 import team7111.robot.Constants.SwerveConstants;
 import team7111.robot.utils.SwerveModule;
 import team7111.robot.utils.gyro.NavXGyro;
-import team7111.robot.utils.singleaxisgyro.GenericSwerveGyro;
-import team7111.robot.utils.singleaxisgyro.RealSwerveGyro;
-import team7111.robot.utils.singleaxisgyro.SimSwerveGyro;
+import team7111.robot.utils.gyro.SimSwerveGyro;
+import team7111.robot.utils.gyro.GenericGyro;
 
-public class SwerveSubsystem extends SubsystemBase {
+public class Swerve extends SubsystemBase {
     private final SwerveModule[] modules;
 
     private final SwerveDriveOdometry swerveOdometry;
     private Field2d field = new Field2d();
 
-    private final GenericSwerveGyro gyro;
+    private final GenericGyro gyro;
     private SwerveModuleState[] states = new SwerveModuleState[]{};
 
     private StructArrayPublisher<SwerveModuleState> commandedStatePublisher = 
@@ -70,7 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
         snapAngle
     };
 
-    public SwerveSubsystem() {
+    public Swerve() {
         modules = new SwerveModule[] {
             new SwerveModule(0, SwerveConstants.drivebaseConfig.moduleTypes[0]),
             new SwerveModule(1, SwerveConstants.drivebaseConfig.moduleTypes[1]),
@@ -79,9 +77,9 @@ public class SwerveSubsystem extends SubsystemBase {
         };
 
         gyro = RobotBase.isReal()
-            ? new RealSwerveGyro(new NavXGyro())
+            ? new NavXGyro()
             : new SimSwerveGyro(this::getStates, SwerveConstants.kinematics);
-        gyro.setInverted(true);
+        gyro.invertYaw(true);
         zeroGyro();
 
         pathMaster = new PathMaster(this::getPose, () -> getYaw());
@@ -245,7 +243,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        return gyro.getRotation(); //Rotation2d.fromDegrees(gyro.getYaw());
+        return gyro.getYaw(); //Rotation2d.fromDegrees(gyro.getYaw());
     }
 
     public Pose2d getPose() {
@@ -267,7 +265,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     private void zeroGyro() {
-        gyro.setRotation(Rotation2d.kZero);
+        gyro.setYaw(Rotation2d.kZero);
     }
 
     public void setPath(Path path){
