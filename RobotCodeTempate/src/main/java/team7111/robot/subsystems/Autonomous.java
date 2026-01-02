@@ -11,7 +11,7 @@ import team7111.robot.utils.AutoAction;
 public class Autonomous extends SubsystemBase {
 
     private WaypointConstraints translationConstraints = new WaypointConstraints(5, 0, 0.1);
-    private WaypointConstraints rotationConstraints = new WaypointConstraints(0, 0, 0);
+    private WaypointConstraints rotationConstraints = new WaypointConstraints(720, 0, 5);
     
     public enum Autos {
         forward,

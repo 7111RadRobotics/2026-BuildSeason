@@ -18,7 +18,7 @@ public class Example extends SubsystemBase {
         thirdExample,
     }
 
-    private ExampleState state = ExampleState.example;
+    private ExampleState currentState = ExampleState.example;
 
     public Example() {}
 
@@ -28,8 +28,24 @@ public class Example extends SubsystemBase {
 
     public void simulationPeriodic(){}
 
+    // The below methods are examples of retrieveable boolean values.
+    // These can be checked in SuperStructure to determine a SuperState
+    // or change a state/value in another subsystem.
+    public boolean isAtSetpoint(){
+        boolean isAtSetpoint = true; // would be true if mechanisms were at/near their setpoints.
+        return isAtSetpoint;
+    }
+
+    public boolean getBeamBreak(){
+        return true; // would return the value of a beambreak object.
+    }
+
+    /**
+     * This is the subsystem's state manager.
+     * It calls the state method of the variable representing the subsystem's state.
+     */
     private void manageState(){
-        switch(state){
+        switch(currentState){
             case example:
                 example();
                 break;
@@ -57,10 +73,10 @@ public class Example extends SubsystemBase {
     }
 
     public void setState(ExampleState state){
-        this.state = state;
+        this.currentState = state;
     }
 
     public ExampleState getState(){
-        return state;
+        return currentState;
     }
 }
