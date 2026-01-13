@@ -8,6 +8,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import team7111.robot.subsystems.Example;
+import team7111.robot.subsystems.SuperStructure;
+import team7111.robot.subsystems.Swerve;
+import team7111.robot.subsystems.Vision;
+import team7111.robot.subsystems.SuperStructure.SuperState;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -15,6 +20,11 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
+
+    private Swerve swerve = new Swerve();
+    private Vision vision = new Vision();
+    private Example example = new Example();
+    private SuperStructure superStructure = new SuperStructure(swerve, vision, example);
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -48,13 +58,18 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        
+        superStructure.setSuperState(SuperState.autonomousEnter);
     }
 
     /** This function is called periodically during autonomous. */
     @Override
     public void autonomousPeriodic() {
         
+    }
+
+    @Override
+    public void autonomousExit(){
+        superStructure.setSuperState(SuperState.autonomousExit);
     }
 
     /** This function is called once when teleop is enabled. */

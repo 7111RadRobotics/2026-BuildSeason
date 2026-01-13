@@ -14,7 +14,7 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints rotationConstraints = new WaypointConstraints(720, 0, 5);
     
     public enum Autos {
-        forward,
+        shootPreload,
     }
 
     public enum Paths {
@@ -31,13 +31,13 @@ public class Autonomous extends SubsystemBase {
 
     public List<AutoAction> getAutonomous(Autos autoName){
         ArrayList<AutoAction> auto = new ArrayList<>();
-        // define each autonomous.
+        // define each autonomous using a switch statement.
         // each auto is an array of "AutoAction's"
         return auto;
     }
 
     public Path getPath(Paths path){
-        // define Path object for each Paths
+        // define Path object for each Paths enum using a switch statement
         return null;
     }
 }

@@ -13,12 +13,12 @@ public class Example extends SubsystemBase {
      * It's name should be the subsystem's followed by "State"
      */
     public enum ExampleState {
-        example,
-        otherExample,
-        thirdExample,
+        stow,
+        deploy,
+        manual,
     }
 
-    private ExampleState currentState = ExampleState.example;
+    private ExampleState currentState = ExampleState.stow;
 
     public Example() {}
 
@@ -46,30 +46,30 @@ public class Example extends SubsystemBase {
      */
     private void manageState(){
         switch(currentState){
-            case example:
-                example();
+            case stow:
+                stow();
                 break;
-            case otherExample:
-                otherExample();
+            case deploy:
+                deploy();
                 break;
-            case thirdExample:
-                thirdExample();
+            case manual:
+                manual();
                 break;
             default:
                 break;
         }
     }
 
-    private void example(){
-        System.out.println("Runs code for the example state");
+    private void stow(){
+        System.out.println("Runs code for the stow state");
     }
 
-    private void otherExample(){
-        System.out.println("Runs code for the otherExample state");
+    private void deploy(){
+        System.out.println("Runs code for the deploy state");
     }
 
-    private void thirdExample(){
-        System.out.println("Runs code for the thirdExample state");
+    private void manual(){
+        System.out.println("Runs code for the manual state");
     }
 
     public void setState(ExampleState state){

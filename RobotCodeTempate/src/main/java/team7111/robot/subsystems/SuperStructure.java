@@ -29,7 +29,7 @@ public class SuperStructure extends SubsystemBase {
     //Subsystem Variables
     private final Swerve swerve;
     private final Vision vision;
-    private final Example exampleMechanism; // object for an example subsystem that controls a mechanism
+    private final Example example; // object for an example subsystem that controls a mechanism
     //TODO: decide and create other subsystems
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
@@ -40,15 +40,19 @@ public class SuperStructure extends SubsystemBase {
     private SuperState superState = SuperState.example1;
 
     private boolean inAuto = false;
+    private int autoIndex = 0;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
      */
-    public SuperStructure(Swerve swerve, Vision vision, Example exampleMechanism){
+    public SuperStructure(Swerve swerve, Vision vision, Example example){
         this.swerve = swerve;
         this.vision = vision;
-        this.exampleMechanism = exampleMechanism;
+        this.example = example;
+
+        this.swerve.setJoysickInputs(() -> driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
+        this.swerve.setDriveFieldRelative(true);
     }
 
     /**
@@ -107,7 +111,8 @@ public class SuperStructure extends SubsystemBase {
      * @return true since there is no logic to compute
      */
     private boolean autonomousEnter(){
-        superState = SuperState.autonomous;
+        setSuperState(SuperState.autonomous);
+        autoIndex = 0;
         autonomous();
         return true;
     }
@@ -123,6 +128,16 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomous(){
         inAuto = true;
 
+        /* TODO: Write code that will run a list of AutoActions received from Autonomous.java
+         * It needs to check whether it is a Path or SuperState and whether there is
+         * an alternate condition (replaces the default), additional condition (AND), or optional condition (OR).
+         * If the AutoAction is a state, it will call manageState(autoAction.getSuperState).
+         * If the AutoAction is a Path, it will set the path in swerve to its path and set the swerve state to initializePath.
+         * The autoIndex should be increased when the current AutoAction's condition is true (This includes taking into account alternate, additional, and optional conditions).
+         * The default condition for a SuperState is the returned boolean from it's state method.
+         * The default condition for a Path is its isFinished() method.
+         */
+
         return true;
     }
 
@@ -134,6 +149,8 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean autonomousExit(){
         inAuto = false;
+        //TODO: Code for setting up teleop goes here.
+        // this may include setting swerve to manual control, setting the superState to a different state, etc.
         return true;
     }
 
@@ -150,7 +167,7 @@ public class SuperStructure extends SubsystemBase {
 
     /**
      * This method is responsible for changing the robot's {@link SuperState}.
-     * <p> This method MUST be used when changing the robot's SuperState as it should not change when in autonomous mode.
+     * <p> This method MUST be used when changing the robot's SuperState to ensure it does not interfere with autonomous.
      * @param state the SuperState to set the robot if not in Autonomous mode
      */
     public void setSuperState(SuperState state){
