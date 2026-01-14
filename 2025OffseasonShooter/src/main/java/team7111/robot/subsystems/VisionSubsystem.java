@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import team7111.robot.Constants;
@@ -20,6 +21,17 @@ public class VisionSubsystem extends SubsystemBase{
     //we on longer have a limelight on the robot, however we may one day need to put it back on again. Therefore, I have left this code inside of the program, although it may make it less readable, it could be useful one day. Thank you for taking the time to read this wonderful message and I hope you have a great day :D
     //private PhotonCamera camera1 = new PhotonCamera("photonvision1");
     
+    /** Offset from horizontal of the camera angle */
+    private final double cameraOffset = 0.0;
+
+    /** Offset from horizontal that the shooter's minimum value is */
+    private final double shooterAngleOffset = 37.0;
+
+    /** Offset added to the camera to get to the shooter */
+    private final double shooterXOffset = 0.0;
+    
+    /** Offset added to the camera to get to the shooter */
+    private final double shooterZOffset = 0.0;
     /**
      * Length is the number of cameras.
      * Each index is the position of the camera.
@@ -41,7 +53,7 @@ public class VisionSubsystem extends SubsystemBase{
         this
         );*/
     public final Camera orangepi1 = new Camera(
-        "OV9281_1", 
+        "OV9281_3", 
         cameraPositionsToCenter[0], 
         new EstimatedRobotPose(estPose3d, 0.0, null, PoseStrategy.AVERAGE_BEST_TARGETS), 
         this
@@ -55,7 +67,7 @@ public class VisionSubsystem extends SubsystemBase{
 
     public Camera[] cameraList = new Camera[] {
         orangepi1,
-        orangepi2,
+
     };
 
     public VisionSubsystem(){
@@ -75,6 +87,8 @@ public class VisionSubsystem extends SubsystemBase{
             }
 
             camera.periodic();
+
+            SmartDashboard.putNumber("Shooting Angle", shooterAngle());
         }
     }
 
@@ -86,21 +100,26 @@ public class VisionSubsystem extends SubsystemBase{
         
         Transform3d distanceToTarget = cameraList[0].getCamToTarget();
 
-        double height = distanceToTarget.getZ();
-        double distance = distanceToTarget.getX();
+        if(distanceToTarget == null) {
+            return 0;
+        }
+
+        double height = distanceToTarget.getZ() + shooterZOffset;
+        double distance = distanceToTarget.getX() + shooterXOffset;
 
         double directDistance = height * height + distance * distance;
         directDistance = Math.sqrt(directDistance);
 
         double calculatedAngle = Math.asin(height/directDistance);
         calculatedAngle = calculatedAngle * 180/Math.PI;
-        
+
         if(calculatedAngle > 30) {
             calculatedAngle = 30;
         } else if(calculatedAngle < 0) {
             calculatedAngle = 0;
         }
 
+        calculatedAngle = calculatedAngle + cameraOffset + shooterAngleOffset;
         return calculatedAngle;
     }
 }
