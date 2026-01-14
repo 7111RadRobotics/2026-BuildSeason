@@ -40,8 +40,8 @@ public class PathMaster {
     private boolean isPathMirrored = false;
     private boolean fieldRelative = false;
 
-    private boolean avoidFieldElements = false;
-    private Translation2d initialPosition = null;
+    private boolean avoidFieldElements = true;
+    private Translation2d initialPosition = new Translation2d(1, 1);
     private Translation2d currentPosition = null;
     private double G = 0;
     private boolean pathfinding = false;

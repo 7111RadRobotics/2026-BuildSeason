@@ -2,6 +2,7 @@ package team7111.lib.pathfinding;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -56,6 +57,7 @@ public class Path {
     private double startDistance = 0;
     private Translation2d initialPosition = null;
     private Translation2d currentPosition = null;
+    private Optional<Map.Entry<Translation2d, Double>> minScore = Optional.empty();
 
     /**
      * Constructs a path from several waypoints. Uses pathMaster class to define parameters.
@@ -257,11 +259,12 @@ public class Path {
     /**
      * Routs around any objects in the path
      */
-public void avoidFieldElements(boolean avoidFieldElements, FieldElement[] fieldElements, Path path, Supplier<Pose2d> suppliedPose){
-        if(!avoidFieldElements){
+    public void avoidFieldElements(boolean avoidFieldElements, FieldElement[] fieldElements, Path path, Supplier<Pose2d> suppliedPose){
+        initialPosition = suppliedPose.get().getTranslation();
+        if (!avoidFieldElements) {
             return;
-        }
-        if (avoidFieldElements) {
+        } else {
+                System.out.println("Runs");
                 waypointPos = path.getCurrentWaypoint().getPose().getTranslation();
                 currentPos = suppliedPose.get().getTranslation();
 
@@ -299,7 +302,13 @@ public void avoidFieldElements(boolean avoidFieldElements, FieldElement[] fieldE
                     double currentDistance = neighbor.getDistance(waypointPos);
                     double pathWeight = startDistance + currentDistance;
                     fScore.put(neighbor, pathWeight);
-                    System.out.println("Neighbor " + neighbor + " | G=" + startDistance + " H=" + currentDistance + " F=" + pathWeight);
+
+                    if(!neighborStatus.get(neighbor)) {
+                        minScore = fScore.entrySet()
+                            .stream()
+                            .min(Map.Entry.comparingByValue());
+                    }
+                    System.out.println(minScore);
                 }
         }
     }
