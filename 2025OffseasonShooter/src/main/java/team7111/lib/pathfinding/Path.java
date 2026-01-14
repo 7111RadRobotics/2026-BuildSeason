@@ -56,8 +56,10 @@ public class Path {
     Map<Translation2d, Double> fScore = new HashMap<>();
     private double startDistance = 0;
     private Translation2d initialPosition = null;
-    private Translation2d currentPosition = null;
     private Optional<Map.Entry<Translation2d, Double>> minScore = Optional.empty();
+    private Translation2d endPath = null;
+    private Double endPathX = null;
+    private Double endPathY = null;
 
     /**
      * Constructs a path from several waypoints. Uses pathMaster class to define parameters.
@@ -275,10 +277,9 @@ public class Path {
                     waypointPos.getX() - currentPos.getX(),
                     waypointPos.getY() - currentPos.getY()
                 );
-                currentPosition = suppliedPose.get().getTranslation();
                 startDistance = Math.sqrt(
-                    Math.pow(currentPosition.getX() - initialPosition.getX(), 2) +
-                    Math.pow(currentPosition.getY() - initialPosition.getY(), 2)
+                    Math.pow(currentPos.getX() - initialPosition.getX(), 2) +
+                    Math.pow(currentPos.getY() - initialPosition.getY(), 2)
                 );
                 pathWeight = currentDistance + startDistance;
 
@@ -309,15 +310,52 @@ public class Path {
                             .min(Map.Entry.comparingByValue());
                     }
                 }
-                Translation2d waypointPosition = minScore
+                Translation2d nodePosition = minScore
                     .map(Map.Entry::getKey)
                     .orElse(null);
-                Waypoint[] pathWaypoints = new Waypoint[]{
-                    new Waypoint(new Pose2d(waypointPosition.getX(), waypointPosition.getY(), suppliedPose.get().getRotation()), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
-                };
+                
+                endPathX = path.getCurrentWaypoint().getPose().getTranslation().getX();
+                endPathY = path.getCurrentWaypoint().getPose().getTranslation().getY();
+
+                endPath = new Translation2d(endPathX * gridSize, endPathY * gridSize);
+                if (currentPos != endPath && currentPos.getDistance(endPath) < robotRadius) {
+                    neighborCheck(nodePosition);
+                    System.out.println("Done");
+                }
         }   
     }
     
+    private void neighborCheck(Translation2d inputNeighbor) {
+        for (double[] dir : directions) {
+            double nx = currentX + dir[0];
+            double ny = currentY + dir[1];
+
+            if (planner.isBlocked(inputNeighbor, robotRadius)) {
+                neighborStatus.put(inputNeighbor, true);
+                continue;
+            }
+
+            neighborStatus.put(inputNeighbor, false);
+
+            double startDistance = currentPos.getDistance(inputNeighbor);
+            double currentDistance = inputNeighbor.getDistance(waypointPos);
+            double pathWeight = startDistance + currentDistance;
+            fScore.put(inputNeighbor, pathWeight);
+
+            if(!neighborStatus.get(inputNeighbor)) {
+                minScore = fScore.entrySet()
+                    .stream()
+                    .min(Map.Entry.comparingByValue());
+            }
+        }
+        Translation2d nodePosition = minScore
+        .map(Map.Entry::getKey)
+        .orElse(null);
+        System.out.println(nodePosition);
+        Waypoint[] nodeWaypoints = new Waypoint[]{
+            new Waypoint(new Pose2d(nodePosition.getX(), nodePosition.getY(), inputNeighbor.getAngle()), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
+        };
+    }
     /**
      * indexes waypoint to path to if there. 
      * If path is finished, sets path to finished and will not path to new waypoint.
