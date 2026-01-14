@@ -308,9 +308,14 @@ public class Path {
                             .stream()
                             .min(Map.Entry.comparingByValue());
                     }
-                    System.out.println(minScore);
                 }
-        }
+                Translation2d waypointPosition = minScore
+                    .map(Map.Entry::getKey)
+                    .orElse(null);
+                Waypoint[] pathWaypoints = new Waypoint[]{
+                    new Waypoint(new Pose2d(waypointPosition.getX(), waypointPosition.getY(), suppliedPose.get().getRotation()), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
+                };
+        }   
     }
     
     /**
