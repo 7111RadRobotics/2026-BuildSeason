@@ -87,13 +87,15 @@ public class AutoAction {
     // these are called chain methods. When you instatiate an object, you can call these to change additional information
 
     /**
-     * Decorates the AutoAction with an alternate condition. This will act as a replacement to the default condition
-     * @param condition the new default condition of the AutoAction
+     * Decorates the AutoAction with an alternate condition. This will act as a replacement to the previous condition
+     * @param condition the new condition of the AutoAction
      * @return itself for method chaining
      */
     public AutoAction withAlternateCondition(BooleanSupplier condition){
         alternateCondition = condition;
         hasAlternateCondition = true;
+        hasAdditionalCondition = false;
+        hasOptionalCondition = false;
         return this;
     }
 
@@ -125,8 +127,6 @@ public class AutoAction {
      */
     public AutoAction withNoConditions(){
         withAlternateCondition(() -> true);
-        hasAdditionalCondition = false;
-        hasOptionalCondition = false;
         return this;
     }
 }
