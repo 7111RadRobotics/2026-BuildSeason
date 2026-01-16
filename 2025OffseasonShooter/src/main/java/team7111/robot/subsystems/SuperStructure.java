@@ -15,6 +15,7 @@ public class SuperStructure extends SubsystemBase{
         intakeTrigger,
         ejectTrigger,
         prepareShotTrigger,
+        prepareShotVisionTrigger,
         shootTrigger,
         manualToggle,
     }
@@ -44,9 +45,10 @@ public class SuperStructure extends SubsystemBase{
     private boolean intakeTrigger = false;
     private boolean ejectTrigger = false;
     private boolean prepareShotTrigger = false;
+    private boolean prepareShotVisionTrigger = false;
     private boolean shootTrigger = false;
     private boolean manualToggle = false;
-
+    
     private SuperState superState = SuperState.unloaded;
 
     private double shotTimer = 0;
@@ -131,6 +133,8 @@ public class SuperStructure extends SubsystemBase{
             case prepareShotTrigger:
                 prepareShotTrigger = state;
                 break;
+            case prepareShotVisionTrigger:
+                prepareShotVisionTrigger = state;
             case shootTrigger:
                 shootTrigger = state;
                 break;
@@ -166,6 +170,10 @@ public class SuperStructure extends SubsystemBase{
         shooter.setState(ShooterState.idle);
         if (intakeTrigger) {
             setSuperState(SuperState.intake);
+        }
+        
+        else if(prepareShotVisionTrigger) {
+            setSuperState(SuperState.prepareShotVision);
         }
 
     }
@@ -234,7 +242,7 @@ public class SuperStructure extends SubsystemBase{
     }
 
     private void prepareShotVision() {
-
+        setSuperState(SuperState.shootVision);
     }
 
     private void shoot() {

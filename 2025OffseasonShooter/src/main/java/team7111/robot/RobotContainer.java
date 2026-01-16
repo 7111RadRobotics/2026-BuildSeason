@@ -92,6 +92,10 @@ public class RobotContainer {
 
         driverController.start().onTrue(swerve.zeroGyroCommand());
 
+        driverController.a()
+            .onTrue(superStructure.setControlStateCommand(ControlState.prepareShotVisionTrigger, true))
+            .onFalse(superStructure.setControlStateCommand(ControlState.prepareShotVisionTrigger, false));
+
         operatorController.rightTrigger()
             .onTrue(superStructure.setControlStateCommand(ControlState.shootTrigger, true))
             .onFalse(superStructure.setControlStateCommand(ControlState.shootTrigger, false));

@@ -33,6 +33,10 @@ public class VisionSubsystem extends SubsystemBase{
     private final double targetHeightOffset = 0.0;
     /** Offset from the target to the aiming, in meters  */
     private final double targetXOffset = 0.0;
+
+    //Max and minimum angles
+    private final double shooterMaxAngle = 67.0;
+    private final double shooterMinAngle = 37.0;
     
     /**
      * Length is the number of cameras.
@@ -116,16 +120,17 @@ public class VisionSubsystem extends SubsystemBase{
         double calculatedAngle = Math.asin(height/directDistance);
         calculatedAngle = calculatedAngle * 180/Math.PI;
 
-        if(calculatedAngle > 30) {
-            calculatedAngle = 30;
-        } else if(calculatedAngle < 0) {
-            calculatedAngle = 0;
-        }
-
         //Adds angle offsets
         calculatedAngle = calculatedAngle + cameraOffset + shooterAngleOffset;
-        //Adds 90 degree offset to the shooter angle to align with input needed
-        calculatedAngle = calculatedAngle + 90;
+        
+        calculatedAngle = 90 - calculatedAngle;
+
+        if(calculatedAngle > shooterMaxAngle) {
+            calculatedAngle = shooterMaxAngle;
+        } else if(calculatedAngle < shooterMinAngle) {
+            calculatedAngle = shooterMinAngle;
+        }
+
 
         return calculatedAngle;
     }
