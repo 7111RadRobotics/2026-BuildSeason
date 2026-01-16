@@ -98,14 +98,17 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
 
     @Override
     public void zeroWheels() {
-        angleMotor.setPosition(Units.degreesToRotations(encoder.getPosition().getDegrees() - encoderOffsetDegrees));
+        //angleMotor.setPosition(Units.degreesToRotations(encoder.getPosition().getDegrees() - encoderOffsetDegrees));
     }
 
     @Override
     public void configure() {
+        //angleMotor.setPosition(Units.degreesToRotations(encoder.getPosition().getDegrees() - encoderOffsetDegrees));
         angleConfig.Feedback.SensorToMechanismRatio = angleGearRatio;
+        
         angleConfig.ClosedLoopGeneral.ContinuousWrap = true;
         driveMotor.getConfigurator().apply(driveConfig);
         angleMotor.getConfigurator().apply(angleConfig);
+        angleMotor.setPosition(Units.degreesToRotations(-encoder.getPosition().getDegrees() + encoderOffsetDegrees));
     }    
 }
