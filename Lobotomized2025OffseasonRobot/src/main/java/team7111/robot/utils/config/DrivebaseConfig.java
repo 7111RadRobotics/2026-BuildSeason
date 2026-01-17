@@ -78,25 +78,26 @@ public class DrivebaseConfig {
         SwerveModuleConfig[] moduleConstants = new SwerveModuleConfig[]{
 
             new SwerveModuleConfig(
-                new SwerveMotorConfig(5, driveMotorConfig), 
-                new SwerveMotorConfig(6, angleMotorConfig), 
-                new CTREEncoder(1, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI),
+                new SwerveMotorConfig(3, driveMotorConfig), 
+                new SwerveMotorConfig(4, angleMotorConfig), 
+                new CTREEncoder(0, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI),
+            
 
             new SwerveModuleConfig(
                 new SwerveMotorConfig(7, driveMotorConfig), 
                 new SwerveMotorConfig(8, angleMotorConfig), 
                 new CTREEncoder(3, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI),
-
-            new SwerveModuleConfig(
-                new SwerveMotorConfig(3, driveMotorConfig), 
-                new SwerveMotorConfig(4, angleMotorConfig), 
-                new CTREEncoder(0, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI),
-
             
             new SwerveModuleConfig(
                 new SwerveMotorConfig(1, driveMotorConfig), 
                 new SwerveMotorConfig(2, angleMotorConfig), 
                 new CTREEncoder(2, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI),
+
+                
+            new SwerveModuleConfig(
+                new SwerveMotorConfig(5, driveMotorConfig), 
+                new SwerveMotorConfig(6, angleMotorConfig), 
+                new CTREEncoder(1, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI),
         };
 
         GenericSwerveModule[] moduleTypes;
