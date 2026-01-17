@@ -2,7 +2,7 @@ package team7111.robot.subsystems;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import team7111.robot.subsystems.Swerve.SwerveState;
 import team7111.robot.utils.AutoAction;
 import team7111.lib.pathfinding.*;
 
@@ -31,6 +31,7 @@ public class SuperStructure extends SubsystemBase {
     private final Vision vision;
     private final Example example; // object for an example subsystem that controls a mechanism
     //TODO: decide and create other subsystems
+    
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
     private final XboxController driverController = new XboxController(0);
@@ -41,6 +42,9 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean inAuto = false;
     private int autoIndex = 0;
+    private AutoAction[] autoActions;
+    private Boolean isActionFinished;
+    private AutoAction autoAction;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
@@ -127,7 +131,34 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean autonomous(){
         inAuto = true;
+        autoAction = autoActions[autoIndex];
 
+        if (autoAction.isPath()){
+            SwerveState swerveState = swerve.getSwerveState();
+            if (!swerveState.equals(SwerveState.initializePath) && !swerveState.equals(SwerveState.runPath)){
+                swerve.setPath(autoAction.getAsPath());
+                swerve.setSwerveState(SwerveState.initializePath);
+            }
+            isActionFinished = autoAction.getAsPath().isPathFinished();
+        } else if (autoAction.isState()) {
+            isActionFinished = manageSuperState(autoAction.getAsState());
+        }
+
+        if (autoAction.hasAlternateCondition()){
+            isActionFinished = autoAction.getAlternateCondition();
+        }
+
+        if (autoAction.hasAdditionalCondition()){
+            isActionFinished = (isActionFinished && autoAction.getAdditionalCondition());
+        }
+
+        if (autoAction.hasOptionalCondition()){
+            isActionFinished = (isActionFinished || autoAction.getOptionalCondition());
+        }
+        
+        if (isActionFinished) {
+            autoIndex += 1;
+        }
         /* TODO: Write code that will run a list of AutoActions received from Autonomous.java
          * It needs to check whether it is a Path or SuperState and whether there is
          * an alternate condition (replaces the default), additional condition (AND), or optional condition (OR).
