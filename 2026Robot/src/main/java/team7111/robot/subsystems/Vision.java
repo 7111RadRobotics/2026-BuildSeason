@@ -19,7 +19,23 @@ import team7111.robot.utils.Camera;
 public class Vision extends SubsystemBase{
     //we on longer have a limelight on the robot, however we may one day need to put it back on again. Therefore, I have left this code inside of the program, although it may make it less readable, it could be useful one day. Thank you for taking the time to read this wonderful message and I hope you have a great day :D
     //private PhotonCamera camera1 = new PhotonCamera("photonvision1");
-    
+
+    /** Offset from horizontal of the camera angle */
+    private final double cameraOffset = 0.0;
+    /** Offset from horizontal that the shooter's minimum value is */
+    private final double shooterAngleOffset = 37.0;
+    /** Offset added to the camera to get to the shooter, in meters */
+    private final double shooterXOffset = 0.0;
+    /** Offset added to the camera to get to the shooter, in meters */
+    private final double shooterZOffset = 0.0;
+    /** Offset from the target to the aiming point, in meters*/
+    private final double targetHeightOffset = 0.0;
+    /** Offset from the target to the aiming, in meters  */
+    private final double targetXOffset = 0.0;
+
+    //Max and minimum angles
+    private final double shooterMaxAngle = 67.0;
+    private final double shooterMinAngle = 37.0;
     /**
      * Length is the number of cameras.
      * Each index is the position of the camera.
@@ -82,23 +98,34 @@ public class Vision extends SubsystemBase{
      * @return value between 0 and 30 digrees
      */
     public double shooterAngle() {
-        
+        //Z is height, X is distance, Y is X or y offset (irrelevant)
+
         Transform3d distanceToTarget = cameraList[0].getCamToTarget();
 
-        double height = distanceToTarget.getZ();
-        double distance = distanceToTarget.getX();
+        if(distanceToTarget == null) {
+            return 0;
+        }
+
+        double height = distanceToTarget.getZ() + shooterZOffset + targetHeightOffset;
+        double distance = distanceToTarget.getX() + shooterXOffset + targetXOffset;
 
         double directDistance = height * height + distance * distance;
         directDistance = Math.sqrt(directDistance);
 
         double calculatedAngle = Math.asin(height/directDistance);
         calculatedAngle = calculatedAngle * 180/Math.PI;
+
+        //Adds angle offsets
+        calculatedAngle = calculatedAngle + cameraOffset + shooterAngleOffset;
         
-        if(calculatedAngle > 30) {
-            calculatedAngle = 30;
-        } else if(calculatedAngle < 0) {
-            calculatedAngle = 0;
+        calculatedAngle = 90 - calculatedAngle;
+
+        if(calculatedAngle > shooterMaxAngle) {
+            calculatedAngle = shooterMaxAngle;
+        } else if(calculatedAngle < shooterMinAngle) {
+            calculatedAngle = shooterMinAngle;
         }
+
 
         return calculatedAngle;
     }
