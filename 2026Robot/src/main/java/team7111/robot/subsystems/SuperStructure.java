@@ -1,7 +1,10 @@
 package team7111.robot.subsystems;
 
+import java.util.List;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import team7111.robot.subsystems.Autonomous.Autos;
 import team7111.robot.subsystems.Swerve.SwerveState;
 import team7111.robot.utils.AutoAction;
 import team7111.lib.pathfinding.*;
@@ -27,6 +30,7 @@ public class SuperStructure extends SubsystemBase {
     }
 
     //Subsystem Variables
+    private final Autonomous auto;
     private final Swerve swerve;
     private final Vision vision;
     private final Example example; // object for an example subsystem that controls a mechanism
@@ -42,13 +46,14 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean inAuto = false;
     private int autoIndex = 0;
-    private AutoAction[] autoActions;
+    private List<AutoAction> autoActions;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
      */
-    public SuperStructure(Swerve swerve, Vision vision, Example example){
+    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Example example){
+        this.auto = auto;
         this.swerve = swerve;
         this.vision = vision;
         this.example = example;
@@ -115,6 +120,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomousEnter(){
         setSuperState(SuperState.autonomous);
         autoIndex = 0;
+        autoActions = auto.getAutonomous(Autos.shootPreload);
         autonomous();
         return true;
     }
@@ -131,7 +137,7 @@ public class SuperStructure extends SubsystemBase {
         inAuto = true;
         boolean isActionFinished = true;
         AutoAction autoAction;
-        autoAction = autoActions[autoIndex];
+        autoAction = autoActions.get(autoIndex);
 
         if (autoAction.isPath()){
             SwerveState swerveState = swerve.getSwerveState();
