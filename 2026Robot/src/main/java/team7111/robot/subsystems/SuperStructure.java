@@ -43,8 +43,6 @@ public class SuperStructure extends SubsystemBase {
     private boolean inAuto = false;
     private int autoIndex = 0;
     private AutoAction[] autoActions;
-    private Boolean isActionFinished;
-    private AutoAction autoAction;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
@@ -131,6 +129,8 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean autonomous(){
         inAuto = true;
+        boolean isActionFinished = true;
+        AutoAction autoAction;
         autoAction = autoActions[autoIndex];
 
         if (autoAction.isPath()){
@@ -155,7 +155,7 @@ public class SuperStructure extends SubsystemBase {
         if (autoAction.hasOptionalCondition()){
             isActionFinished = (isActionFinished || autoAction.getOptionalCondition());
         }
-        
+
         if (isActionFinished) {
             autoIndex += 1;
         }
