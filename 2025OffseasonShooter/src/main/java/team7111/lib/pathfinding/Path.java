@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class Path {
 
@@ -60,6 +62,8 @@ public class Path {
     private Translation2d endPath = null;
     private Double endPathX = null;
     private Double endPathY = null;
+    private Waypoint[] nodeWaypoints;
+    private Waypoint tempWaypoint[] = new Waypoint[]{new Waypoint(new Pose2d(0, 0, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10))};
 
     /**
      * Constructs a path from several waypoints. Uses pathMaster class to define parameters.
@@ -266,7 +270,6 @@ public class Path {
         if (!avoidFieldElements) {
             return;
         } else {
-                System.out.println("Runs");
                 waypointPos = path.getCurrentWaypoint().getPose().getTranslation();
                 currentPos = suppliedPose.get().getTranslation();
 
@@ -352,9 +355,17 @@ public class Path {
         .map(Map.Entry::getKey)
         .orElse(null);
         System.out.println(nodePosition);
-        Waypoint[] nodeWaypoints = new Waypoint[]{
+        nodeWaypoints = new Waypoint[]{
             new Waypoint(new Pose2d(nodePosition.getX(), nodePosition.getY(), inputNeighbor.getAngle()), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
         };
+    }
+
+    public Waypoint[] getWaypoint() {
+        if (nodeWaypoints != null) {
+            return nodeWaypoints;
+        } else {
+            return tempWaypoint;
+        }
     }
     /**
      * indexes waypoint to path to if there. 

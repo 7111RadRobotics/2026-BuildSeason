@@ -2,8 +2,14 @@ package team7111.robot;
 
 import team7111.lib.pathfinding.Waypoint;
 import team7111.lib.pathfinding.WaypointConstraints;
+
+import static edu.wpi.first.units.Units.Degree;
+
+import java.util.Map;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -12,7 +18,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import team7111.lib.pathfinding.FieldElement;
 import team7111.lib.pathfinding.Path;
+import team7111.lib.pathfinding.PathMaster;
 import team7111.robot.Constants.ControllerConstants;
 import team7111.robot.Constants.SwerveConstants;
 import team7111.robot.subsystems.BarrelSubsystem;
@@ -41,7 +49,9 @@ public class RobotContainer {
     public final BarrelSubsystem barrel;
     public final ShooterSubsystem shooter;
     public final SuperStructure superStructure;
+    public final FieldElement fieldElement;
     public SendableChooser<Command> autoChooser;
+    private Path pathLib;
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);
@@ -52,14 +62,17 @@ public class RobotContainer {
         barrel = new BarrelSubsystem();
         shooter = new ShooterSubsystem(vision);
         superStructure = new SuperStructure(vision, swerve, paths, intake, barrel, shooter, ControllerConstants.operatorControllerID);
+        fieldElement = new FieldElement(null);
 
         autoChooser = new SendableChooser<>();
 
         Waypoint[] waypoints = new Waypoint[]{
-            new Waypoint(new Pose2d(7.217, 4.199, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
+            new Waypoint(new Pose2d(0, 0, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10)),
         };
 
-        Path path = new Path(waypoints);
+        pathLib = new Path(waypoints);
+
+        Path path = new Path(pathLib.getWaypoint());
 
         autoChooser.addOption("Path_TEST", swerve.setPathCommand(path).andThen(swerve.setSwerveStateCommand(SwerveState.initializePath)));
 
