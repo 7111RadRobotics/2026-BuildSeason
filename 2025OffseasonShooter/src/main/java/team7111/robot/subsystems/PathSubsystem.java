@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.lib.pathfinding.Path;
+import team7111.lib.pathfinding.PathMaster;
 import team7111.lib.pathfinding.Waypoint;
 import team7111.lib.pathfinding.WaypointConstraints;
 
@@ -33,7 +34,6 @@ public class PathSubsystem extends SubsystemBase{
 
     public enum Autos {
         forwardAuto,
-
     }
 
     public void periodic() {
