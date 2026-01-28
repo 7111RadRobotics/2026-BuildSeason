@@ -15,13 +15,13 @@ import team7111.robot.utils.AutoAction;
 public class Autonomous extends SubsystemBase {
 
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
-    private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 5);
+    private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
     
-    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.005);
+    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.01);
     private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
 
-    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.001);
-    private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.5);
+    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.002);
+    private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.3);
 
     public enum Autos {
         shootPreload,
