@@ -36,6 +36,7 @@ public class SuperStructure extends SubsystemBase {
     private final Swerve swerve;
     private final Vision vision;
     private final Example example; // object for an example subsystem that controls a mechanism
+    private final Aimbot targeting;
     //TODO: decide and create other subsystems
     
 
@@ -54,11 +55,12 @@ public class SuperStructure extends SubsystemBase {
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
      */
-    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Example example){
+    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Example example, Aimbot targeting){
         this.auto = auto;
         this.swerve = swerve;
         this.vision = vision;
         this.example = example;
+        this.targeting = targeting;
 
         this.swerve.setJoysickInputs(() -> driverController.getLeftY(), () -> -driverController.getLeftX(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);

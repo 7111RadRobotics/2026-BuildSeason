@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import team7111.robot.subsystems.Aimbot;
 import team7111.robot.subsystems.Autonomous;
 import team7111.robot.subsystems.Example;
 import team7111.robot.subsystems.SuperStructure;
@@ -26,7 +27,8 @@ public class Robot extends TimedRobot {
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
     private Example example = new Example();
-    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, example);
+    private Aimbot targeting = new Aimbot(vision, null, null, null);
+    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, example, targeting);
 
     /**
      * This function is run when the robot is first started up and should be used for any
