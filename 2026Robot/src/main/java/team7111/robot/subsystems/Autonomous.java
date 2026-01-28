@@ -14,9 +14,15 @@ import team7111.robot.utils.AutoAction;
 
 public class Autonomous extends SubsystemBase {
 
-    private WaypointConstraints translationConstraints = new WaypointConstraints(5, 0, 0.001);
-    private WaypointConstraints rotationConstraints = new WaypointConstraints(720, 0, 1);
+    private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
+    private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 5);
     
+    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.005);
+    private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
+
+    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.001);
+    private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.5);
+
     public enum Autos {
         shootPreload,
         forwardTest,
@@ -30,6 +36,18 @@ public class Autonomous extends SubsystemBase {
 
     public Autonomous(){
 
+    }
+
+    public Waypoint fastPoint(double x, double y, double rotDegrees) {
+       return new Waypoint(new Pose2d(x, y, Rotation2d.fromDegrees(rotDegrees)), fastTransConstraints, fastRotConstraints);
+    }
+
+    public Waypoint balancedPoint(double x, double y, double rotDegrees) {
+       return new Waypoint(new Pose2d(x, y, Rotation2d.fromDegrees(rotDegrees)), balancedTransConstraints, balancedRotConstraints);
+    }
+
+    public Waypoint slowPoint(double x, double y, double rotDegrees) {
+       return new Waypoint(new Pose2d(x, y, Rotation2d.fromDegrees(rotDegrees)), slowTransConstraints, slowRotConstraints);
     }
 
     public void periodic(){}
@@ -60,10 +78,10 @@ public class Autonomous extends SubsystemBase {
         // define Path object for each Paths enum using a switch statement
         switch (path) {
             case forward:
-                waypoints.add(new Waypoint(new Pose2d(1, 0, Rotation2d.fromDegrees(0)), translationConstraints, rotationConstraints));
+                waypoints.add(new Waypoint(new Pose2d(1, 0, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints));
                 break;
             case rotate90:
-                waypoints.add(new Waypoint(new Pose2d(0, 0, Rotation2d.fromDegrees(90)), translationConstraints, rotationConstraints));
+                waypoints.add(new Waypoint(new Pose2d(0, 0, Rotation2d.fromDegrees(90)), balancedTransConstraints, balancedRotConstraints));
                 break;
         }
         return new Path(waypoints);

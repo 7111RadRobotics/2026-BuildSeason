@@ -1,6 +1,5 @@
 package team7111.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -15,6 +14,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,19 +22,21 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import team7111.lib.pathfinding.*;
+import team7111.robot.Constants.ControllerConstants;
 import team7111.robot.Constants.SwerveConstants;
 import team7111.robot.utils.SwerveModule;
 import team7111.robot.utils.gyro.NavXGyro;
-import team7111.robot.utils.gyro.SimSwerveGyro;
-import team7111.robot.utils.gyro.GenericGyro;
+import team7111.robot.utils.singleaxisgyro.GenericSwerveGyro;
+import team7111.robot.utils.singleaxisgyro.RealSwerveGyro;
+import team7111.robot.utils.singleaxisgyro.SimSwerveGyro;
 
-public class Swerve extends SubsystemBase {
+public class SwerveSubsystem extends SubsystemBase {
     private final SwerveModule[] modules;
 
     private final SwerveDriveOdometry swerveOdometry;
     private Field2d field = new Field2d();
 
-    private final GenericGyro gyro;
+    private final GenericSwerveGyro gyro;
     private SwerveModuleState[] states = new SwerveModuleState[]{};
 
     private StructArrayPublisher<SwerveModuleState> commandedStatePublisher = 
@@ -56,10 +58,9 @@ public class Swerve extends SubsystemBase {
     private DoubleSupplier joystickXTranslation = () -> 0;
     private DoubleSupplier joystickYaw = () -> 0;
 
-    private double snapAngleSetpoint = 45;
-    private PIDController snapAnglePID;
+    private double snapAngleVariable = 45;
 
-    private final double controllerDeadzone = 0.0;
+    private PIDController yawController;
 
     public enum SwerveState{
         initializePath,
@@ -69,7 +70,7 @@ public class Swerve extends SubsystemBase {
         snapAngle
     };
 
-    public Swerve() {
+    public SwerveSubsystem() {
         modules = new SwerveModule[] {
             new SwerveModule(0, SwerveConstants.drivebaseConfig.moduleTypes[0]),
             new SwerveModule(1, SwerveConstants.drivebaseConfig.moduleTypes[1]),
@@ -78,19 +79,19 @@ public class Swerve extends SubsystemBase {
         };
 
         gyro = RobotBase.isReal()
-            ? new NavXGyro()
+            ? new RealSwerveGyro(new NavXGyro())
             : new SimSwerveGyro(this::getStates, SwerveConstants.kinematics);
-        gyro.invertYaw(true);
+        gyro.setInverted(true);
         zeroGyro();
 
         pathMaster = new PathMaster(this::getPose, () -> getYaw());
-        pathMaster.setTranslationPID(2.30, 0.2, 0.075);
-        pathMaster.setRotationPID(0.031, 0.0023, 0.0);
+        pathMaster.setTranslationPID(10.0, 0.0, 0.0);
+        pathMaster.setRotationPID(4.0, 0, 0);
         pathMaster.setInversions(false, false, true, false);
 
         swerveOdometry = new SwerveDriveOdometry(SwerveConstants.kinematics, getYaw(), getPositions());
         
-        snapAnglePID = new PIDController(1.0, 0.0, 0.0);
+        yawController = new PIDController(1.0, 0.0, 0.0);
     }
 
     @Override 
@@ -147,7 +148,6 @@ public class Swerve extends SubsystemBase {
                 }
                 if(path.isPathFinished()){
                     setSwerveState(SwerveState.stationary);
-                    
                     break;
                 }
                 pathMaster.periodic(path);
@@ -164,7 +164,7 @@ public class Swerve extends SubsystemBase {
             case stationary:
                 manual(0, 0, 0, false, false);
             case snapAngle:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(snapAngleSetpoint), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), yawController.calculate(snapAngleVariable), isDriveFieldRelative, false);
                 break;
             default:
                 break;
@@ -173,9 +173,9 @@ public class Swerve extends SubsystemBase {
 
     public void manual(double forwardBack, double leftRight, double rotation, boolean isFieldRelative, boolean isOpenLoop){
         // Adding deadzone.
-        forwardBack = Math.abs(forwardBack) < controllerDeadzone ? 0 : forwardBack;
-        leftRight = Math.abs(leftRight) < controllerDeadzone ? 0 : leftRight;
-        rotation = Math.abs(rotation) < controllerDeadzone ? 0 : rotation;
+        forwardBack = Math.abs(forwardBack) < ControllerConstants.axisDeadzone ? 0 : forwardBack;
+        leftRight = Math.abs(leftRight) < ControllerConstants.axisDeadzone ? 0 : leftRight;
+        rotation = Math.abs(rotation) < ControllerConstants.axisDeadzone ? 0 : rotation;
 
         double hypot = Math.hypot(leftRight, forwardBack);
         if(Math.abs(hypot) > 1){
@@ -193,7 +193,7 @@ public class Swerve extends SubsystemBase {
 
         // Get desired module states.
         ChassisSpeeds chassisSpeeds = isFieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw().unaryMinus())
             : new ChassisSpeeds(forwardBack, leftRight, rotation);
 
         SwerveModuleState[] states = SwerveConstants.kinematics.toSwerveModuleStates(chassisSpeeds);
@@ -208,9 +208,13 @@ public class Swerve extends SubsystemBase {
     public SwerveState getSwerveState(){
         return currentSwerveState;
     }
+
+    public Command setSwerveStateCommand(SwerveState swerveState){
+        return runOnce(()-> currentSwerveState = swerveState);
+    }
     
     public void setSnapAngle(Double snapNumber) {
-        snapAngleSetpoint = snapNumber;
+        snapAngleVariable = snapNumber;
     }
 
     /** To be used by auto. Use the drive method during teleop. */
@@ -245,7 +249,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        return gyro.getYaw(); //Rotation2d.fromDegrees(gyro.getYaw());
+        return gyro.getRotation(); //Rotation2d.fromDegrees(gyro.getYaw());
     }
 
     public Pose2d getPose() {
@@ -266,15 +270,20 @@ public class Swerve extends SubsystemBase {
         isDriveFieldRelative = isFieldRelative;
     }
 
-    public void zeroGyro() {
-        gyro.setYaw(Rotation2d.kZero);
-        
+    private void zeroGyro() {
+        gyro.setRotation(Rotation2d.kZero);
     }
 
-    
+    public Command zeroGyroCommand() {
+        return runOnce(this::zeroGyro).withName("ZeroGyroCommand");
+    }
 
     public void setPath(Path path){
         this.path = path;
+    }
+
+    public Command setPathCommand(Path path){
+        return runOnce(() -> setPath(path));
     }
 
     @Override
