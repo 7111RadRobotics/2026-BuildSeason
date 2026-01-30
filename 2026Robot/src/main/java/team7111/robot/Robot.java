@@ -4,7 +4,11 @@
 
 package team7111.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,7 +31,7 @@ public class Robot extends TimedRobot {
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
     private Example example = new Example();
-    private Aimbot targeting = new Aimbot(vision, null, null, null);
+    private Aimbot targeting = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()), new XboxController(1));
     private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, example, targeting);
 
     /**

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Aimbot extends SubsystemBase{
@@ -45,9 +46,9 @@ public class Aimbot extends SubsystemBase{
 
     //ANGLE CONSTRAINTS
     /** Minimum shooter angle in degrees, from horizontal */
-    private final double minShooterAngle = 0.0;
+    private final double minShooterAngle = 37.0;
     /** Maximum shooter angle in degrees, from horizontal */
-    private final double maxShooterAngle = 0.0;
+    private final double maxShooterAngle = 67.0;
     
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
@@ -146,6 +147,9 @@ public class Aimbot extends SubsystemBase{
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
     public void periodic() {
+        SmartDashboard.putBoolean("is using vision", isUsingVision);
+        SmartDashboard.putBoolean("isEnabled", isEnabled);
+
         if(!isEnabled) {
             calculatedAngle = minShooterAngle;
             calculatedSpeed = 0;
@@ -250,6 +254,7 @@ public class Aimbot extends SubsystemBase{
 
         calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
         calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;
+        SmartDashboard.putNumber("calculated angle untampered", calculatedAngle);
     }
 
     /** Ensures the angles are within the min and max physical angles on the shooter */
@@ -278,6 +283,10 @@ public class Aimbot extends SubsystemBase{
             
             return calculatedPos;
         } else {
+            //ISSUE:
+            //Vision uses local x and y difference
+            //This is using field relative x and y difference
+            //Same reason angle is hard to calculate
             Transform3d calculatedPos = new Transform3d(targetPose.getX() - robotPose.get().getX(),
                 targetPose.getY() - robotPose.get().getY(),
                 targetPose.getZ(), null);
@@ -290,6 +299,10 @@ public class Aimbot extends SubsystemBase{
 
             return returnedTrans;
         }
+    }
+
+    public XboxController getOperatorController(){
+        return operatorController;
     }
 }
 //floccinaucinihilipilification

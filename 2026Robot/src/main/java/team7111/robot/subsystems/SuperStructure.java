@@ -44,7 +44,7 @@ public class SuperStructure extends SubsystemBase {
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
     private final XboxController driverController = new XboxController(0);
-    private final XboxController operatorController = new XboxController(1);
+    private final XboxController operatorController;
 
     /** This represents the current superstate of the robot */
     private SuperState superState = SuperState.example1;
@@ -63,8 +63,9 @@ public class SuperStructure extends SubsystemBase {
         this.vision = vision;
         this.example = example;
         this.targeting = targeting;
+        operatorController = targeting.getOperatorController();
 
-        this.swerve.setJoysickInputs(() -> driverController.getLeftY(), () -> -driverController.getLeftX(), () -> driverController.getRightX());
+        this.swerve.setJoysickInputs(() -> -driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
     }
 
