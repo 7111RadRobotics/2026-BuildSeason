@@ -75,7 +75,7 @@ public class SuperStructure extends SubsystemBase{
     private XboxController operatorController;
     Waypoint waypoint = new Waypoint(new Pose2d(4, 4, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10));
 
-    private Translation2d trans = new Translation2d(4, 4);
+    private Translation2d trans = new Translation2d(2, 2);
     private Pose2d fieldPose = new Pose2d(trans.getX(), trans.getY(), trans.getAngle());
 
     Pathfinding finding;
@@ -95,9 +95,13 @@ public class SuperStructure extends SubsystemBase{
         this.shooter = shooter;
 
         finding = new Pathfinding(swerve);
+        Waypoint[] pathFinding = finding.avoidFieldElements(waypoint, fieldElement); 
+        Path findingPath = new Path(pathFinding);
+        swerve.setPath(findingPath);
 
         this.operatorController = new XboxController(operatorPort);
     }
+    
 
     public void periodic() {
         manageSuperState();
@@ -105,7 +109,6 @@ public class SuperStructure extends SubsystemBase{
         SmartDashboard.putBoolean("ManualToggle", manualToggle);
         if (manualToggle)
             setSuperState(SuperState.manual); 
-        finding.avoidFieldElements(waypoint, fieldElement); 
     }
 
     private void manageSuperState() {

@@ -11,6 +11,10 @@ import java.util.OptionalInt;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.RobotBase;
 import team7111.robot.subsystems.SwerveSubsystem;
 
 public class Pathfinding {
@@ -50,8 +54,14 @@ public class Pathfinding {
     double minScoreY;
     int dx;
     int dy;
+    boolean isSafe;
+    boolean visited;
+    List<Pose2d> storedPosition = new ArrayList<>();
+    List<Translation2d> visitedNodes = new ArrayList<>();
 
-    private List<Pose2d> avoidPoses = new ArrayList<>();
+    List<Pose2d> avoidPoses = new ArrayList<>();
+
+    int iterations = 0;
 
     private void setAvoidPose(FieldElement fieldElements) {
             Pose2d[] poses;
@@ -65,41 +75,85 @@ public class Pathfinding {
             }
     }
 
-    public void avoidFieldElements(Waypoint waypoint, FieldElement fieldElements) {
-        wayPos = new Translation2d(waypoint.getPose().getX(), waypoint.getPose().getY());
-
+    public Waypoint[] avoidFieldElements(Waypoint waypoint, FieldElement fieldElements) {
+        
+        visitedNodes.clear();
+        storedPosition.clear();
+        avoidPoses.clear();
+        iterations = 0;
+        
+        robotPose = swerve.getPose();
+        gridPosition = robotPose.getTranslation();
+        wayPos = waypoint.getPose().getTranslation();
+    
         setAvoidPose(fieldElements);
-
-        for (int[] dir : directions) {
-            Translation2d neighbor = new Translation2d(gridPosition.getX() + (dir[0] * 0.25), gridPosition.getY() + (dir[1] * 0.25));
-            dx = dir[0];
-            dy = dir[1];
-
-            for (Pose2d obstacle : avoidPoses) {
-                currentDistance = Math.sqrt(
-                Math.pow(gridPosition.getX() + (dir[0] * 0.25) - wayPos.getX(), 2) +
-                Math.pow(gridPosition.getY() + (dir[1] * 0.25) - wayPos.getY(), 2)
+    
+        while (robotPose.getTranslation().getDistance(wayPos) > 0.1 && iterations < 200) {
+            minScore = -1;
+    
+            for (int[] dir : directions) {
+                Translation2d neighbor = new Translation2d(
+                    gridPosition.getX() + (dir[0] * 0.25), 
+                    gridPosition.getY() + (dir[1] * 0.25)
                 );
-                startDistance = Math.sqrt(
-                    Math.pow(gridPosition.getX() - startPose.getX(), 2) +
-                    Math.pow(gridPosition.getY() - startPose.getY(), 2)
-                );
-                pathWeight = currentDistance + startDistance;
-                if (neighbor.getDistance(obstacle.getTranslation()) > safety) {
-                    if (minScore == -1) {
-                      minScore = pathWeight;
-                    } else if (minScore >= pathWeight) {
-                      minScore = pathWeight;
-                      minScoreX = dx;
-                      minScoreY = dy;
+    
+                visited = false;
+                for (Translation2d visit : visitedNodes) {
+                    if (neighbor.getDistance(visit) < 0.05) {
+                        visited = true;
+                        break;
+                    }
+                }
+                if (visited) continue; 
+    
+                isSafe = true;
+                for (Pose2d obstacle : avoidPoses) {
+                    if (neighbor.getDistance(obstacle.getTranslation()) < safety) {
+                        isSafe = false;
+                        break;
+                    }
+                }
+    
+                if (isSafe) {
+                    double d1 = neighbor.getDistance(startPose.getTranslation());
+                    double d2 = neighbor.getDistance(wayPos);
+                    pathWeight = d1 + d2;
+    
+                    if (minScore == -1 || pathWeight < minScore) {
+                        minScore = pathWeight;
+                        minScoreX = neighbor.getX(); 
+                        minScoreY = neighbor.getY();
                     }
                 }
             }
+    
+            if (minScore != -1) {
+                gridPosition = new Translation2d(minScoreX, minScoreY);
+                robotPose = new Pose2d(gridPosition, robotPose.getRotation());
+                
+                storedPosition.add(robotPose);
+                visitedNodes.add(gridPosition);
+            } else {
+                break;
+            }
+            iterations++;
         }
-        startPoseX = startPoseX + (dx*0.25);
-        startPoseY = startPoseY + (dx*0.25);
-        robotPose = new Pose2d(robotPose.getTranslation().getX()+(dx*0.25), robotPose.getTranslation().getY()+(dy*0.25), robotPose.getRotation());
-        System.out.println("Min Node: (" + dx + ", " + dy + "), " + minScore);
-        System.out.println("Current Pos:" + startPoseX + "," + startPoseY);
+    
+        if (storedPosition.isEmpty()) {
+            return new Waypoint[] { waypoint };
+        }
+    
+        List<Translation2d> interiorWaypoints = new ArrayList<>();
+        for (int i = 0; i < storedPosition.size() - 1; i++) {
+            interiorWaypoints.add(storedPosition.get(i).getTranslation());
+        }
+    
+        Waypoint[] path = new Waypoint[storedPosition.size()];
+
+        for (int i = 0; i < storedPosition.size(); i++) {
+            path[i] = new Waypoint(storedPosition.get(i), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10));
+        }
+
+        return path;
     }
 }
