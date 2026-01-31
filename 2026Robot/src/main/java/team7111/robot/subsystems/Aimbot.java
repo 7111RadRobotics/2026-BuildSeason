@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,8 +44,8 @@ public class Aimbot extends SubsystemBase{
     /** Only used with camera, distance to the center of the target from the apriltag */
     private final double camToTargetHeightOffset = 2/3;
 
-    /** shooter wheel diameter, in inches */
-    private final double shooterDiameter = 4;
+    /** shooter wheel diameter, in meters */
+    private final double shooterDiameter = Units.inchesToMeters(4);
     /** Auto calculated based on shooter diameter, in inches */
     private final double wheelCircumference = shooterDiameter * Math.PI;
 
@@ -71,7 +72,7 @@ public class Aimbot extends SubsystemBase{
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
-    /** How far from horizontal the camera is, in degrees*/
+    /** How far from horizontal the shooter is, in degrees */
     private double shooterAngleOffset = 0.0;
 
     /** Enables/disables the math calculations (saves calculation time)
@@ -246,26 +247,36 @@ public class Aimbot extends SubsystemBase{
         double distanceToTarget = CamToTarget.getX() + shooterXOffset;
         double heightDifference = CamToTarget.getZ() - shooterHeightOffset;
 
+        SmartDashboard.putNumber("Distance to target", distanceToTarget);
         //Subtracts a meter from the distance to get a 2nd target point
-        double distanceToHubEdge = distanceToTarget - 1;
+        double distanceToHubEdge = distanceToTarget - 0.5;
         double targetHeightAboveHubEdge = 2.286; //90 inches above the floor, settable to anything desired for angle adjustment
 
         double calculatedRatio = 
-        ((distanceToTarget*distanceToTarget*heightDifference) - (distanceToHubEdge*distanceToHubEdge*targetHeightAboveHubEdge)) /
-        ((distanceToHubEdge*distanceToTarget*(distanceToHubEdge-distanceToTarget)));
+            ((distanceToTarget*distanceToTarget*heightDifference) - (distanceToHubEdge*distanceToHubEdge*targetHeightAboveHubEdge)) /
+            ((distanceToHubEdge*distanceToTarget*(distanceToHubEdge-distanceToTarget)));
 
-        calculatedAngle = Math.atan(calculatedRatio) * 180/Math.PI;
+        if(calculatedRatio < 0) {
+            calculatedAngle = minShooterAngle;
+        } else {
+            calculatedAngle = Math.atan(calculatedRatio) * 180/Math.PI;
+        }
         
         SmartDashboard.putNumber("Nan?", calculatedRatio);
 
         double velocityCalculation = 
-        (distanceToHubEdge * calculatedRatio - targetHeightAboveHubEdge) /
-        ((1+calculatedRatio * calculatedRatio) * distanceToHubEdge * distanceToHubEdge);
+            (distanceToHubEdge * calculatedRatio - targetHeightAboveHubEdge) /
+            ((1+calculatedRatio * calculatedRatio) * distanceToHubEdge * distanceToHubEdge);
+        SmartDashboard.putNumber("Velocity calculation", velocityCalculation);
         
         //Converts from meters per second to rotations per minute
         double velocityReq = Math.sqrt((9.81/(2*velocityCalculation)));
-        velocityReq = velocityReq / (wheelCircumference / 12) * 3.281;
-        calculatedSpeed = velocityReq / 60;
+        SmartDashboard.putNumber("VelocityRequired", velocityReq);
+
+        velocityReq = velocityReq / wheelCircumference;
+        SmartDashboard.putNumber("VelocityToRotationsPerMinute", velocityReq);
+
+        calculatedSpeed = velocityReq * 60;
     }
     
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
