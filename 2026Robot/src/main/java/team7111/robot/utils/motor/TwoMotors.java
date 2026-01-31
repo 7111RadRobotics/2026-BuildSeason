@@ -79,6 +79,10 @@ public class TwoMotors implements Motor {
         return motor1.isAtSetpoint(deadzone);
     }
 
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return motor1.isAtSetpoint(deadzone);
+    }
+
     public SimpleMotorFeedforward getFeedForward(){
         return motor1.getFeedForward();
     }
@@ -88,8 +92,8 @@ public class TwoMotors implements Motor {
         motor2.setFeedFoward(kS, kV, kA);
     }
 
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
-        motor1.setSpeedLimits(positiveSpeed, negativeSpeed);
-        motor2.setSpeedLimits(positiveSpeed, negativeSpeed);
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
+        motor1.setSpeedLimits(positiveSpeed, negativeSpeed, isVoltage);
+        motor2.setSpeedLimits(positiveSpeed, negativeSpeed, isVoltage);
     }
 }

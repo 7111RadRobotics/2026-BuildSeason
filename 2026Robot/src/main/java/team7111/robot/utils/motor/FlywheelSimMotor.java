@@ -7,92 +7,90 @@ import team7111.robot.utils.encoder.GenericEncoder;
 
 public class FlywheelSimMotor implements Motor{
 
-    public FlywheelSimMotor(GenericEncoder encoder, FlywheelSim motor, PIDController pid, SimpleMotorFeedforward ff){
+    private FlywheelSim motor;
+    private PIDController pid;
+    private GenericEncoder encoder;
+    private double velocitySetpoint = 0;
 
+    public FlywheelSimMotor(GenericEncoder encoder, FlywheelSim flywheelSim, PIDController pid, SimpleMotorFeedforward ff){
+        motor = flywheelSim;
+        this.pid = pid;
+        this.encoder = encoder;
     }
 
     @Override
     public void setDutyCycle(double speed) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
+        motor.setInput(speed);
     }
 
     @Override
     public double getDutyCycle() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDutyCycle'");
+        return motor.getOutput(0);
     }
 
     @Override
     public void setVelocity(double rpm) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
+        //motor.setAngularVelocity(rpm * (2*Math.PI) / 60);
+        motor.setInputVoltage(pid.calculate(getVelocity(), rpm));
     }
 
     @Override
     public double getVelocity() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getVelocity'");
+        return motor.getAngularVelocityRPM();
     }
 
     @Override
     public void setPositionReadout(double position) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPositionReadout'");
+        
     }
 
     @Override
     public double getPosition() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPosition'");
+        return 0;
     }
 
     @Override
     public void setSetpoint(double setPoint, boolean useSimFF) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setSetpoint'");
+        
     }
 
     @Override
     public void setPID(double p, double i, double d) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPID'");
+        pid.setPID(p, i, d);
     }
 
     @Override
     public PIDController getPID() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPID'");
+        return pid;
     }
 
     @Override
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setSpeedLimits'");
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
+        
     }
 
     @Override
     public GenericEncoder getEncoder() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEncoder'");
+        return encoder;
     }
 
     @Override
     public double getVoltage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getVoltage'");
+        return motor.getInputVoltage();
     }
 
     @Override
     public void setVoltage(double volts) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setVoltage'");
+        motor.setInputVoltage(volts);
     }
 
     @Override
     public boolean isAtSetpoint(double deadzone) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isAtSetpoint'");
+        return false;
+    }
+
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return getVelocity() <= velocitySetpoint + deadzone && getVelocity() >= velocitySetpoint - deadzone;
     }
 
     @Override
@@ -109,8 +107,7 @@ public class FlywheelSimMotor implements Motor{
 
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'periodic'");
+        
     }
 
 }

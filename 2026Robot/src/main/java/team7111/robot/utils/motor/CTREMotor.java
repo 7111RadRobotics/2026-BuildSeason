@@ -23,8 +23,11 @@ public class CTREMotor implements Motor {
     private GenericEncoder encoder = null;
     private double gearRatio;
     private double currentSetpoint;
-    private double positiveSpeedLimit = 20;
-    private double negativeSpeedLimit = -20;
+    private double velocitySetpoint = 0;
+    private double positiveVoltageLimit = 20;
+    private double negativeVoltageLimit = -20;
+    private double positiveVelocityLimit = 5000;
+    private double negativeVelocityLimit = -5000;
     private SimpleMotorFeedforward feedforward;
     private ArmFeedforward armFF;
     private int id;
@@ -83,6 +86,12 @@ public class CTREMotor implements Motor {
     }
 
     public void setVelocity(double rpm){
+        if(rpm > positiveVelocityLimit){
+            rpm = positiveVelocityLimit;
+        }
+        if(rpm < negativeVelocityLimit){
+            rpm = negativeVelocityLimit;
+        }
         motor.setControl(velocityDutyCycle.withVelocity(rpm * gearRatio));
     }
 
@@ -120,12 +129,12 @@ public class CTREMotor implements Motor {
             feedforwardOutput = 0;
         double totalOutput = pidOutput + feedforwardOutput;
         SmartDashboard.putNumber("Motor " + id + " pid", totalOutput);
-        if(totalOutput > positiveSpeedLimit){
-            motor.setVoltage(positiveSpeedLimit);
-            //motor.set(positiveSpeedLimit);
-        }else if(totalOutput < negativeSpeedLimit){
-            motor.setVoltage(negativeSpeedLimit);
-            //motor.set(negativeSpeedLimit);
+        if(totalOutput > positiveVoltageLimit){
+            motor.setVoltage(positiveVoltageLimit);
+            //motor.set(positiveVoltageLimit);
+        }else if(totalOutput < negativeVoltageLimit){
+            motor.setVoltage(negativeVoltageLimit);
+            //motor.set(negativeVoltageLimit);
         }else{
             motor.setVoltage(totalOutput);
         }
@@ -158,6 +167,10 @@ public class CTREMotor implements Motor {
         }
         return false;
     }
+
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return getPosition() >= velocitySetpoint - deadzone && getPosition() <= velocitySetpoint + deadzone;
+    }
         
     public SimpleMotorFeedforward getFeedForward(){
         return feedforward;
@@ -184,8 +197,13 @@ public class CTREMotor implements Motor {
             motorDEntry.getDouble(0));*/
     }
 
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
-        positiveSpeedLimit = positiveSpeed;
-        negativeSpeedLimit = negativeSpeed;
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
+        if(isVoltage){
+            positiveVoltageLimit = positiveSpeed;
+            negativeVoltageLimit = negativeSpeed;
+        }else{
+            positiveVelocityLimit = positiveSpeed;
+            negativeVelocityLimit = negativeSpeed;
+        }
     }
 }

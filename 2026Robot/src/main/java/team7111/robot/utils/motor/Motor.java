@@ -74,7 +74,7 @@ public interface Motor {
      * @param positiveSpeed -Type "double", the speed limit in the positive direction
      * @param negativeSpeed -Type "double", the speed limit in the negative direction
      */
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed);
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage);
 
     /**
      * Gets the motor encoder.
@@ -97,6 +97,8 @@ public interface Motor {
      * @return Type "boolean", true if the motor is within the setpoint + or - the deadzone, false if otherwise.
      */
     public boolean isAtSetpoint(double deadzone);
+
+    public boolean isAtVelocitySetpoint(double deadZone);
 
     /**
      * @return Type "SimpleMotorFeedForward", an object containing all the parameters for the feedforward as properties.

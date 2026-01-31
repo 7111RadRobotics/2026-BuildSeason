@@ -108,7 +108,7 @@ public class ElevatorSimMotor implements Motor{
     }
 
     @Override
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setSpeedLimits'");
     }
@@ -121,5 +121,11 @@ public class ElevatorSimMotor implements Motor{
     @Override
     public double getVelocity() {
         return motor.getVelocityMetersPerSecond() / gearRatio;
+    }
+
+    @Override
+    public boolean isAtVelocitySetpoint(double deadZone) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isAtVelocitySetpoint'");
     }
 }

@@ -8,6 +8,9 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,11 +23,15 @@ public class REVMotor implements Motor {
     private PIDController pid;
     private GenericEncoder encoder = null;
     private double gearRatio = 1;
-    private SimpleMotorFeedforward feedForward;
+    private SimpleMotorFeedforward simpleMotorFeedforward;
+    private ElevatorFeedforward elevatorFeedforward;
+    private ArmFeedforward armFeedforward;
     private double setPoint;
-    private double currentSetpoint; 
-    private double positiveSpeedLimit = 20;
-    private double negativeSpeedLimit = -20;
+    private double velocitySetpoint;
+    private double positiveVoltageLimit = 20;
+    private double negativeVoltageLimit = -20;
+    private double positiveVelocityLimit = 5000;
+    private double negativeVelocityLimit = -5000;
     
     public REVMotor (int id) {
         motor = new SparkMax(id, MotorType.kBrushless);
@@ -35,7 +42,7 @@ public class REVMotor implements Motor {
         this.encoder = encoder;
         this.gearRatio = config.gearRatio;
         this.pid = config.pid;
-        this.feedForward = config.simpleFF;
+        this.simpleMotorFeedforward = config.simpleFF;
 
         motor = new SparkMax(id, MotorType.kBrushless);
         config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
@@ -56,6 +63,7 @@ public class REVMotor implements Motor {
     }
 
     public void setVelocity(double rpm){
+        velocitySetpoint = rpm;
         motor.getClosedLoopController().setSetpoint(rpm * gearRatio, ControlType.kVelocity);
     }
 
@@ -81,16 +89,16 @@ public class REVMotor implements Motor {
     
     public void setSetpoint(double setPoint, boolean useSimFF){
         double pidOutput = pid.calculate(getPosition(), setPoint);
-        double feedforwardOutput = feedForward != null
-            ? feedForward.calculate(pid.getErrorDerivative())
+        double feedforwardOutput = simpleMotorFeedforward != null
+            ? simpleMotorFeedforward.calculate(pid.getErrorDerivative())
             : 0;
         double output = pidOutput + feedforwardOutput;
 
         this.setPoint = setPoint;
-        if(output > positiveSpeedLimit){
-            output = positiveSpeedLimit;
-        }else if(output < negativeSpeedLimit){
-            output = negativeSpeedLimit;
+        if(output > positiveVoltageLimit){
+            output = positiveVoltageLimit;
+        }else if(output < negativeVoltageLimit){
+            output = negativeVoltageLimit;
         }
         motor.setVoltage(pidOutput + feedforwardOutput); //Needs velocity for feedforward
         
@@ -129,17 +137,26 @@ public class REVMotor implements Motor {
             return false;
     }
 
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return getVelocity() >= velocitySetpoint - deadzone && getVelocity() <= velocitySetpoint + deadzone;
+    }
+
     public SimpleMotorFeedforward getFeedForward(){
-        return feedForward;
+        return simpleMotorFeedforward;
     }
 
     public void setFeedFoward(double kS, double kV, double kA){
-        feedForward = new SimpleMotorFeedforward(kS, kV, kA);
+        simpleMotorFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
     }
 
-    public void setSpeedLimits(double positiveSpeedLimit, double negativeSpeedLimit){
-        this.positiveSpeedLimit = positiveSpeedLimit;
-        this.negativeSpeedLimit = negativeSpeedLimit;
+    public void setSpeedLimits(double positiveLimit, double negativeLimit, boolean isVoltage){
+        if(isVoltage){
+            this.positiveVoltageLimit = positiveLimit;
+            this.negativeVoltageLimit = negativeLimit;
+        }else{
+            positiveVelocityLimit = positiveLimit;
+            negativeVelocityLimit = negativeLimit;
+        }
     }
     
 }
