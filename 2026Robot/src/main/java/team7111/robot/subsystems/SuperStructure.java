@@ -67,6 +67,8 @@ public class SuperStructure extends SubsystemBase {
 
         this.swerve.setJoysickInputs(() -> -driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
+
+        targeting.giveResources(operatorController);
     }
 
     /**

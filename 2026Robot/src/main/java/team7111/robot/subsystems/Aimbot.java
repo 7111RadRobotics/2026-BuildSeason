@@ -2,8 +2,12 @@ package team7111.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import org.opencv.core.Mat;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -18,10 +22,10 @@ public class Aimbot extends SubsystemBase{
     //CONTROLLER
     /** Controls the manual firing, and adds angle if the stick is moved */
     private XboxController operatorController = null;
-    /** Multiplied against the angle stick (left) */
-    private double angleSensitivity = 0.25;
-    /** Multiplied against the speed stick (Right) */
-    private double speedSensitivity = 0.1;
+    /** Multiplied against the angle stick (left). Called 50x per second, so max rate is this number x50 */
+    private double angleSensitivity = 0.005;
+    /** Multiplied against the speed stick (Right). Called 50x per second, so max rate is this number x50 */
+    private double speedSensitivity = 0.001;
     /** How far the stick can override the angle in non manual shots (degrees) */
     private double angleOverrideRange = 10;
     /** How far the operator can override the speed in non manual shots (rpm) */
@@ -62,8 +66,8 @@ public class Aimbot extends SubsystemBase{
     /** Offset from the center of the robot to the shooter, in meters */
     private final double shooterXOffset = 0.25;
     
-    /** Optimal rpm of the shooter wheel for max distance with continuous fire */
-    private final double shooterOptimalSpeed = 10;
+    /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
+    private final double shooterOptimalSpeed = 1500;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -91,17 +95,24 @@ public class Aimbot extends SubsystemBase{
     }
 
     /** Current type of shot to calculate */
-    private shotType currentShotType = shotType.Manual;
+    private shotType currentShotType = shotType.Parabolic;
 
     /** Calculated angle set in periodic method, in degrees (includes shooter and camera offsets in calculation already) */
     private double calculatedAngle = 0.0;
     /** Calculated speed the wheel needs to spin at, in rotations per minute */
     private double calculatedSpeed = 0.0; 
+    /** The direction in degrees to the target */
+    private double degreeToTarget = 0.0;
 
     public Aimbot(Vision vision, Supplier<Pose2d> robotPose, Pose3d targetPose, XboxController operatorController) {
         this.vision = vision;
         this.robotPose = robotPose;
         this.targetPose = targetPose;
+        this.operatorController = operatorController;
+    }
+
+    /** Sets suppliers if not able to be given when aimbot class is initilized */
+    public void giveResources(XboxController operatorController) {
         this.operatorController = operatorController;
     }
 
@@ -118,6 +129,10 @@ public class Aimbot extends SubsystemBase{
 
     public double getCalculatedSpeed() {
         return this.calculatedSpeed;
+    }
+
+    public double getCalculatedDirection() {
+        return this.degreeToTarget;
     }
 
     /** Enables or disables the autoshooting calculations */
@@ -147,8 +162,9 @@ public class Aimbot extends SubsystemBase{
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
     public void periodic() {
-        SmartDashboard.putBoolean("is using vision", isUsingVision);
-        SmartDashboard.putBoolean("isEnabled", isEnabled);
+        SmartDashboard.putBoolean("Is enabled", isEnabled);
+        SmartDashboard.putBoolean("Is vision enabled", isUsingVision);
+        SmartDashboard.putNumber("angle to target", degreeToTarget);
 
         if(!isEnabled) {
             calculatedAngle = minShooterAngle;
@@ -160,15 +176,31 @@ public class Aimbot extends SubsystemBase{
         switch (currentShotType) {
             case Direct:
                 directShot();
+                SmartDashboard.putBoolean("ShootDirect", true);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
                 break;
             case Parabolic:
                 parabolicShot();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", true);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
                 break;
             case Transport:
                 transport();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", true);
+                SmartDashboard.putBoolean("Manual", false);
                 break;
             case Manual:
                 manual();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", true);
                 break;
         }
 
@@ -193,7 +225,7 @@ public class Aimbot extends SubsystemBase{
         double directDistance = height * height + distance * distance;
         directDistance = Math.sqrt(directDistance);
 
-        double calculatedAngle = Math.asin(height/directDistance);
+        calculatedAngle = Math.asin(height/directDistance);
         calculatedAngle = calculatedAngle * 180/Math.PI;
 
         calculatedSpeed = shooterOptimalSpeed;
@@ -214,14 +246,17 @@ public class Aimbot extends SubsystemBase{
         double distanceToTarget = CamToTarget.getX() + shooterXOffset;
         double heightDifference = CamToTarget.getZ() - shooterHeightOffset;
 
+        //Subtracts a meter from the distance to get a 2nd target point
         double distanceToHubEdge = distanceToTarget - 1;
-        double targetHeightAboveHubEdge = 2.286; //90 inches above the floor
+        double targetHeightAboveHubEdge = 2.286; //90 inches above the floor, settable to anything desired for angle adjustment
 
         double calculatedRatio = 
         ((distanceToTarget*distanceToTarget*heightDifference) - (distanceToHubEdge*distanceToHubEdge*targetHeightAboveHubEdge)) /
         ((distanceToHubEdge*distanceToTarget*(distanceToHubEdge-distanceToTarget)));
 
-        calculatedAngle = Math.atan(calculatedRatio);
+        calculatedAngle = Math.atan(calculatedRatio) * 180/Math.PI;
+        
+        SmartDashboard.putNumber("Nan?", calculatedRatio);
 
         double velocityCalculation = 
         (distanceToHubEdge * calculatedRatio - targetHeightAboveHubEdge) /
@@ -259,6 +294,9 @@ public class Aimbot extends SubsystemBase{
 
     /** Ensures the angles are within the min and max physical angles on the shooter */
     private void useRestraints() {
+        SmartDashboard.putNumber("CalculatedAngle before clamped", calculatedAngle);
+        SmartDashboard.putNumber("CalculatedSpeed before clamped", calculatedSpeed);
+
         if(calculatedAngle < minShooterAngle) {
             calculatedAngle = minShooterAngle;
         } else if(calculatedAngle > maxShooterAngle) {
@@ -272,6 +310,11 @@ public class Aimbot extends SubsystemBase{
         }
     }
 
+    /** Gets a transform 3d object to the target, either using vision or absolute position to calculate <p>
+     * X is distance to the target,
+     * Z is height off ground,
+     * Rotation is the direction you need to be pointing at the target, not an offset, in degrees.
+     */
     private Transform3d getTransToTarget() {
         
         if(isUsingVision) {
@@ -279,26 +322,78 @@ public class Aimbot extends SubsystemBase{
             if( visionResults == null) {
                 return null;
             }
-            Transform3d calculatedPos = new Transform3d(visionResults.getX() + camToTargetXOffset, visionResults.getY(), visionResults.getZ() + camToTargetHeightOffset, null);
+            //Robot relative
+            Transform3d calculatedPos = new Transform3d(visionResults.getX() + camToTargetXOffset, //Distance to the target from center of robot
+                visionResults.getY(), //Left/Right offset of the robot to the target
+                visionResults.getZ() + camToTargetHeightOffset, //Height of the target (from 0)
+                null);
+
+            //X difference and y difference
+            double xdif = targetPose.getX() - robotPose.get().getX();
+            double ydif = targetPose.getY() - robotPose.get().getY();
+
+            double rotation = 0;
+            if(xdif > 0) {
+                if(ydif > 0) {
+                    rotation = Math.atan(xdif/ydif) * 180/Math.PI;
+                } else {
+                    rotation = Math.atan(-ydif/xdif) * 180/Math.PI + 90;
+                }
+            } else {
+                if(ydif > 0) {
+                    rotation = Math.atan(ydif/-xdif) * 180/Math.PI + 270;
+                } else {
+                    rotation = Math.atan(-xdif/-ydif) * 180/Math.PI + 180;
+                }
+            }
+
+            double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
+            Transform3d returnedTrans = new Transform3d(distance,
+                0.0,
+                visionResults.getZ(),
+                new Rotation3d(new Rotation2d(rotation)));
+            degreeToTarget = rotation;
+
+            return returnedTrans;
+        }
+        //Field relative
+        Transform3d calculatedPos = new Transform3d(targetPose.getX() - robotPose.get().getX(), //Left/Right distance to the target
+            targetPose.getY() - robotPose.get().getY(), //Up/Down offset in 2d grid
+            targetPose.getZ(), //Height of the target (from 0)
+            null);
             
-            return calculatedPos;
+        //X difference and y difference
+        double xdif = targetPose.getX() - robotPose.get().getX();
+        double ydif = targetPose.getY() - robotPose.get().getY();
+
+        double rotation = 0;
+        if(xdif > 0) {
+            if(ydif > 0) {
+                rotation = Math.atan(xdif/ydif) * 180/Math.PI;
+            } else {
+                rotation = Math.atan(-ydif/xdif) * 180/Math.PI + 90;
+            }
         } else {
             //ISSUE:
             //Vision uses local x and y difference
             //This is using field relative x and y difference
             //Same reason angle is hard to calculate
-            Transform3d calculatedPos = new Transform3d(targetPose.getX() - robotPose.get().getX(),
-                targetPose.getY() - robotPose.get().getY(),
-                targetPose.getZ(), null);
-            
-            double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
-            Transform3d returnedTrans = new Transform3d(
-                distance, 
-                0.0, 
-                targetPose.getZ() - shooterHeightOffset, null);
-
-            return returnedTrans;
+            if(ydif > 0) {
+                rotation = Math.atan(ydif/-xdif) * 180/Math.PI + 270;
+            } else {
+                rotation = Math.atan(-xdif/-ydif) * 180/Math.PI + 180;
+            }
         }
+
+        double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
+        Transform3d returnedTrans = new Transform3d(
+            distance, 
+            0.0, 
+            targetPose.getZ() - shooterHeightOffset, 
+            new Rotation3d(new Rotation2d(rotation)));
+        degreeToTarget = rotation;
+
+        return returnedTrans;
     }
 
     public XboxController getOperatorController(){

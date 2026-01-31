@@ -51,7 +51,11 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
+        long timerstart = System.nanoTime();
         CommandScheduler.getInstance().run();
+        long timerend = System.nanoTime();
+
+        SmartDashboard.putNumber("Total time of robot", (double) ((timerend-timerstart) / 1000000.0));
     }
 
     /**
