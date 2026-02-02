@@ -11,11 +11,11 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import team7111.robot.utils.motor.Motor.MechanismType;
 
 public class MotorConfig {
-    public final double gearRatio;
-    public final boolean isInverted;
-    public final boolean isBreakMode;
-    public final PIDController pid;
-    public final MechanismType mechanism;
+    public double gearRatio;
+    public boolean isInverted;
+    public boolean isBreakMode;
+    public PIDController pid;
+    public MechanismType mechanism;
     public ArmFeedforward armFF = null;
     public ElevatorFeedforward elevatorFF = null;
     public SimpleMotorFeedforward simpleFF = null;
@@ -54,6 +54,11 @@ public class MotorConfig {
 
     public MotorConfig withSparkConfig(SparkBaseConfig config){
         this.sparkConfig = config;
+        return this;
+    }
+
+    public MotorConfig withInverted(boolean isInverted){
+        this.isInverted = isInverted;
         return this;
     }
 }
