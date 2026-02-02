@@ -1,6 +1,7 @@
 package team7111.robot.utils.motor;
 
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -46,7 +47,12 @@ public class REVMotor implements Motor {
 
         motor = new SparkMax(id, MotorType.kBrushless);
         config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
-        motor.configure(config.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        config.sparkConfig.inverted(config.isInverted);
+        IdleMode idleMode = config.isBreakMode
+            ? IdleMode.kBrake
+            : IdleMode.kCoast;
+        config.sparkConfig.idleMode(idleMode);
+        motor.configure(config.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Voltage", () -> motor.getBusVoltage()).withWidget("");
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Speed", () -> motor.get()).withWidget("");
@@ -64,6 +70,12 @@ public class REVMotor implements Motor {
 
     public void setVelocity(double rpm){
         velocitySetpoint = rpm;
+        if(velocitySetpoint > positiveVelocityLimit){
+            velocitySetpoint = positiveVelocityLimit;
+        }
+        if(velocitySetpoint < negativeVelocityLimit){
+            velocitySetpoint = negativeVelocityLimit;
+        }
         motor.getClosedLoopController().setSetpoint(rpm * gearRatio, ControlType.kVelocity);
     }
 
