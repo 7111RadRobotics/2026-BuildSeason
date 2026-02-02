@@ -82,6 +82,8 @@ public class SuperStructure extends SubsystemBase{
 
     private FieldElement fieldElement = new FieldElement(fieldPose, 0.5);
 
+    
+
     public SuperStructure(
         VisionSubsystem vision, SwerveSubsystem swerve, PathSubsystem paths, 
         IntakeSubsystem intake, BarrelSubsystem barrel, ShooterSubsystem shooter,

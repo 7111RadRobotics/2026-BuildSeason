@@ -43,8 +43,8 @@ public class Pathfinding {
         {1, -1},
         {-1, 1},
     };
-    double gridSize = 0.25;
-    double robotRadius = 0.5;
+    double gridSize = 0.1;
+    double robotRadius = 0.3;
     double currentDistance;
     double startDistance;
     double pathWeight;
@@ -62,6 +62,10 @@ public class Pathfinding {
     List<Pose2d> avoidPoses = new ArrayList<>();
 
     int iterations = 0;
+
+    double d1;
+    double d2;
+    double dis;
 
     private void setAvoidPose(FieldElement fieldElements) {
             Pose2d[] poses;
@@ -81,6 +85,7 @@ public class Pathfinding {
         storedPosition.clear();
         avoidPoses.clear();
         iterations = 0;
+        dis = 0;
         
         robotPose = swerve.getPose();
         gridPosition = robotPose.getTranslation();
@@ -93,8 +98,8 @@ public class Pathfinding {
     
             for (int[] dir : directions) {
                 Translation2d neighbor = new Translation2d(
-                    gridPosition.getX() + (dir[0] * 0.25), 
-                    gridPosition.getY() + (dir[1] * 0.25)
+                    gridPosition.getX() + (dir[0] * gridSize), 
+                    gridPosition.getY() + (dir[1] * gridSize)
                 );
     
                 visited = false;
@@ -115,8 +120,8 @@ public class Pathfinding {
                 }
     
                 if (isSafe) {
-                    double d1 = neighbor.getDistance(startPose.getTranslation());
-                    double d2 = neighbor.getDistance(wayPos);
+                    d1 = gridPosition.getDistance(neighbor) + dis;
+                    d2 = neighbor.getDistance(wayPos);
                     pathWeight = d1 + d2;
     
                     if (minScore == -1 || pathWeight < minScore) {
@@ -133,6 +138,7 @@ public class Pathfinding {
                 
                 storedPosition.add(robotPose);
                 visitedNodes.add(gridPosition);
+                dis += gridPosition.getDistance(new Translation2d(minScoreX, minScoreY));
             } else {
                 break;
             }
@@ -143,11 +149,26 @@ public class Pathfinding {
             return new Waypoint[] { waypoint };
         }
     
-        List<Translation2d> interiorWaypoints = new ArrayList<>();
-        for (int i = 0; i < storedPosition.size() - 1; i++) {
-            interiorWaypoints.add(storedPosition.get(i).getTranslation());
+        if (storedPosition.size() <= 3) {
+        } else {
+            for (int i = storedPosition.size() - 2; i > 0; i--) {
+                Pose2d prev = storedPosition.get(i - 1);
+                Pose2d current = storedPosition.get(i);
+                Pose2d next = storedPosition.get(i + 1);
+        
+                double dx1 = current.getX() - prev.getX();
+                double dy1 = current.getY() - prev.getY();
+                double dx2 = next.getX() - current.getX();
+                double dy2 = next.getY() - current.getY();
+        
+                double crossProduct = Math.abs(dx1 * dy2 - dy1 * dx2);
+        
+                if (crossProduct > 1e-5) { 
+                    storedPosition.remove(i);
+                }
+            }
         }
-    
+
         Waypoint[] path = new Waypoint[storedPosition.size()];
 
         for (int i = 0; i < storedPosition.size(); i++) {
