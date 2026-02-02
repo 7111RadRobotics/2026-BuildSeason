@@ -14,9 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import team7111.robot.subsystems.Aimbot;
 import team7111.robot.subsystems.Autonomous;
-import team7111.robot.subsystems.Hopper;
-import team7111.robot.subsystems.Intake;
-import team7111.robot.subsystems.Shooter;
+import team7111.robot.subsystems.Example;
 import team7111.robot.subsystems.SuperStructure;
 import team7111.robot.subsystems.Swerve;
 import team7111.robot.subsystems.Vision;
@@ -32,11 +30,9 @@ public class Robot extends TimedRobot {
     private Autonomous auto = new Autonomous();
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
-    private Aimbot aimbot = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()), new XboxController(1));
-    private Intake intake = new Intake();
-    private Hopper hopper = new Hopper();
-    private Shooter shooter = new Shooter();
-    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter);
+    private Example example = new Example();
+    private Aimbot targeting = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()), new XboxController(1));
+    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, example, targeting);
 
     /**
      * This function is run when the robot is first started up and should be used for any
