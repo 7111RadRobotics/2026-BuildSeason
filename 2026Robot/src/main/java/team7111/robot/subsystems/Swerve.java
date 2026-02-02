@@ -210,7 +210,7 @@ public class Swerve extends SubsystemBase {
         return currentSwerveState;
     }
     
-    public void setSnapAngle(double snapNumber) {
+    public void setSnapAngle(Double snapNumber) {
         snapAngleSetpoint = snapNumber;
     }
 
