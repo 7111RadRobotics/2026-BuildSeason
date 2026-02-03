@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
     private Aimbot aimbot = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()), new XboxController(1));
     private Intake intake = new Intake();
     private Hopper hopper = new Hopper();
-    private Shooter shooter = new Shooter();
+    private Shooter shooter = new Shooter(aimbot);
     private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter);
 
     /**
