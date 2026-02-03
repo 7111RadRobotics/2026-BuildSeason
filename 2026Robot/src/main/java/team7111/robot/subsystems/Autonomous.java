@@ -19,7 +19,7 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
     private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
     
-    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.05);
+    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.1);
     private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
 
     private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.002);
@@ -92,7 +92,7 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(balancedPoint(0, 0, 90));
                 break;
             case forward2:
-                waypoints.add(balancedPoint(2, 0, 90));
+                waypoints.add(slowPoint(2, 0, 90));
                 break;
             case forwardRotate180:
                 waypoints.add(balancedPoint(1, 0, 90));

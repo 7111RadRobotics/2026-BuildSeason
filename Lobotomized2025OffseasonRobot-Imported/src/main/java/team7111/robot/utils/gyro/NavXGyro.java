@@ -41,7 +41,7 @@ public class NavXGyro implements GenericGyro{
     }
 
     public void setYaw(Rotation2d rotation){
-        yawOffset = rotation;
+        gyro.reset();
     }
 
     public void setPitch(Rotation2d rotation){

@@ -67,7 +67,7 @@ public class SparkMaxSwerveModule implements GenericSwerveModule {
     @Override
     public void setClosedDriveState(SwerveModuleState state) {
         double speedRPM = (state.speedMetersPerSecond * driveGearRatio * 60.0) / SwerveConstants.wheelCircumference;
-        SmartDashboard.putNumber("converted velocity", speedRPM);
+        SmartDashboard.putNumber("converted velocity (RPM)", speedRPM);
         SmartDashboard.putNumber("received state", state.speedMetersPerSecond);
         SmartDashboard.putNumber("reconverted state", speedRPM * SwerveConstants.wheelCircumference / (60.0 * driveGearRatio));
         driveMotor.setVoltage(altDrivePID.calculate(getDriveVelocity(), speedRPM/2));
