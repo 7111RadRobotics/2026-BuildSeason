@@ -68,19 +68,19 @@ public class Shooter extends SubsystemBase {
         this.aimbot = aimbot;
 
         hood = RobotBase.isReal()
-            ? new CTREMotor(1, new RelativeThroughBore(0, 0, 1), hoodConfig)
+            ? new CTREMotor(15, new RelativeThroughBore(1, 2, 1/(8192*17.5) * 4), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
                     DCMotor.getKrakenX60(1), hoodConfig.gearRatio, 0.01, 0.2, 
-                    Degrees.of(0).in(Radians), Degrees.of(90).in(Radians), true, Degrees.of(37).in(Radians)), 
+                    Degrees.of(37).in(Radians), Degrees.of(67).in(Radians), true, Degrees.of(37).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
-                new REVMotor(0, null, flywheelConfig), 
-                new REVMotor(0, null, flywheelConfig))
+                new REVMotor(12, null, flywheelConfig), 
+                new REVMotor(10, null, flywheelConfig))
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
