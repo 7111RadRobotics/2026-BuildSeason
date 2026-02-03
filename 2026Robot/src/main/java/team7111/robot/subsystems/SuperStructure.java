@@ -28,10 +28,10 @@ public class SuperStructure extends SubsystemBase {
         //TODO: decide and create more states (and remove examples)
         example1,
         example2,
+        aimAtTarget,
         autonomousEnter,
         autonomous,
         autonomousExit,
-        toggleTargeting,
     }
 
     //Subsystem Variables
@@ -131,14 +131,14 @@ public class SuperStructure extends SubsystemBase {
                 return example1();
             case example2:
                 return example2();
+            case aimAtTarget:
+                return aimAtTarget();
             case autonomous:
                 return autonomous();
             case autonomousEnter:
                 return autonomousEnter();
             case autonomousExit:
                 return autonomousExit();
-            case toggleTargeting:
-                return toggleTargeting();
             default:
                 return defaultState(state);
         }
@@ -152,7 +152,7 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean example1(){
         shooter.setState(ShooterState.idle);
-        if(driverController.getLeftBumperButtonPressed()){
+        if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.example2);
         }
         return shooter.isAtSetpoint();
@@ -160,8 +160,18 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean example2(){
         shooter.setState(ShooterState.stopped);
-        if(driverController.getLeftBumperButtonPressed()){
+        if(operatorController.getLeftBumperButtonPressed()){
+            setSuperState(SuperState.aimAtTarget);
+        }
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean aimAtTarget(){
+        shooter.setState(ShooterState.scoreAimbot);
+        targeting.setToggle(true);
+        if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.example1);
+            targeting.setToggle(false);
         }
         return shooter.isAtSetpoint();
     }
@@ -250,11 +260,6 @@ public class SuperStructure extends SubsystemBase {
         
         //TODO: Code for setting up teleop goes here.
         // this may include setting swerve to manual control, setting the superState to a different state, etc.
-        return true;
-    }
-
-    private boolean toggleTargeting() {
-       targeting.toggle(); 
         return true;
     }
 

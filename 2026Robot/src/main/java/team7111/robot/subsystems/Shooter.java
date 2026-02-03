@@ -15,7 +15,10 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.utils.encoder.RelativeThroughBore;
 import team7111.robot.utils.motor.ArmSimMotor;
 import team7111.robot.utils.motor.CTREMotor;
@@ -41,14 +44,17 @@ public class Shooter extends SubsystemBase {
         manual,
     }
 
+    private Aimbot aimbot;
+
     private Mechanism2d mechanism2d = new Mechanism2d(3, 3);
-    private MechanismLigament2d hoodLigament = new MechanismLigament2d("Shooter Hood", 1.5, 37);
+    private MechanismLigament2d hoodTrajectoryLigament = new MechanismLigament2d("Trajectory", 1.5, 37);
+    private MechanismLigament2d hoodPositionLigament = new MechanismLigament2d("Position", 0.75, 0, 3, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
         48/12 * 24/15 * 210/12, true, true, new PIDController(0.1, 0, 0), MechanismType.arm, 0.001, 0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, false, false, new PIDController(0, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0);
+        1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0);
 
     private Motor hood;
     private Motor flywheels;
@@ -58,14 +64,16 @@ public class Shooter extends SubsystemBase {
 
     private ShooterState currentState = ShooterState.stopped;
 
-    public Shooter() {
+    public Shooter(Aimbot aimbot) {
+        this.aimbot = aimbot;
+
         hood = RobotBase.isReal()
             ? new CTREMotor(1, new RelativeThroughBore(1, 2, 1), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
                     DCMotor.getKrakenX60(1), hoodConfig.gearRatio, 0.01, 0.2, 
-                    Degrees.of(37).in(Radians), Degrees.of(67).in(Radians), true, Degrees.of(37).in(Radians)), 
+                    Degrees.of(0).in(Radians), Degrees.of(90).in(Radians), true, Degrees.of(37).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
@@ -79,7 +87,8 @@ public class Shooter extends SubsystemBase {
                 flywheelConfig.pid,
                 flywheelConfig.simpleFF);
 
-        mechanism2d.getRoot("Shooter hood", 1.5, 1.5).append(hoodLigament);
+        mechanism2d.getRoot("Shooter hood", 1.5, 1.5).append(hoodTrajectoryLigament);
+        mechanism2d.getRoot("Shooter hood", 1.5, 1.5).append(hoodPositionLigament);
 
         Shuffleboard.getTab("Mechanisms").add("Shooter", mechanism2d);
     }
@@ -89,10 +98,16 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        hood.setSetpoint(90 - hoodPosition, false);
+        if(90 - hoodPosition > 67){
+            hood.setSetpoint(67, false);
+        }else if(90 - hoodPosition < 37){
+            hood.setSetpoint(37, false);
+        }else
+            hood.setSetpoint(90 - hoodPosition, false);
         flywheels.setVelocity(flywheelSpeed);
 
-        hoodLigament.setAngle(hood.getPosition() + 90);
+        hoodTrajectoryLigament.setAngle(hood.getPosition() + 90);
+        hoodPositionLigament.setAngle(hood.getPosition());
         SmartDashboard.putNumber("hood position", hood.getPosition());
     }
 
@@ -136,7 +151,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void idleMode(){
-        hoodPosition = 50;
+        hoodPosition = 35;
         flywheelSpeed = 1000;
     }
 
@@ -144,7 +159,11 @@ public class Shooter extends SubsystemBase {
 
     private void score(){}
 
-    private void scoreAimbot(){}
+    private void scoreAimbot(){
+        hoodPosition = aimbot.getCalculatedAngle();
+        flywheelSpeed = aimbot.getCalculatedSpeed();
+        aimbot.setShotType(shotType.Parabolic);
+    }
 
     private void stopped(){
         hoodPosition = 30;
