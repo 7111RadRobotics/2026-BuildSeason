@@ -12,23 +12,37 @@ import team7111.robot.utils.encoder.GenericEncoder;
  */
 public interface Motor {
 
+    public enum MechanismType {
+        flywheel,
+        arm,
+        elevator,
+    }
+
     /**
      * Sets motor speed
      * @param speed -Type "double", range is -1 to 1. -1 is full speed back, 1 is full speed forward.
      */
-    public void setSpeed(double speed);
+    public void setDutyCycle(double speed);
 
     /**
      * @return Type "double", returns the speed of the motor. Ranges between -1 and 1. -1 is full speed back, 1 is full speed forward.
      * @see #
      */
-    public double getSpeed();
+    public double getDutyCycle();
+
+    /**
+     * 
+     * @return
+     */
+    public void setVelocity(double rpm);
+
+    public double getVelocity();
 
     /**
      * Sets the motor position, overwriting the old variable.
      * @param position -Type "double", position for the motor in digrees.
      */
-    public void setPosition(double position);
+    public void setPositionReadout(double position);
     
     /**
      * Gets the current position of the motor
@@ -60,7 +74,7 @@ public interface Motor {
      * @param positiveSpeed -Type "double", the speed limit in the positive direction
      * @param negativeSpeed -Type "double", the speed limit in the negative direction
      */
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed);
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage);
 
     /**
      * Gets the motor encoder.
@@ -83,6 +97,8 @@ public interface Motor {
      * @return Type "boolean", true if the motor is within the setpoint + or - the deadzone, false if otherwise.
      */
     public boolean isAtSetpoint(double deadzone);
+
+    public boolean isAtVelocitySetpoint(double deadZone);
 
     /**
      * @return Type "SimpleMotorFeedForward", an object containing all the parameters for the feedforward as properties.

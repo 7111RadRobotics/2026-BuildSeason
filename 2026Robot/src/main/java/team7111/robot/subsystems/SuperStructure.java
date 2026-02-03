@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.subsystems.Autonomous.Autos;
+import team7111.robot.subsystems.Shooter.ShooterState;
 import team7111.robot.subsystems.Swerve.SwerveState;
 import team7111.robot.utils.AutoAction;
 import team7111.lib.pathfinding.*;
@@ -37,10 +38,10 @@ public class SuperStructure extends SubsystemBase {
     private final Autonomous auto;
     private final Swerve swerve;
     private final Vision vision;
-    private final Example example; // object for an example subsystem that controls a mechanism
     private final Aimbot targeting;
-    //TODO: decide and create other subsystems
-    
+    private final Intake intake;
+    private final Hopper hopper;
+    private final Shooter shooter;
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
     private final XboxController driverController = new XboxController(0);
@@ -57,16 +58,21 @@ public class SuperStructure extends SubsystemBase {
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
      */
-    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Example example, Aimbot targeting){
+    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Aimbot aimbot, Intake intake, Hopper hopper, Shooter shooter){
         this.auto = auto;
         this.swerve = swerve;
         this.vision = vision;
-        this.example = example;
-        this.targeting = targeting;
+        this.targeting = aimbot;
+        this.intake = intake;
+        this.hopper = hopper;
+        this.shooter = shooter;
+
         operatorController = targeting.getOperatorController();
 
         this.swerve.setJoysickInputs(() -> -driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
+
+        targeting.giveResources(operatorController);
     }
 
     /**
@@ -145,12 +151,19 @@ public class SuperStructure extends SubsystemBase {
      * Mainly used for autonomous routines.
      */
     private boolean example1(){
-        return true;
+        shooter.setState(ShooterState.idle);
+        if(driverController.getLeftBumperButtonPressed()){
+            setSuperState(SuperState.example2);
+        }
+        return shooter.isAtSetpoint();
     }
 
     private boolean example2(){
-        System.out.println("example2");
-        return true;
+        shooter.setState(ShooterState.stopped);
+        if(driverController.getLeftBumperButtonPressed()){
+            setSuperState(SuperState.example1);
+        }
+        return shooter.isAtSetpoint();
     }
 
     /** 

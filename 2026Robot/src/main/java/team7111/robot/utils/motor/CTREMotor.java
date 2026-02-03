@@ -1,6 +1,8 @@
 package team7111.robot.utils.motor;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -8,6 +10,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import team7111.robot.utils.encoder.GenericEncoder;
@@ -19,32 +23,44 @@ public class CTREMotor implements Motor {
     private GenericEncoder encoder = null;
     private double gearRatio;
     private double currentSetpoint;
-    private double positiveSpeedLimit = 1;
-    private double negativeSpeedLimit = -1;
+    private double velocitySetpoint = 0;
+    private double positiveVoltageLimit = 20;
+    private double negativeVoltageLimit = -20;
+    private double positiveVelocityLimit = 5000;
+    private double negativeVelocityLimit = -5000;
     private SimpleMotorFeedforward feedforward;
     private ArmFeedforward armFF;
-    private Motor simType;
     private int id;
+
+    private VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
 
     private GenericEntry motorPEntry;
     private GenericEntry motorIEntry;
     private GenericEntry motorDEntry;
     
-    public CTREMotor(int id, GenericEncoder encoder, double gearRatio, PIDController pid, SimpleMotorFeedforward feedForward, ArmFeedforward armFF, Motor simType, TalonFXConfiguration talonConfig){
+    public CTREMotor(int id, GenericEncoder encoder, MotorConfig config){
         this.encoder = encoder;
-        this.gearRatio = gearRatio;
-        this.pid = pid;
-        this.feedforward = feedForward;
-        this.armFF = armFF;
+        this.gearRatio = config.gearRatio;
+        this.pid = config.pid;
+        this.feedforward = config.simpleFF;
+        this.armFF = config.armFF;
         this.id = id;
         motor = new TalonFX(id);
-        this.simType = simType;
         motorPEntry = Shuffleboard.getTab("test").add("Motor " + id + " P", 0).getEntry();
         motorIEntry = Shuffleboard.getTab("test").add("Motor " + id + " I", 0).getEntry();
         motorDEntry = Shuffleboard.getTab("test").add("Motor " + id + " D", 0).getEntry();
 
-        motor.getConfigurator().apply(talonConfig);
-        setPosition(0);
+        config.talonConfig.Slot0.kP = pid.getP();
+        config.talonConfig.Slot0.kI = pid.getI();
+        config.talonConfig.Slot0.kD = pid.getD();
+        config.talonConfig.MotorOutput.Inverted = config.isInverted
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive; 
+        config.talonConfig.MotorOutput.NeutralMode = config.isBreakMode
+            ? NeutralModeValue.Brake
+            : NeutralModeValue.Coast;
+        motor.getConfigurator().apply(config.talonConfig);
+        setPositionReadout(0);
 
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Voltage", () -> motor.getMotorVoltage().getValueAsDouble()).withWidget("");
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Speed", () -> motor.get()).withWidget("");
@@ -58,18 +74,32 @@ public class CTREMotor implements Motor {
         motorIEntry = Shuffleboard.getTab("test").add("Motor " + id + " I", 0).getEntry();
         motorDEntry = Shuffleboard.getTab("test").add("Motor " + id + " D", 0).getEntry();
 
-        setPosition(0);
+        setPositionReadout(0);
     }
 
-    public void setSpeed(double speed){
+    public void setDutyCycle(double speed){
         motor.set(speed);
     }
 
-    public double getSpeed(){
+    public double getDutyCycle(){
         return motor.get();
     }
+
+    public void setVelocity(double rpm){
+        if(rpm > positiveVelocityLimit){
+            rpm = positiveVelocityLimit;
+        }
+        if(rpm < negativeVelocityLimit){
+            rpm = negativeVelocityLimit;
+        }
+        motor.setControl(velocityDutyCycle.withVelocity(rpm * gearRatio));
+    }
+
+    public double getVelocity(){
+        return motor.getVelocity().getValueAsDouble() / gearRatio;
+    }
     
-    public void setPosition(double position){
+    public void setPositionReadout(double position){
         if(encoder != null){
             encoder.setPosition(Rotation2d.fromDegrees(position));
         } else {
@@ -99,12 +129,12 @@ public class CTREMotor implements Motor {
             feedforwardOutput = 0;
         double totalOutput = pidOutput + feedforwardOutput;
         SmartDashboard.putNumber("Motor " + id + " pid", totalOutput);
-        if(totalOutput > positiveSpeedLimit){
-            motor.setVoltage(positiveSpeedLimit);
-            //motor.set(positiveSpeedLimit);
-        }else if(totalOutput < negativeSpeedLimit){
-            motor.setVoltage(negativeSpeedLimit);
-            //motor.set(negativeSpeedLimit);
+        if(totalOutput > positiveVoltageLimit){
+            motor.setVoltage(positiveVoltageLimit);
+            //motor.set(positiveVoltageLimit);
+        }else if(totalOutput < negativeVoltageLimit){
+            motor.setVoltage(negativeVoltageLimit);
+            //motor.set(negativeVoltageLimit);
         }else{
             motor.setVoltage(totalOutput);
         }
@@ -137,6 +167,10 @@ public class CTREMotor implements Motor {
         }
         return false;
     }
+
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return getPosition() >= velocitySetpoint - deadzone && getPosition() <= velocitySetpoint + deadzone;
+    }
         
     public SimpleMotorFeedforward getFeedForward(){
         return feedforward;
@@ -163,8 +197,13 @@ public class CTREMotor implements Motor {
             motorDEntry.getDouble(0));*/
     }
 
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
-        positiveSpeedLimit = positiveSpeed;
-        negativeSpeedLimit = negativeSpeed;
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
+        if(isVoltage){
+            positiveVoltageLimit = positiveSpeed;
+            negativeVoltageLimit = negativeSpeed;
+        }else{
+            positiveVelocityLimit = positiveSpeed;
+            negativeVelocityLimit = negativeSpeed;
+        }
     }
 }

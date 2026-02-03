@@ -9,13 +9,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PosePlanning {
 
-    // Member variable accessible by all methods
     private List<Pose2d> avoidPoses = new ArrayList<>();
 
-    // Populate avoidPoses from field elements
     public void setAvoidPose(FieldElement[] fieldElements) {
-        avoidPoses.clear(); // clear old obstacles if needed
-        
         for (FieldElement element : fieldElements) {
             Pose2d[] poses;
             if (element.returnCorners() == null) {

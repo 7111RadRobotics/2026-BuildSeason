@@ -30,15 +30,15 @@ public class ElevatorSimMotor implements Motor{
         this.motor = elevatorSim;       
     }
 
-    public void setSpeed(double speed){
+    public void setDutyCycle(double speed){
         motor.setInput(speed);
     }
 
-    public double getSpeed(){
+    public double getDutyCycle(){
         return motor.getOutput(0);
     }
 
-    public void setPosition(double position){
+    public void setPositionReadout(double position){
         motor.setState(position, 0);
     }
     
@@ -108,8 +108,24 @@ public class ElevatorSimMotor implements Motor{
     }
 
     @Override
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setSpeedLimits'");
+    }
+
+    @Override
+    public void setVelocity(double rpm) {
+        //does nothing
+    }
+
+    @Override
+    public double getVelocity() {
+        return motor.getVelocityMetersPerSecond() / gearRatio;
+    }
+
+    @Override
+    public boolean isAtVelocitySetpoint(double deadZone) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isAtVelocitySetpoint'");
     }
 }

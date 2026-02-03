@@ -15,18 +15,27 @@ public class TwoMotors implements Motor {
    
     }
     
-    public void setSpeed(double speed){
-        motor1.setSpeed(speed);
-        motor2.setSpeed(speed);
+    public void setDutyCycle(double speed){
+        motor1.setDutyCycle(speed);
+        motor2.setDutyCycle(speed);
     }
 
-    public double getSpeed(){
-        return motor1.getSpeed();
+    public double getDutyCycle(){
+        return motor1.getDutyCycle();
     }
 
-    public void setPosition(double position){
-        motor1.setPosition(position);
-        motor2.setPosition(position);
+    public void setVelocity(double rpm){
+        motor1.setVelocity(rpm);
+        motor2.setVelocity(rpm);
+    }
+
+    public double getVelocity(){
+        return motor1.getVelocity();
+    }
+
+    public void setPositionReadout(double position){
+        motor1.setPositionReadout(position);
+        motor2.setPositionReadout(position);
     }
     
     public double getPosition(){
@@ -70,6 +79,10 @@ public class TwoMotors implements Motor {
         return motor1.isAtSetpoint(deadzone);
     }
 
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return motor1.isAtSetpoint(deadzone);
+    }
+
     public SimpleMotorFeedforward getFeedForward(){
         return motor1.getFeedForward();
     }
@@ -79,8 +92,8 @@ public class TwoMotors implements Motor {
         motor2.setFeedFoward(kS, kV, kA);
     }
 
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
-        motor1.setSpeedLimits(positiveSpeed, negativeSpeed);
-        motor2.setSpeedLimits(positiveSpeed, negativeSpeed);
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
+        motor1.setSpeedLimits(positiveSpeed, negativeSpeed, isVoltage);
+        motor2.setSpeedLimits(positiveSpeed, negativeSpeed, isVoltage);
     }
 }

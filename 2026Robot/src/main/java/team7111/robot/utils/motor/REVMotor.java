@@ -1,10 +1,17 @@
 package team7111.robot.utils.motor;
 
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,27 +24,35 @@ public class REVMotor implements Motor {
     private PIDController pid;
     private GenericEncoder encoder = null;
     private double gearRatio = 1;
-    private SimpleMotorFeedforward feedForward;
+    private SimpleMotorFeedforward simpleMotorFeedforward;
+    private ElevatorFeedforward elevatorFeedforward;
+    private ArmFeedforward armFeedforward;
     private double setPoint;
-    private Motor simType;
-    private double currentSetpoint; 
-    private double positiveSpeedLimit = 1;
-    private double negativeSpeedLimit = -1;
+    private double velocitySetpoint;
+    private double positiveVoltageLimit = 20;
+    private double negativeVoltageLimit = -20;
+    private double positiveVelocityLimit = 5000;
+    private double negativeVelocityLimit = -5000;
     
     public REVMotor (int id) {
         motor = new SparkMax(id, MotorType.kBrushless);
 
     }
     
-    public REVMotor(int id, GenericEncoder encoder, double gearRatio, PIDController pid, SimpleMotorFeedforward feedforward, Motor simType, SparkBaseConfig sparkMotorConfig){
+    public REVMotor(int id, GenericEncoder encoder, MotorConfig config){
         this.encoder = encoder;
-        this.gearRatio = gearRatio;
-        this.pid = pid;
-        this.feedForward = feedforward;
+        this.gearRatio = config.gearRatio;
+        this.pid = config.pid;
+        this.simpleMotorFeedforward = config.simpleFF;
 
         motor = new SparkMax(id, MotorType.kBrushless);
-        this.simType = simType;
-        motor.configure(sparkMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
+        config.sparkConfig.inverted(config.isInverted);
+        IdleMode idleMode = config.isBreakMode
+            ? IdleMode.kBrake
+            : IdleMode.kCoast;
+        config.sparkConfig.idleMode(idleMode);
+        motor.configure(config.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Voltage", () -> motor.getBusVoltage()).withWidget("");
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Speed", () -> motor.get()).withWidget("");
@@ -45,15 +60,30 @@ public class REVMotor implements Motor {
     }
 
 
-    public void setSpeed(double speed){
+    public void setDutyCycle(double speed){
         motor.set(speed);
     }
 
-    public double getSpeed(){
+    public double getDutyCycle(){
         return motor.get();
     }
+
+    public void setVelocity(double rpm){
+        velocitySetpoint = rpm;
+        if(velocitySetpoint > positiveVelocityLimit){
+            velocitySetpoint = positiveVelocityLimit;
+        }
+        if(velocitySetpoint < negativeVelocityLimit){
+            velocitySetpoint = negativeVelocityLimit;
+        }
+        motor.getClosedLoopController().setSetpoint(rpm * gearRatio, ControlType.kVelocity);
+    }
+
+    public double getVelocity(){
+        return motor.getEncoder().getVelocity() / gearRatio;
+    }
     
-    public void setPosition(double position){
+    public void setPositionReadout(double position){
         if(encoder != null){
             encoder.setPosition(Rotation2d.fromDegrees(position));
         } else {
@@ -71,16 +101,16 @@ public class REVMotor implements Motor {
     
     public void setSetpoint(double setPoint, boolean useSimFF){
         double pidOutput = pid.calculate(getPosition(), setPoint);
-        double feedforwardOutput = feedForward != null
-            ? feedForward.calculate(pid.getErrorDerivative())
+        double feedforwardOutput = simpleMotorFeedforward != null
+            ? simpleMotorFeedforward.calculate(pid.getErrorDerivative())
             : 0;
         double output = pidOutput + feedforwardOutput;
 
         this.setPoint = setPoint;
-        if(output > positiveSpeedLimit){
-            output = positiveSpeedLimit;
-        }else if(output < negativeSpeedLimit){
-            output = negativeSpeedLimit;
+        if(output > positiveVoltageLimit){
+            output = positiveVoltageLimit;
+        }else if(output < negativeVoltageLimit){
+            output = negativeVoltageLimit;
         }
         motor.setVoltage(pidOutput + feedforwardOutput); //Needs velocity for feedforward
         
@@ -119,17 +149,26 @@ public class REVMotor implements Motor {
             return false;
     }
 
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return getVelocity() >= velocitySetpoint - deadzone && getVelocity() <= velocitySetpoint + deadzone;
+    }
+
     public SimpleMotorFeedforward getFeedForward(){
-        return feedForward;
+        return simpleMotorFeedforward;
     }
 
     public void setFeedFoward(double kS, double kV, double kA){
-        feedForward = new SimpleMotorFeedforward(kS, kV, kA);
+        simpleMotorFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
     }
 
-    public void setSpeedLimits(double positiveSpeedLimit, double negativeSpeedLimit){
-        this.positiveSpeedLimit = positiveSpeedLimit;
-        this.negativeSpeedLimit = negativeSpeedLimit;
+    public void setSpeedLimits(double positiveLimit, double negativeLimit, boolean isVoltage){
+        if(isVoltage){
+            this.positiveVoltageLimit = positiveLimit;
+            this.negativeVoltageLimit = negativeLimit;
+        }else{
+            positiveVelocityLimit = positiveLimit;
+            negativeVelocityLimit = negativeLimit;
+        }
     }
     
 }

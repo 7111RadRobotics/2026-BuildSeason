@@ -23,15 +23,15 @@ public class ArmSimMotor implements Motor {
         this.feedforward = feedforward;
     }
 
-    public void setSpeed(double speed){
+    public void setDutyCycle(double speed){
         motor.setInput(speed);
     }
 
-    public double getSpeed(){
+    public double getDutyCycle(){
         return motor.getOutput(0);
     }
 
-    public void setPosition(double position){
+    public void setPositionReadout(double position){
         
     }
     
@@ -86,6 +86,10 @@ public class ArmSimMotor implements Motor {
         return getPosition() <= setpoint + deadzone && getPosition() >= setpoint - deadzone;
     }
 
+    public boolean isAtVelocitySetpoint(double deadzone){
+        return false;
+    }
+
     public SimpleMotorFeedforward getFeedForward(){
         return new SimpleMotorFeedforward(feedforward.getKs(), feedforward.getKv(), feedforward.getKa());
     }
@@ -95,8 +99,18 @@ public class ArmSimMotor implements Motor {
     }
 
     @Override
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed) {
+    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setSpeedLimits'");
+    }
+
+    @Override
+    public void setVelocity(double rpm) {
+        // does nothing
+    }
+
+    @Override
+    public double getVelocity() {
+        return motor.getVelocityRadPerSec() / (2*Math.PI);
     }
 }
