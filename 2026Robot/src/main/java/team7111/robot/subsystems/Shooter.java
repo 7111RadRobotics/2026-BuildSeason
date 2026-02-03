@@ -60,7 +60,7 @@ public class Shooter extends SubsystemBase {
 
     public Shooter() {
         hood = RobotBase.isReal()
-            ? new CTREMotor(1, new RelativeThroughBore(0, 0, 1), hoodConfig)
+            ? new CTREMotor(1, new RelativeThroughBore(1, 2, 1), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
@@ -71,8 +71,8 @@ public class Shooter extends SubsystemBase {
         
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
-                new REVMotor(0, null, flywheelConfig), 
-                new REVMotor(0, null, flywheelConfig))
+                new REVMotor(10, null, flywheelConfig), 
+                new REVMotor(12, null, flywheelConfig))
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
