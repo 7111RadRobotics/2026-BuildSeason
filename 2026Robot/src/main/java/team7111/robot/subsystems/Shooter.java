@@ -46,9 +46,9 @@ public class Shooter extends SubsystemBase {
 
     private Aimbot aimbot;
 
-    private Mechanism2d mechanism2d = new Mechanism2d(3, 3);
-    private MechanismLigament2d hoodTrajectoryLigament = new MechanismLigament2d("Trajectory", 1.5, 37);
-    private MechanismLigament2d hoodPositionLigament = new MechanismLigament2d("Position", 0.75, 0, 3, new Color8Bit(Color.kCyan));
+    private Mechanism2d mechanism2d = new Mechanism2d(1, 1);
+    private MechanismLigament2d hoodTrajectoryLigament = new MechanismLigament2d("Trajectory", 1.5, 37, 2, new Color8Bit(Color.kOrange));
+    private MechanismLigament2d hoodPositionLigament = new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
         48/12 * 24/15 * 210/12, true, true, new PIDController(0.1, 0, 0), MechanismType.arm, 0.001, 0, 0, 0);
@@ -61,6 +61,11 @@ public class Shooter extends SubsystemBase {
 
     private double hoodPosition = 37;
     private double flywheelSpeed = 0;
+
+    private final double maxHoodPos = 67;
+    private final double minHoodPos = 37;
+    private final double maxHoodTraj = 90 - minHoodPos;
+    private final double minHoodTraj = 90 - maxHoodPos;
 
     private ShooterState currentState = ShooterState.stopped;
 
@@ -87,8 +92,8 @@ public class Shooter extends SubsystemBase {
                 flywheelConfig.pid,
                 flywheelConfig.simpleFF);
 
-        mechanism2d.getRoot("Shooter hood", 1.5, 1.5).append(hoodTrajectoryLigament);
-        mechanism2d.getRoot("Shooter hood", 1.5, 1.5).append(hoodPositionLigament);
+        mechanism2d.getRoot("Shooter hood", 0.5, 0.5).append(hoodTrajectoryLigament);
+        mechanism2d.getRoot("Shooter hood", 0.5, 0.5).append(hoodPositionLigament);
 
         Shuffleboard.getTab("Mechanisms").add("Shooter", mechanism2d);
     }
@@ -98,17 +103,18 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        if(90 - hoodPosition > 67){
-            hood.setSetpoint(67, false);
-        }else if(90 - hoodPosition < 37){
-            hood.setSetpoint(37, false);
+        if(90 - hoodPosition > maxHoodPos){
+            hood.setSetpoint(maxHoodPos, false);
+        }else if(90 - hoodPosition < minHoodPos){
+            hood.setSetpoint(minHoodPos, false);
         }else
             hood.setSetpoint(90 - hoodPosition, false);
         flywheels.setVelocity(flywheelSpeed);
 
-        hoodTrajectoryLigament.setAngle(hood.getPosition() + 90);
-        hoodPositionLigament.setAngle(hood.getPosition());
+        hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
+        hoodPositionLigament.setAngle(-hood.getPosition() + 180);
         SmartDashboard.putNumber("hood position", hood.getPosition());
+        SmartDashboard.putNumber("hood setpoint", hoodPosition);
     }
 
     public void simulationPeriodic(){}
@@ -130,9 +136,6 @@ public class Shooter extends SubsystemBase {
             case idle:
                 idleMode();
                 break;
-            case manual:
-                manual();
-                break;
             case pass:
                 pass();
                 break;
@@ -144,6 +147,9 @@ public class Shooter extends SubsystemBase {
                 break;
             case stopped:
                 stopped();
+                break;
+            case manual:
+                manual();
                 break;
             default:
                 break;
@@ -171,7 +177,9 @@ public class Shooter extends SubsystemBase {
     }
 
     private void manual(){
-        //System.out.println("Runs code for the manual state");
+        aimbot.setShotType(shotType.Manual);
+        hoodPosition = aimbot.getCalculatedAngle();
+        flywheelSpeed = aimbot.getCalculatedSpeed();
     }
 
     public void setState(ShooterState state){

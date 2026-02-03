@@ -22,16 +22,17 @@ import team7111.lib.pathfinding.*;
 public class SuperStructure extends SubsystemBase {
     /**
      * This enumeration contains the values or "states" which determine the subsystems.
-     * The top 2 state names are placeholders. 
+     * The top 2 state names are temporary states for testing 
      */
     public enum SuperState {
         //TODO: decide and create more states (and remove examples)
-        example1,
-        example2,
+        temp1,
+        temp2,
         aimAtTarget,
         autonomousEnter,
         autonomous,
         autonomousExit,
+        manual,
     }
 
     //Subsystem Variables
@@ -45,10 +46,10 @@ public class SuperStructure extends SubsystemBase {
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
     private final XboxController driverController = new XboxController(0);
-    private final XboxController operatorController;
+    private final XboxController operatorController = new XboxController(1);
 
     /** This represents the current superstate of the robot */
-    private SuperState superState = SuperState.example1;
+    private SuperState superState = SuperState.temp1;
 
     private boolean inAuto = false;
     private int autoIndex = 0;
@@ -66,8 +67,6 @@ public class SuperStructure extends SubsystemBase {
         this.intake = intake;
         this.hopper = hopper;
         this.shooter = shooter;
-
-        operatorController = targeting.getOperatorController();
 
         this.swerve.setJoysickInputs(() -> -driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
@@ -127,12 +126,14 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean manageSuperState(SuperState state){
         switch(state){
-            case example1:
-                return example1();
-            case example2:
-                return example2();
+            case temp1:
+                return temp1();
+            case temp2:
+                return temp2();
             case aimAtTarget:
                 return aimAtTarget();
+            case manual:
+                return manual();
             case autonomous:
                 return autonomous();
             case autonomousEnter:
@@ -145,20 +146,20 @@ public class SuperStructure extends SubsystemBase {
     }
 
     /**
-     * Each of these methods, called "state methods" (state1-autonomousExit), represent a defined state.
+     * Each of these methods, called "state methods" (temp1-autonomousExit), represent a defined state.
      * When called by the state manager, it will set the states of different subsystems.
      * @return true if the state is complete. The condition could represent mechanisms at a setpoint, a beambreak trigger, a timer, etc.
      * Mainly used for autonomous routines.
      */
-    private boolean example1(){
+    private boolean temp1(){
         shooter.setState(ShooterState.idle);
         if(operatorController.getLeftBumperButtonPressed()){
-            setSuperState(SuperState.example2);
+            setSuperState(SuperState.temp2);
         }
         return shooter.isAtSetpoint();
     }
 
-    private boolean example2(){
+    private boolean temp2(){
         shooter.setState(ShooterState.stopped);
         if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.aimAtTarget);
@@ -170,10 +171,18 @@ public class SuperStructure extends SubsystemBase {
         shooter.setState(ShooterState.scoreAimbot);
         targeting.setToggle(true);
         if(operatorController.getLeftBumperButtonPressed()){
-            setSuperState(SuperState.example1);
+            setSuperState(SuperState.temp1);
             targeting.setToggle(false);
         }
         return shooter.isAtSetpoint();
+    }
+
+
+    private boolean manual(){
+        // code for direct control of mechanisms goes here
+
+
+        return true;
     }
 
     /** 
@@ -256,7 +265,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomousExit(){
         inAuto = false;
         swerve.setSwerveState(SwerveState.manual);
-        setSuperState(SuperState.example1);
+        setSuperState(SuperState.temp1);
         
         //TODO: Code for setting up teleop goes here.
         // this may include setting swerve to manual control, setting the superState to a different state, etc.

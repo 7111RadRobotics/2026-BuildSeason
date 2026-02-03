@@ -51,7 +51,6 @@ public class Hopper extends SubsystemBase {
                 break;
             default:
                 break;
-            
         }
     }
 

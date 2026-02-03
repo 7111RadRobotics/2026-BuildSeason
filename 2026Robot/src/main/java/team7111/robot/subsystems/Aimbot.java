@@ -105,11 +105,10 @@ public class Aimbot extends SubsystemBase{
     /** The direction in degrees to the target */
     private double degreeToTarget = 0.0;
 
-    public Aimbot(Vision vision, Supplier<Pose2d> robotPose, Pose3d targetPose, XboxController operatorController) {
+    public Aimbot(Vision vision, Supplier<Pose2d> robotPose, Pose3d targetPose) {
         this.vision = vision;
         this.robotPose = robotPose;
         this.targetPose = targetPose;
-        this.operatorController = operatorController;
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
@@ -405,10 +404,6 @@ public class Aimbot extends SubsystemBase{
         degreeToTarget = rotation;
 
         return returnedTrans;
-    }
-
-    public XboxController getOperatorController(){
-        return operatorController;
     }
 }
 //floccinaucinihilipilification
