@@ -98,7 +98,12 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        hood.setSetpoint(90 - hoodPosition, false);
+        if(90 - hoodPosition > 67){
+            hood.setSetpoint(67, false);
+        }else if(90 - hoodPosition < 37){
+            hood.setSetpoint(37, false);
+        }else
+            hood.setSetpoint(90 - hoodPosition, false);
         flywheels.setVelocity(flywheelSpeed);
 
         hoodTrajectoryLigament.setAngle(hood.getPosition() + 90);
