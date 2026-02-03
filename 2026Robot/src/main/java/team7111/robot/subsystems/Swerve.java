@@ -85,7 +85,7 @@ public class Swerve extends SubsystemBase {
 
         pathMaster = new PathMaster(this::getPose, () -> getYaw());
         pathMaster.setTranslationPID(3, 0.015215, 0.1012);
-        pathMaster.setRotationPID(0.3, 0.000, 0.00);
+        pathMaster.setRotationPID(0.1425, 0.000, 0.00240225);
         pathMaster.setInversions(false, false, true, false);
 
         swerveOdometry = new SwerveDriveOdometry(SwerveConstants.kinematics, getYaw(), getPositions());
