@@ -59,13 +59,13 @@ public class Shooter extends SubsystemBase {
     private Motor hood;
     private Motor flywheels;
 
-    private double hoodPosition = 37;
+    private double hoodTrajSetpoint = 37;
     private double flywheelSpeed = 0;
 
     private final double maxHoodPos = 67;
     private final double minHoodPos = 37;
-    private final double maxHoodTraj = 90 - minHoodPos;
-    private final double minHoodTraj = 90 - maxHoodPos;
+    private final double maxHoodTraj = 90 - minHoodPos; // 53
+    private final double minHoodTraj = 90 - maxHoodPos; // 23
 
     private ShooterState currentState = ShooterState.stopped;
 
@@ -103,18 +103,18 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        if(90 - hoodPosition > maxHoodPos){
+        if(90 - hoodTrajSetpoint > maxHoodPos){
             hood.setSetpoint(maxHoodPos, false);
-        }else if(90 - hoodPosition < minHoodPos){
+        }else if(90 - hoodTrajSetpoint < minHoodPos){
             hood.setSetpoint(minHoodPos, false);
         }else
-            hood.setSetpoint(90 - hoodPosition, false);
+            hood.setSetpoint(90 - hoodTrajSetpoint, false);
         flywheels.setVelocity(flywheelSpeed);
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
         hoodPositionLigament.setAngle(-hood.getPosition() + 180);
         SmartDashboard.putNumber("hood position", hood.getPosition());
-        SmartDashboard.putNumber("hood setpoint", hoodPosition);
+        SmartDashboard.putNumber("hood setpoint", hoodTrajSetpoint);
     }
 
     public void simulationPeriodic(){}
@@ -157,7 +157,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void idleMode(){
-        hoodPosition = 37;
+        hoodTrajSetpoint = 37;
         flywheelSpeed = 1000;
     }
 
@@ -166,19 +166,19 @@ public class Shooter extends SubsystemBase {
     private void score(){}
 
     private void scoreAimbot(){
-        hoodPosition = aimbot.getCalculatedAngle();
+        hoodTrajSetpoint = aimbot.getCalculatedAngle();
         flywheelSpeed = aimbot.getCalculatedSpeed();
         aimbot.setShotType(shotType.Parabolic);
     }
 
     private void stopped(){
-        hoodPosition = 30;
+        hoodTrajSetpoint = 30;
         flywheelSpeed = 0;
     }
 
     private void manual(){
         aimbot.setShotType(shotType.Manual);
-        hoodPosition = aimbot.getCalculatedAngle();
+        hoodTrajSetpoint = aimbot.getCalculatedAngle();
         flywheelSpeed = aimbot.getCalculatedSpeed();
     }
 

@@ -7,14 +7,16 @@ public class AbsoluteThroughbore implements GenericEncoder {
 
     private DutyCycleEncoder encoder;
     private double offset;
+    private double conversionFactor;
 
     public AbsoluteThroughbore(int channel){
         encoder = new DutyCycleEncoder(channel);
     }
 
-    public AbsoluteThroughbore(int channel, double offset) {
+    public AbsoluteThroughbore(int channel, double conversionFactor, double offset) {
         encoder = new DutyCycleEncoder(channel);
         this.offset = offset;
+        this.conversionFactor = conversionFactor;
     }
 
     @Override

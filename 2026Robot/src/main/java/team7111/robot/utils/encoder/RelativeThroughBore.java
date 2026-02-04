@@ -21,7 +21,7 @@ public class RelativeThroughBore implements GenericEncoder {
 
     @Override
     public Rotation2d getPosition() {
-       return Rotation2d.fromRotations((((double)encoder.get() / 2048.0) * 1/conversionFactor) * 360 + offset);
+       return Rotation2d.fromDegrees((((double)encoder.get() / 2048.0) * 1/conversionFactor) * 360 + offset);
     }
 
     @Override
