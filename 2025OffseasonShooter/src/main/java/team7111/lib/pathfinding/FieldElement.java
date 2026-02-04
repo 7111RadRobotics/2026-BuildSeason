@@ -67,4 +67,17 @@ public class FieldElement {
         };
         return returnPose2d;
     }
+
+    /**
+     * too lazy to try and get radius using returnCirclePose
+     */
+
+    public double returnCircleRadius()
+    {
+        if(center == null)
+        {
+            return 0;
+        }
+        return radius;
+    }
 }

@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import team7111.robot.subsystems.PathSubsystem;
 import team7111.robot.subsystems.SwerveSubsystem;
-import team7111.lib.pathfinding.PosePlanning;
 
 public class PathMaster {
     private PIDController xPID;
@@ -41,10 +40,6 @@ public class PathMaster {
     private boolean fieldRelative = false;
 
     private boolean avoidFieldElements = true;
-    private Translation2d initialPosition = new Translation2d(1, 1);
-    private Translation2d currentPosition = null;
-    private double G = 0;
-    private boolean pathfinding = false;
 
     public PathMaster(Supplier<Pose2d> suppliedPose, Supplier<Rotation2d> gyroYaw){
 
@@ -122,8 +117,6 @@ public class PathMaster {
     
     void useBrokenPathFinding(boolean avoidFieldElements){
         this.avoidFieldElements = avoidFieldElements;
-        pathfinding = true;
-        initialPosition = suppliedPose.get().getTranslation();
     }
 
     

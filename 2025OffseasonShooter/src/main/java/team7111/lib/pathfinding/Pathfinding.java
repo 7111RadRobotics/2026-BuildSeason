@@ -66,11 +66,22 @@ public class Pathfinding {
     double d1;
     double d2;
     double dis;
+    double slopeX1;
+    double slopeX2;
+    double slopeY1;
+    double slopeY2;
+    double slope1;
+    double slope2;
+    double slopeX3;
+    double slopeY3;
+    double radius;
 
     private void setAvoidPose(FieldElement fieldElements) {
             Pose2d[] poses;
             if (fieldElements.returnCorners() == null) {
                 poses = fieldElements.returnCirclePose();
+                radius = fieldElements.returnCircleRadius();
+                safety = safety + radius;
             } else {
                 poses = fieldElements.returnCorners();
             }
@@ -80,12 +91,19 @@ public class Pathfinding {
     }
 
     public Waypoint[] avoidFieldElements(Waypoint waypoint, FieldElement fieldElements) {
-        
         visitedNodes.clear();
         storedPosition.clear();
         avoidPoses.clear();
         iterations = 0;
         dis = 0;
+        double slopeX1;
+        double slopeX2 = 0;
+        double slopeY1 = 0;
+        double slopeY2 = 0;
+        double slope1 = 0;
+        double slope2 = 0;
+        double slopeX3 = 0;
+        double slopeY3 = 0;
         
         robotPose = swerve.getPose();
         gridPosition = robotPose.getTranslation();
@@ -93,7 +111,7 @@ public class Pathfinding {
     
         setAvoidPose(fieldElements);
     
-        while (robotPose.getTranslation().getDistance(wayPos) > 0.1 && iterations < 200) {
+        while (robotPose.getTranslation().getDistance(wayPos) > 0.02 && iterations < 400) {
             minScore = -1;
     
             for (int[] dir : directions) {
@@ -149,26 +167,22 @@ public class Pathfinding {
             return new Waypoint[] { waypoint };
         }
     
-        if (storedPosition.size() <= 3) {
-        } else {
-            for (int i = storedPosition.size() - 2; i > 0; i--) {
-                Pose2d prev = storedPosition.get(i - 1);
-                Pose2d current = storedPosition.get(i);
-                Pose2d next = storedPosition.get(i + 1);
-        
-                double dx1 = current.getX() - prev.getX();
-                double dy1 = current.getY() - prev.getY();
-                double dx2 = next.getX() - current.getX();
-                double dy2 = next.getY() - current.getY();
-        
-                double crossProduct = Math.abs(dx1 * dy2 - dy1 * dx2);
-        
-                if (crossProduct > 1e-5) { 
-                    storedPosition.remove(i);
-                }
-            }
-        }
+        List<Translation2d> interiorWaypoints = new ArrayList<>();
 
+        for (int i = 0; i < storedPosition.size() - 1; i++) {
+            slopeX1 = storedPosition.get(i).getX();
+            slopeY1 = storedPosition.get(i).getX();
+            slopeX2 = storedPosition.get(i + 2).getX();
+            slopeY2 = storedPosition.get(i + 2).getX();
+            slopeX3 = storedPosition.get(i + 1).getX();
+            slopeY3 = storedPosition.get(i + 1).getX();
+            slope1 = ((slopeY1 - slopeY2)/(slopeX1 - slopeX2));
+            slope2 = ((slopeY1 - slopeY3)/(slopeX1 - slopeX3));
+            if (slope1 == slope2) {
+                storedPosition.remove(i + 1);
+            }
+            interiorWaypoints.add(storedPosition.get(i).getTranslation());
+        }
         Waypoint[] path = new Waypoint[storedPosition.size()];
 
         for (int i = 0; i < storedPosition.size(); i++) {

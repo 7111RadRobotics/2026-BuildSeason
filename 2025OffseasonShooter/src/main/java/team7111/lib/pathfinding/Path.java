@@ -38,32 +38,6 @@ public class Path {
     double currentDistance = 0;
     double fieldLength = 0;
     double fieldWidth = 0;
-    final double gridSize = 0.25;
-    final double robotRadius = 0.4;
-    private PosePlanning planner = new PosePlanning();
-    double[][] directions = {
-        {1,0},
-        {0,1},
-        {-1,0},
-        {0,-1},
-        {1,1},
-        {-1,1},
-        {1,-1},
-        {-1,-1},
-    };
-    double currentX = 0;
-    double currentY = 0;
-    double pathWeight = 0;
-    Map<Translation2d, Boolean> neighborStatus = new HashMap<>();
-    Map<Translation2d, Double> fScore = new HashMap<>();
-    private double startDistance = 0;
-    private Translation2d initialPosition = null;
-    private Optional<Map.Entry<Translation2d, Double>> minScore = Optional.empty();
-    private Translation2d endPath = null;
-    private Double endPathX = 7.2;
-    private Double endPathY = 5.3;
-    private Waypoint[] nodeWaypoints;
-    public Waypoint tempWaypoint[] = new Waypoint[]{new Waypoint(new Pose2d(4, 4, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10))};
 
     /**
      * Constructs a path from several waypoints. Uses pathMaster class to define parameters.
@@ -269,15 +243,6 @@ public class Path {
         
     }
 
-    public Waypoint[] getWaypoint() {
-        if (nodeWaypoints != null) {
-            System.out.println("nodeWaypoints: " + nodeWaypoints);
-            return nodeWaypoints;
-        } else {
-            System.out.println("tempWaypoints: " + tempWaypoint);
-            return tempWaypoint;
-        }
-    }
     /**
      * indexes waypoint to path to if there. 
      * If path is finished, sets path to finished and will not path to new waypoint.

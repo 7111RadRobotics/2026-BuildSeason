@@ -73,14 +73,14 @@ public class SuperStructure extends SubsystemBase{
     private double secureTimer = 0;
 
     private XboxController operatorController;
-    Waypoint waypoint = new Waypoint(new Pose2d(4, 4, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(10, 0, 0.25), new WaypointConstraints(360, 0, 10));
+    Waypoint waypoint = new Waypoint(new Pose2d(11, 11, Rotation2d.fromDegrees(180.0)), new WaypointConstraints(20, 19, 0.25), new WaypointConstraints(360, 0, 10));
 
-    private Translation2d trans = new Translation2d(2, 2);
+    private Translation2d trans = new Translation2d(6, 6);
     private Pose2d fieldPose = new Pose2d(trans.getX(), trans.getY(), trans.getAngle());
 
     Pathfinding finding;
 
-    private FieldElement fieldElement = new FieldElement(fieldPose, 0.5);
+    private FieldElement fieldElement = new FieldElement(fieldPose, 4);
 
     
 
