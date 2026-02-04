@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
     private MechanismLigament2d hoodPositionLigament = new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        48/12 * 24/15 * 210/12, true, true, new PIDController(0.1, 0, 0), MechanismType.arm, 0.001, 0, 0, 0);
+        48/12 * 24/15 * 210/12, true, false, new PIDController(0.1, 0, 0), MechanismType.arm, 0.001, 0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
         1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0);
@@ -73,7 +73,7 @@ public class Shooter extends SubsystemBase {
         this.aimbot = aimbot;
 
         hood = RobotBase.isReal()
-            ? new CTREMotor(15, new RelativeThroughBore(1, 2, 1/(8192*17.5) * 4), hoodConfig)
+            ? new CTREMotor(15, new RelativeThroughBore(1, 2, 17.5, 30), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
@@ -157,7 +157,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void idleMode(){
-        hoodPosition = 35;
+        hoodPosition = 37;
         flywheelSpeed = 1000;
     }
 
