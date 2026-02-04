@@ -1,6 +1,16 @@
 package team7111.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import team7111.robot.utils.motor.FlywheelSimMotor;
+import team7111.robot.utils.motor.Motor;
+import team7111.robot.utils.motor.Motor.MechanismType;
+import team7111.robot.utils.motor.MotorConfig;
+import team7111.robot.utils.motor.REVMotor;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 /**
  * This class is an example to how a subsystem looks and functions.
@@ -21,7 +31,22 @@ public class Hopper extends SubsystemBase {
 
     private HopperState currentState = HopperState.idle;
 
-    public Hopper() {}
+    private MotorConfig hopperMotorConfig = new MotorConfig(
+        1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+    );
+
+    private Motor hopperMotor;
+
+    public Hopper() {
+        hopperMotor = RobotBase.isReal()
+            ? new REVMotor(30, null, hopperMotorConfig)
+            : new FlywheelSimMotor(
+                null, 
+                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, hopperMotorConfig.gearRatio), DCMotor.getNEO(1), 0.1),
+                hopperMotorConfig.pid,
+                hopperMotorConfig.simpleFF
+            );
+    }
 
     public void periodic(){
         manageState();
@@ -38,7 +63,7 @@ public class Hopper extends SubsystemBase {
     private void manageState(){
         switch(currentState){
             case idle:
-                idle();
+                idleMode();
                 break;
             case intake:
                 intake();
