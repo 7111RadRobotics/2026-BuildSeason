@@ -51,9 +51,9 @@ public class Aimbot extends SubsystemBase{
 
     //ANGLE CONSTRAINTS
     /** Minimum shooter angle in degrees, from horizontal */
-    private final double minShooterAngle = 0.0;
+    private final double minShooterAngle = 37.0;
     /** Maximum shooter angle in degrees, from horizontal */
-    private final double maxShooterAngle = 90.0;
+    private final double maxShooterAngle = 67.0;
     
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
