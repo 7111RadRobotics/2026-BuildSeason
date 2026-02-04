@@ -104,6 +104,14 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggleVision();
         }
 
+        //While a button held, point swerve towards target
+        if(driverController.getAButtonPressed()) {
+            swerve.setSnapAngle(targeting.getCalculatedDirection());
+            swerve.setSwerveState(SwerveState.snapAngle);
+        } else if(driverController.getAButtonReleased()) {
+            swerve.setSwerveState(SwerveState.manual);
+        }
+
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
 
