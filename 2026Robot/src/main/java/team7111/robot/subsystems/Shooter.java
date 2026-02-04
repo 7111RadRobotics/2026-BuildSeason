@@ -78,7 +78,7 @@ public class Shooter extends SubsystemBase {
                 null,
                 new SingleJointedArmSim(
                     DCMotor.getKrakenX60(1), hoodConfig.gearRatio, 0.01, 0.2, 
-                    Degrees.of(37).in(Radians), Degrees.of(67).in(Radians), true, Degrees.of(37).in(Radians)), 
+                    Degrees.of(minHoodPos).in(Radians), Degrees.of(maxHoodPos).in(Radians), true, Degrees.of(minHoodPos).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
