@@ -1,6 +1,10 @@
 package team7111.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -72,12 +76,14 @@ public class Shooter extends SubsystemBase {
     public Shooter(Aimbot aimbot) {
         this.aimbot = aimbot;
 
+        double hoodMOI = Inches.of(15.5).in(Meters) * Inches.of(15.5).in(Meters) * Pounds.of(3.953).in(Kilograms) / 3.0; // referenced from YAMS
+
         hood = RobotBase.isReal()
             ? new CTREMotor(15, new RelativeThroughBore(1, 2, 17.5, 30), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getKrakenX60(1), hoodConfig.gearRatio, 0.01, 0.2, 
+                    DCMotor.getKrakenX60(1), hoodConfig.gearRatio, hoodMOI, 0.2, 
                     Degrees.of(minHoodPos).in(Radians), Degrees.of(maxHoodPos).in(Radians), true, Degrees.of(minHoodPos).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
