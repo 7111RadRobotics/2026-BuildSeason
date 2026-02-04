@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.subsystems.Autonomous.Autos;
+import team7111.robot.subsystems.Intake.IntakeState;
 import team7111.robot.subsystems.Shooter.ShooterState;
 import team7111.robot.subsystems.Swerve.SwerveState;
 import team7111.robot.utils.AutoAction;
@@ -164,6 +165,7 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.temp2);
         }
+        intake.setState(IntakeState.intake);
         return shooter.isAtSetpoint();
     }
 
@@ -172,6 +174,7 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.aimAtTarget);
         }
+        intake.setState(IntakeState.stow);
         return shooter.isAtSetpoint();
     }
 
