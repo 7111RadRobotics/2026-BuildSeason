@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -31,7 +32,7 @@ import team7111.robot.utils.gyro.GenericGyro;
 public class Swerve extends SubsystemBase {
     private final SwerveModule[] modules;
 
-    private final SwerveDriveOdometry swerveOdometry;
+    private final SwerveDrivePoseEstimator swerveOdometry;
     private Field2d field = new Field2d();
 
     private final GenericGyro gyro;
@@ -88,7 +89,7 @@ public class Swerve extends SubsystemBase {
         pathMaster.setRotationPID(0.1425, 0.000, 0.00240225);
         pathMaster.setInversions(false, false, true, false);
 
-        swerveOdometry = new SwerveDriveOdometry(SwerveConstants.kinematics, getYaw(), getPositions());
+        swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), getPositions(), getPose());
         
         snapAnglePID = new PIDController(1.0, 0.0, 0.0);
     }
@@ -250,7 +251,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return swerveOdometry.getEstimatedPosition();
     }
 
     public void resetOdometry(Pose2d pose) {
