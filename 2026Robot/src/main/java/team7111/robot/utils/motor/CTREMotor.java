@@ -5,10 +5,15 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
@@ -20,16 +25,18 @@ public class CTREMotor implements Motor {
     private TalonFX motor;
     private PIDController pid = new PIDController(0.05, 0, 0);
     private TalonFXConfiguration config;
+    private MechanismType mechanismType;
     private GenericEncoder encoder = null;
     private double gearRatio;
     private double currentSetpoint;
     private double velocitySetpoint = 0;
-    private double positiveVoltageLimit = 20;
-    private double negativeVoltageLimit = -20;
+    private double positiveVoltageLimit = 100;
+    private double negativeVoltageLimit = -100;
     private double positiveVelocityLimit = 5000;
     private double negativeVelocityLimit = -5000;
     private SimpleMotorFeedforward feedforward;
     private ArmFeedforward armFF;
+    private ElevatorFeedforward elevatorFF;
     private int id;
 
     private VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
@@ -44,6 +51,7 @@ public class CTREMotor implements Motor {
         this.pid = config.pid;
         this.feedforward = config.simpleFF;
         this.armFF = config.armFF;
+        this.elevatorFF = config.elevatorFF;
         this.id = id;
         motor = new TalonFX(id);
         motorPEntry = Shuffleboard.getTab("test").add("Motor " + id + " P", 0).getEntry();
@@ -69,6 +77,7 @@ public class CTREMotor implements Motor {
 
     public CTREMotor(int id){
         this.id = id;
+        this.mechanismType = MechanismType.flywheel;
         motor = new TalonFX(id);
         motorPEntry = Shuffleboard.getTab("test").add("Motor " + id + " P", 0).getEntry();
         motorIEntry = Shuffleboard.getTab("test").add("Motor " + id + " I", 0).getEntry();
@@ -117,16 +126,26 @@ public class CTREMotor implements Motor {
     }
         
     
-    public void setSetpoint(double setPoint, boolean useSimFF){
+    public void setSetpoint(double setPoint, boolean useFF){
         currentSetpoint = setPoint;
         double pidOutput = pid.calculate(getPosition(), setPoint);
-        double feedforwardOutput;
-        if(feedforward != null){
-            feedforwardOutput = useSimFF
-            ? armFF.calculate((setPoint + 0.1973) * 2 * Math.PI , pid.getErrorDerivative())
-            : feedforward.calculate(pid.getErrorDerivative());
-        }else 
-            feedforwardOutput = 0;
+        double feedforwardOutput = 0;
+        
+        if(useFF){
+            switch(mechanismType){
+                case arm:
+                    feedforwardOutput = armFF.calculate(Degrees.of(setPoint).in(Radians), pid.getErrorDerivative());
+                    break;
+                case elevator:
+                    feedforwardOutput = elevatorFF.calculate(pid.getErrorDerivative());
+                    break;
+                case flywheel:
+                default:
+                    feedforwardOutput = feedforward.calculate(pid.getErrorDerivative());
+                    break;
+            }
+        }
+
         double totalOutput = pidOutput + feedforwardOutput;
         SmartDashboard.putNumber("Motor " + id + " pid", totalOutput);
         if(totalOutput > positiveVoltageLimit){

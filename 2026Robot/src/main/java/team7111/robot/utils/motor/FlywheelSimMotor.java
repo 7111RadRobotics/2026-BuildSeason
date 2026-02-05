@@ -50,7 +50,7 @@ public class FlywheelSimMotor implements Motor{
     }
 
     @Override
-    public void setSetpoint(double setPoint, boolean useSimFF) {
+    public void setSetpoint(double setPoint, boolean useFF) {
         
     }
 

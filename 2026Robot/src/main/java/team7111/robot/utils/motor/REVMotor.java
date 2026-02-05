@@ -2,6 +2,10 @@ package team7111.robot.utils.motor;
 
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -24,13 +28,14 @@ public class REVMotor implements Motor {
     private PIDController pid;
     private GenericEncoder encoder = null;
     private double gearRatio = 1;
-    private SimpleMotorFeedforward simpleMotorFeedforward;
-    private ElevatorFeedforward elevatorFeedforward;
-    private ArmFeedforward armFeedforward;
+    private MechanismType mechanismType = null;
+    private SimpleMotorFeedforward simpleMotorFeedforward = null;
+    private ElevatorFeedforward elevatorFeedforward = null;
+    private ArmFeedforward armFeedforward = null;
     private double setPoint;
     private double velocitySetpoint;
-    private double positiveVoltageLimit = 20;
-    private double negativeVoltageLimit = -20;
+    private double positiveVoltageLimit = 100;
+    private double negativeVoltageLimit = -100;
     private double positiveVelocityLimit = 5000;
     private double negativeVelocityLimit = -5000;
     
@@ -43,8 +48,10 @@ public class REVMotor implements Motor {
         this.encoder = encoder;
         this.gearRatio = config.gearRatio;
         this.pid = config.pid;
+        this.armFeedforward = config.armFF;
+        this.elevatorFeedforward = config.elevatorFF;
         this.simpleMotorFeedforward = config.simpleFF;
-
+    
         motor = new SparkMax(id, MotorType.kBrushless);
         config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
         config.sparkConfig.inverted(config.isInverted);
@@ -99,11 +106,23 @@ public class REVMotor implements Motor {
         }
     }  
     
-    public void setSetpoint(double setPoint, boolean useSimFF){
+    public void setSetpoint(double setPoint, boolean useFF){
         double pidOutput = pid.calculate(getPosition(), setPoint);
-        double feedforwardOutput = simpleMotorFeedforward != null
-            ? simpleMotorFeedforward.calculate(pid.getErrorDerivative())
-            : 0;
+        double feedforwardOutput = 0;
+        if(useFF){
+            switch(mechanismType){
+                case arm:
+                    feedforwardOutput = armFeedforward.calculate(Degrees.of(setPoint).in(Radians), pid.getErrorDerivative());
+                    break;
+                case elevator:
+                    feedforwardOutput = elevatorFeedforward.calculate(pid.getErrorDerivative());
+                    break;
+                case flywheel:
+                default:
+                    feedforwardOutput = simpleMotorFeedforward.calculate(pid.getErrorDerivative());
+                    break;
+            }
+        }
         double output = pidOutput + feedforwardOutput;
 
         this.setPoint = setPoint;
@@ -112,7 +131,7 @@ public class REVMotor implements Motor {
         }else if(output < negativeVoltageLimit){
             output = negativeVoltageLimit;
         }
-        motor.setVoltage(pidOutput + feedforwardOutput); //Needs velocity for feedforward
+        motor.setVoltage(output); //Needs velocity for feedforward
         
     }
 

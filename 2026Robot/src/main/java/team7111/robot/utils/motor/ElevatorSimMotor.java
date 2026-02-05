@@ -50,9 +50,9 @@ public class ElevatorSimMotor implements Motor{
         }
     }        
     
-    public void setSetpoint(double setPoint, boolean useSimFF){
+    public void setSetpoint(double setPoint, boolean useFF){
         double pidOutput = pid.calculate(getPosition(), setPoint);
-        double feedforwardOutput = feedForward != null 
+        double feedforwardOutput = useFF && feedForward != null 
             ? feedForward.calculate(pid.getErrorDerivative())
             : 0;
 

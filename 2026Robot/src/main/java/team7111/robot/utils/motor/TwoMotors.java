@@ -42,9 +42,9 @@ public class TwoMotors implements Motor {
         return motor1.getPosition();
     }
     
-    public void setSetpoint(double setPoint, boolean useSimFF){
-        motor1.setSetpoint(setPoint, useSimFF);
-        motor2.setSetpoint(setPoint, useSimFF);
+    public void setSetpoint(double setPoint, boolean useFF){
+        motor1.setSetpoint(setPoint, useFF);
+        motor2.setSetpoint(setPoint, useFF);
     }
 
     /** Must be called by the subystems periodic method */

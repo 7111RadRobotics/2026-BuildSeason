@@ -42,14 +42,14 @@ public class ArmSimMotor implements Motor {
         return Units.radiansToDegrees(motor.getAngleRads());
     }
     
-    public void setSetpoint(double setPoint, boolean useSimFF){
+    public void setSetpoint(double setPoint, boolean useFF){
 
-        double useFeedForward;
-        if (feedforward != null) {
-            useFeedForward = feedforward.calculate(getPosition(), pid.getErrorDerivative());
+        double useFeedForward = 0;
+        if(useFF){
+            if (feedforward != null) {
+                useFeedForward = feedforward.calculate(getPosition(), pid.getErrorDerivative());
+            }
         }
-        else useFeedForward = 0;
-        
         outputVoltage = pid.calculate(getPosition(), setPoint) + useFeedForward;
         this.setpoint = setPoint;
         motor.setInputVoltage(outputVoltage);
