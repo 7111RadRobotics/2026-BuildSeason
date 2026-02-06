@@ -1,7 +1,6 @@
 package team7111.robot.utils.encoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 
 public class RelativeThroughBore implements GenericEncoder {
@@ -9,7 +8,6 @@ public class RelativeThroughBore implements GenericEncoder {
     private Encoder encoder;
     private double offset = 0;
 
-    private Rotation2d zeroOffset = new Rotation2d();
     private double conversionFactor = 1;
 
     public RelativeThroughBore(int channelA, int channelB, double conversionFactor, double offset) {
