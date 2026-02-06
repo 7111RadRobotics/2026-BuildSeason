@@ -5,6 +5,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
@@ -94,13 +96,13 @@ public class REVMotor implements Motor {
         if(encoder != null){
             encoder.setPosition(Rotation2d.fromDegrees(position));
         } else {
-            motor.getEncoder().setPosition(position / gearRatio);
+            motor.getEncoder().setPosition(Degrees.of(position / gearRatio).in(Rotations));
         }
     }
     
     public double getPosition(){
         if(encoder == null){
-            return motor.getEncoder().getPosition() * gearRatio;
+            return motor.getEncoder().getPosition() * gearRatio * 360;
         } else{
             return encoder.getPosition().getDegrees();
         }

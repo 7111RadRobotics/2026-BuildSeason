@@ -10,9 +10,10 @@ public class RelativeThroughBore implements GenericEncoder {
 
     private double conversionFactor = 1;
 
-    public RelativeThroughBore(int channelA, int channelB, double conversionFactor, double offset) {
+    public RelativeThroughBore(int channelA, int channelB, boolean isCCW, double conversionFactor, double offset) {
         encoder = new Encoder(channelA, channelB);
         encoder.setDistancePerPulse(conversionFactor);
+        encoder.setReverseDirection(!isCCW);
         this.conversionFactor = conversionFactor;
         this.offset = offset;
     }
