@@ -75,9 +75,9 @@ public class Aimbot extends SubsystemBase{
     private final double RPMMult = 1;
 
     /** How far from horizontal the camera is, in degrees */
-    private final double cameraAngleOffset = 0.0;
+    private double cameraAngleOffset = 0.0;
     /** How far from horizontal the shooter is, in degrees */
-    private final double shooterAngleOffset = 0.0;
+    private double shooterAngleOffset = 0.0;
 
     /** Enables/disables the math calculations (saves calculation time)
      *  <p> If disabled, sets angle to minimum shooter angle and speed to 0 */
