@@ -1,5 +1,6 @@
 package team7111.robot.utils.motor;
 
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -11,6 +12,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -55,7 +57,9 @@ public class REVMotor implements Motor {
         this.simpleMotorFeedforward = config.simpleFF;
     
         motor = new SparkMax(id, MotorType.kBrushless);
+
         config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
+        //config.sparkConfig.closedLoop.feedForward.sva(config.simpleFF.getKs(), config.simpleFF.getKs(), config.simpleFF.getKs(), ClosedLoopSlot.kSlot1);
         config.sparkConfig.inverted(config.isInverted);
         IdleMode idleMode = config.isBreakMode
             ? IdleMode.kBrake

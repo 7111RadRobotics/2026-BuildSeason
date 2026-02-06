@@ -51,14 +51,18 @@ public class Shooter extends SubsystemBase {
     private Aimbot aimbot;
 
     private Mechanism2d mechanism2d = new Mechanism2d(1, 1);
-    private MechanismLigament2d hoodTrajectoryLigament = new MechanismLigament2d("Trajectory", 1.5, 37, 2, new Color8Bit(Color.kOrange));
-    private MechanismLigament2d hoodPositionLigament = new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
+    private MechanismLigament2d hoodTrajectoryLigament = 
+        new MechanismLigament2d("Trajectory", 1.5, 37, 2, new Color8Bit(Color.kOrange));
+    private MechanismLigament2d hoodPositionLigament = 
+        new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        48/12 * 24/15 * 210/12, true, false, new PIDController(0.1, 0, 0), MechanismType.arm, 0.001, 0, 0, 0);
+        48/12 * 24/15 * 210/12, false, false, new PIDController(0.1, 0, 0), 
+        MechanismType.arm, 0.001, 0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0);
+        1, false, false, new PIDController(0.0005, 0.0000, 0.5), 
+        MechanismType.flywheel, 0.01, 0.0, 0.0, 0);
 
     private Motor hood;
     private Motor flywheels;
@@ -91,7 +95,7 @@ public class Shooter extends SubsystemBase {
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
                 new REVMotor(12, null, flywheelConfig), 
-                new REVMotor(10, null, flywheelConfig))
+                new REVMotor(10, null, flywheelConfig.withInverted(true)))
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
@@ -121,6 +125,8 @@ public class Shooter extends SubsystemBase {
         hoodPositionLigament.setAngle(-hood.getPosition() + 180);
         SmartDashboard.putNumber("hood position", hood.getPosition());
         SmartDashboard.putNumber("hood setpoint", hoodTrajSetpoint);
+        SmartDashboard.putNumber("Flywheel Velocity", flywheels.getVelocity());
+        SmartDashboard.putNumber("FlywheelSetpoint", flywheelSpeed);
     }
 
     public void simulationPeriodic(){}
@@ -164,7 +170,7 @@ public class Shooter extends SubsystemBase {
 
     private void idleMode(){
         hoodTrajSetpoint = 37;
-        flywheelSpeed = 1000;
+        flywheelSpeed = 100;
     }
 
     private void pass(){}

@@ -32,19 +32,10 @@ public class MotorConfig {
         this.pid = pid;
         this.mechanism = mechanism;
 
-        switch(mechanism){
-            case flywheel:
-                simpleFF = new SimpleMotorFeedforward(kS, kV, kA);
-                break;
-            case arm:
-                armFF = new ArmFeedforward(kS, Kg, kV, kA);
-                break;
-            case elevator:
-                elevatorFF = new ElevatorFeedforward(kS, Kg, kV, kA);
-                break;
-            default:
-                break;
-        }
+        simpleFF = new SimpleMotorFeedforward(kS, kV, kA);
+        armFF = new ArmFeedforward(kS, Kg, kV, kA);
+        elevatorFF = new ElevatorFeedforward(kS, Kg, kV, kA);
+        
     }
 
     public MotorConfig withTalonConfig(TalonFXConfiguration config){
