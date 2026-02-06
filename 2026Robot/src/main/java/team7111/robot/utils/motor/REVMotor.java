@@ -1,17 +1,13 @@
 package team7111.robot.utils.motor;
 
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Rotations;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
