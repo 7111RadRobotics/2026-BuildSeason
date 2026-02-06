@@ -55,6 +55,7 @@ public class Aimbot extends SubsystemBase{
     /** Maximum shooter angle in degrees, from horizontal */
     private final double maxShooterAngle = 67.0;
     
+    private final double lowestShooterAngle = minShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
     private final double maxShooterSpeed = 2000;
@@ -69,6 +70,9 @@ public class Aimbot extends SubsystemBase{
     
     /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
     private final double shooterOptimalSpeed = 1500;
+
+    /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
+    private final double RPMMult = 1;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -167,7 +171,7 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putNumber("angle to target", degreeToTarget);
 
         if(!isEnabled) {
-            calculatedAngle = minShooterAngle;
+            calculatedAngle = lowestShooterAngle;
             calculatedSpeed = 0;
             return;
         }
@@ -280,7 +284,7 @@ public class Aimbot extends SubsystemBase{
     
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
-        calculatedAngle = minShooterAngle;
+        calculatedAngle = lowestShooterAngle;
         calculatedSpeed = 0;
     }
 
@@ -296,6 +300,8 @@ public class Aimbot extends SubsystemBase{
             calculatedAngle = calculatedAngle + cameraAngleOffset;
         }
         calculatedAngle = calculatedAngle + shooterAngleOffset;
+
+        calculatedAngle = calculatedAngle * RPMMult;
 
         calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
         calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;
