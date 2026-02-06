@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
         double hoodMOI = Inches.of(15.5).in(Meters) * Inches.of(15.5).in(Meters) * Pounds.of(3.953).in(Kilograms) / 3.0; // referenced from YAMS
 
         hood = RobotBase.isReal()
-            ? new CTREMotor(15, new RelativeThroughBore(1, 2, 17.5, 30), hoodConfig)
+            ? new CTREMotor(15, new RelativeThroughBore(1, 2, false, 17.5, 37), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(

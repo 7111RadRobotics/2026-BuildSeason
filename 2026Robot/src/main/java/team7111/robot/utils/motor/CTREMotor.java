@@ -119,9 +119,9 @@ public class CTREMotor implements Motor {
     
     public double getPosition(){
         if(encoder == null){
-            return motor.getPosition().getValueAsDouble() / gearRatio;
+            return motor.getPosition().getValueAsDouble() / gearRatio * 360;
         } else{
-            return encoder.getPosition().getRotations();
+            return encoder.getPosition().getDegrees();
         }
     }
         

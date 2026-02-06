@@ -100,7 +100,7 @@ public class REVMotor implements Motor {
     
     public double getPosition(){
         if(encoder == null){
-            return motor.getEncoder().getPosition() * gearRatio;
+            return motor.getEncoder().getPosition() * gearRatio * 360;
         } else{
             return encoder.getPosition().getDegrees();
         }
