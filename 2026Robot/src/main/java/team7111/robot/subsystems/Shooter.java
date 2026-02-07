@@ -55,12 +55,12 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        48/12 * 24/15 * 210/12, false, false, new PIDController(0.1, 0, 0), 
-        MechanismType.arm, 0.001, 0, 0, 0);
+        48/12 * 24/15 * 210/12, false, false, new PIDController(0.2, 0, 0), 
+        MechanismType.arm, 0.001, 0.001, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, false, false, new PIDController(0.0005, 0.0000, 0.5), 
-        MechanismType.flywheel, 0.01, 0.0, 0.0, 0);
+        1, false, false, new PIDController(0.0005, 0.0000, 0.1), 
+        MechanismType.flywheel, 0.179, 0.38, 0.25, 0);
 
     private Motor hood;
     private Motor flywheels;
@@ -93,7 +93,8 @@ public class Shooter extends SubsystemBase {
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
                 new REVMotor(12, null, flywheelConfig), 
-                new REVMotor(10, null, flywheelConfig.withInverted(true)))
+                new REVMotor(10, null, flywheelConfig),
+                12, true)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
@@ -117,12 +118,13 @@ public class Shooter extends SubsystemBase {
             hood.setSetpoint(minHoodPos, false);
         }else
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
-        flywheels.setVelocity(flywheelSpeed);
+        flywheels.setVelocity(flywheelSpeed );//* 1.2715);
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
         hoodPositionLigament.setAngle(-hood.getPosition() + 180);
         SmartDashboard.putNumber("hood position", hood.getPosition());
         SmartDashboard.putNumber("hood setpoint", hoodTrajSetpoint);
+        SmartDashboard.putNumber("hood trajectory", -hood.getPosition() + 90);
         SmartDashboard.putNumber("Flywheel Velocity", flywheels.getVelocity());
         SmartDashboard.putNumber("FlywheelSetpoint", flywheelSpeed);
     }
@@ -133,7 +135,7 @@ public class Shooter extends SubsystemBase {
     // These can be checked in SuperStructure to determine a SuperState
     // or change a state/value in another subsystem.
     public boolean isAtSetpoint(){
-        boolean isAtSetpoint = hood.isAtSetpoint(0.1); 
+        boolean isAtSetpoint = hood.isAtSetpoint(2); 
         return isAtSetpoint;
     }
 
@@ -167,8 +169,8 @@ public class Shooter extends SubsystemBase {
     }
 
     private void idleMode(){
-        hoodTrajSetpoint = 37;
-        flywheelSpeed = 100;
+        hoodTrajSetpoint = 23;
+        flywheelSpeed = 1000;
     }
 
     private void pass(){}
@@ -182,7 +184,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void stopped(){
-        hoodTrajSetpoint = 30;
+        hoodTrajSetpoint = 50;
         flywheelSpeed = 0;
     }
 

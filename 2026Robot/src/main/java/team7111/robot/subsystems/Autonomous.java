@@ -68,8 +68,9 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.rotate90)));
                 break;
             case multiPoint:
+                auto.add(new AutoAction(SuperState.temp2).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.forward)));
-                auto.add(new AutoAction(SuperState.temp1));
+                auto.add(new AutoAction(SuperState.temp1).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.forward2)));
                 break;
             case forward180:

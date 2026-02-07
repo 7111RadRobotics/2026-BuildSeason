@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
 
         //TODO set REV motor ID to a real ID
         flyWheel = RobotBase.isReal()
-            ? new REVMotor(20, null, flyWheelConfig)
+            ? null //new REVMotor(20, null, flyWheelConfig)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(1), 0.1),
@@ -86,8 +86,8 @@ public class Intake extends SubsystemBase {
     public void periodic(){
         manageState();
         pivot.setSetpoint(pivotPos, false);
-        flyWheel.setDutyCycle(flyWheelSpeed);
-        flyWheel.periodic();
+        //flyWheel.setDutyCycle(flyWheelSpeed);
+        //flyWheel.periodic();
         pivot.periodic();
         intakeLigament.setAngle(pivot.getPosition());
     }

@@ -54,7 +54,7 @@ public class Aimbot extends SubsystemBase{
     private final double lowestShooterAngle = minShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
-    private final double maxShooterSpeed = 2000;
+    private final double maxShooterSpeed = 3000;
     /** Minimum rotations per minute allowable on the shooter (Overrided in off state, in RPM) */
     private final double minShooterSpeed = 0;
 

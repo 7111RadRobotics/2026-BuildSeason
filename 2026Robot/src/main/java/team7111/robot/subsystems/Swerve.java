@@ -89,7 +89,8 @@ public class Swerve extends SubsystemBase {
         pathMaster.setInversions(false, false, true, false);
 
         
-        swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), getPositions(), new Pose2d(0,0, new Rotation2d(0)));
+        swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
+            getPositions(), new Pose2d(0,0, Rotation2d.fromDegrees(0)));
         
         snapAnglePID = new PIDController(1.0, 0.0, 0.0);
     }

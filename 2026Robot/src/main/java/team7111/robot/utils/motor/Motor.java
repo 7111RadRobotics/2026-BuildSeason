@@ -112,6 +112,8 @@ public interface Motor {
      */
     public void setFeedFoward(double kS, double kV, double kA);
 
+    default public void setFollower(boolean isFollower, int id, boolean isInverted){}
+
     /** Must be called by the subystems periodic method */
     public void periodic();
 }

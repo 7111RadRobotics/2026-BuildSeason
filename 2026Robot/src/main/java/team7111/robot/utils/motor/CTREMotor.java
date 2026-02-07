@@ -2,6 +2,7 @@ package team7111.robot.utils.motor;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -16,6 +17,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -25,7 +27,7 @@ import team7111.robot.utils.encoder.GenericEncoder;
 public class CTREMotor implements Motor {
     private TalonFX motor;
     private PIDController pid = new PIDController(0.05, 0, 0);
-    private TalonFXConfiguration config;
+    private TalonFXConfiguration talonConfig;
     private MechanismType mechanismType;
     private GenericEncoder encoder = null;
     private double gearRatio;
@@ -39,6 +41,9 @@ public class CTREMotor implements Motor {
     private ArmFeedforward armFF;
     private ElevatorFeedforward elevatorFF;
     private int id;
+    private boolean isFollower = false;
+    private boolean isFollowerInverted = false;
+    private int leaderID;
 
     private VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
 
@@ -197,11 +202,17 @@ public class CTREMotor implements Motor {
     }
 
     public void setFeedFoward(double kS, double kV, double kA){
-        config.Slot0.kS = kS;
-        config.Slot0.kV = kV;
-        config.Slot0.kA = kA;
-        motor.getConfigurator().apply(config);
+        talonConfig.Slot0.kS = kS;
+        talonConfig.Slot0.kV = kV;
+        talonConfig.Slot0.kA = kA;
+        motor.getConfigurator().apply(talonConfig);
         feedforward = new SimpleMotorFeedforward(kS, kV, kA);
+    }
+
+    public void setFollower(boolean isFollower, int id, boolean isInverted){
+        this.isFollower = isFollower;
+        this.leaderID = id;
+        this.isFollowerInverted = isInverted;
     }
 
     public void periodic(){
@@ -211,6 +222,13 @@ public class CTREMotor implements Motor {
         SmartDashboard.putNumber("Motor " + id + " setpoint", currentSetpoint);
         SmartDashboard.putBoolean("Motor " + id + " isAtSetpoint", isAtSetpoint(0.05));
 
+        MotorAlignmentValue motorAlignmentValue = isFollowerInverted
+            ? MotorAlignmentValue.Opposed
+            : MotorAlignmentValue.Aligned;
+
+        if (isFollower) {
+            motor.setControl(new Follower(leaderID, motorAlignmentValue));
+        }
         /*pid = new PIDController(
             motorPEntry.getDouble(0), 
             motorIEntry.getDouble(0), 
