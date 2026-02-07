@@ -1,10 +1,12 @@
 package team7111.robot.subsystems;
 
+import java.lang.annotation.Target;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -71,5 +73,76 @@ public class Vision extends SubsystemBase{
 
             camera.periodic();
         }
+    }
+
+    /**
+     * returns the position of the robot averaged between all cameras
+     */
+    public Pose3d getRobotPose() {
+        double averageX = 0;
+        double averageY = 0;
+        double averageZ = 0;
+        double averageRot = 0;
+        int numOfCamerasSeen = 0;
+        for(int i = 0; i < cameraList.length; i++) {
+            if(cameraList[i].estRobotPose != null) {
+                averageX += cameraList[i].estRobotPose.estimatedPose.getX();
+                averageY += cameraList[i].estRobotPose.estimatedPose.getY();
+                averageZ += cameraList[i].estRobotPose.estimatedPose.getZ();
+                averageRot += cameraList[i].estRobotPose.estimatedPose.getRotation().getAngle();
+                numOfCamerasSeen++;
+            }
+        }
+
+        averageX /= numOfCamerasSeen;
+        averageY /= numOfCamerasSeen;
+        averageZ /= numOfCamerasSeen;
+        averageRot /= numOfCamerasSeen;
+
+        Pose3d estPose = new Pose3d(averageX, averageY, averageZ, new Rotation3d(new Rotation2d(averageRot)));
+
+        return estPose;
+    }
+
+    /**
+     * Returns null if the apriltag is not found.
+     */
+    public Pose3d getRobotPose(int apriltag) {
+        int[] targetId = new int[cameraList.length];
+
+        for(int i = 0; i < cameraList.length; i++) {
+            for(int j = 0; j < cameraList[0].getLatestResult().targets.size(); j++) {
+                if(cameraList[i].getLatestResult().getTargets().get(j).fiducialId == apriltag) {
+                    targetId[i] = j;
+                    break;
+                } else {
+                    targetId[i] = -1;
+                }
+            }
+        }
+        
+        
+        Transform3d transform = null;
+        for(int i = 0; i < cameraList.length; i++) {
+            if(targetId[i] != -1) {
+                transform = cameraList[i].getLatestResult().getTargets().get(targetId[i]).getBestCameraToTarget();
+                break;
+            }
+        }
+
+        //If the target is not found, returns null
+        if(transform == null) {
+            return null;
+        }
+
+        Pose3d estPose = cameraList[0].getApriltagPos(apriltag).transformBy(transform);
+        
+        
+        return estPose;
+    }
+
+    /** Gets the robot position from a specific camera*/
+    public Pose3d getRobotPose(Camera camera) {
+        return camera.estRobotPose.estimatedPose;
     }
 }
