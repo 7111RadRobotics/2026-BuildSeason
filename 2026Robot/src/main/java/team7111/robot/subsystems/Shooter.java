@@ -118,7 +118,7 @@ public class Shooter extends SubsystemBase {
             hood.setSetpoint(minHoodPos, false);
         }else
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
-        flywheels.setVelocity(flywheelSpeed );//* 1.2715);
+        flywheels.setVelocity(flywheelSpeed * 1.2715);
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
         hoodPositionLigament.setAngle(-hood.getPosition() + 180);

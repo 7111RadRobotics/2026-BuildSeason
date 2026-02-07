@@ -1,6 +1,8 @@
 package team7111.robot.subsystems;
 
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -11,6 +13,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 import team7111.robot.utils.Camera;
 
 public class Vision extends SubsystemBase{
@@ -30,6 +34,8 @@ public class Vision extends SubsystemBase{
     public Pose2d robotPose = new Pose2d();
     public Pose3d estPose3d = new Pose3d();
 
+    private List<PhotonTrackedTarget> targets = new ArrayList<>();
+
     // TODO: change variable names on actual robot
     /*public final Camera limelight = new Camera(
         "photonvision", 
@@ -37,26 +43,33 @@ public class Vision extends SubsystemBase{
         new EstimatedRobotPose(estPose3d, 0.0, null, PoseStrategy.AVERAGE_BEST_TARGETS), 
         this
         );*/
-    public final Camera orangepi1 = new Camera(
-        "OV9281_3", 
-        cameraPositionsToCenter[0], 
-        new EstimatedRobotPose(estPose3d, 0.0, null, PoseStrategy.AVERAGE_BEST_TARGETS), 
-        this
-        );
-    public final Camera orangepi2 = new Camera(
-        "OV9281_2", 
-        cameraPositionsToCenter[0], 
-        new EstimatedRobotPose(estPose3d, 0.0, null, PoseStrategy.AVERAGE_BEST_TARGETS), 
-        this
-        );
+    public final Camera orangepi1;
+    public final Camera orangepi2;
 
-    public Camera[] cameraList = new Camera[] {
-        orangepi1,
-    };
+    public Camera[] cameraList;
 
     /** Constructor */
     public Vision(){
+        targets.add(new PhotonTrackedTarget());
 
+        orangepi1 = new Camera(
+            "OV9281_3", 
+            cameraPositionsToCenter[0], 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            this
+        );
+
+        orangepi2 = new Camera(
+            "OV9281_2", 
+            cameraPositionsToCenter[0], 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            this
+        );
+
+
+        cameraList = new Camera[] {
+            orangepi1,
+        };
     }
 
     public void periodic(){
