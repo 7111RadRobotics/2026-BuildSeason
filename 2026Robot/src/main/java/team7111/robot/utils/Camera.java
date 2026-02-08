@@ -58,7 +58,7 @@ public class Camera extends PhotonCamera{
         this.cameraToRobotCenter = cameraToRobotCenter;
         this.vision = vision;
         this.estRobotPose = estRobotPose;
-        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, cameraToRobotCenter); //WAS ERRORED OUT
+        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, estRobotPose.strategy, cameraToRobotCenter); //WAS ERRORED OUT
     }
     
     public void periodic(){
@@ -90,7 +90,7 @@ public class Camera extends PhotonCamera{
         return photonPoseEstimator.update(latestResult);
     }
     public Pose2d getRobotPose(){
-        newPose = estRobotPose.estimatedPose.transformBy(cameraToRobotCenter).toPose2d();
+        newPose = estRobotPose.estimatedPose.toPose2d();
         return newPose;
     }
     public Matrix<N3, N1> getPoseAmbiguity(){
