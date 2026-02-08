@@ -39,7 +39,7 @@ public class Camera extends PhotonCamera{
     private Pose2d newPose = new Pose2d();
     {
         try {
-            apriltagMap = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+            apriltagMap = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2026RebuiltWelded.m_resourceFile);
         } catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -58,7 +58,7 @@ public class Camera extends PhotonCamera{
         this.cameraToRobotCenter = cameraToRobotCenter;
         this.vision = vision;
         this.estRobotPose = estRobotPose;
-        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, PoseStrategy.AVERAGE_BEST_TARGETS, cameraToRobotCenter); //WAS ERRORED OUT
+        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, cameraToRobotCenter); //WAS ERRORED OUT
     }
     
     public void periodic(){
@@ -83,7 +83,7 @@ public class Camera extends PhotonCamera{
     }
 
     public boolean updatePose(){
-        return getLatestResult().hasTargets();
+        return latestResult.hasTargets();
     }
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);

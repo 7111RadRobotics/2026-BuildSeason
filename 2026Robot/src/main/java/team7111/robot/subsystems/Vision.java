@@ -55,14 +55,13 @@ public class Vision extends SubsystemBase{
         orangepi1 = new Camera(
             "OV9281_3", 
             cameraPositionsToCenter[0], 
-            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            new EstimatedRobotPose(estPose3d, 0.0, targets), 
             this
         );
-
         orangepi2 = new Camera(
             "OV9281_2", 
             cameraPositionsToCenter[0], 
-            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            new EstimatedRobotPose(estPose3d, 0.0, targets), 
             this
         );
 
