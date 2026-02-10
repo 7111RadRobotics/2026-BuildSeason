@@ -57,6 +57,31 @@ public class SparkMaxSwerveModule implements GenericSwerveModule {
         angleGearRatio = config.angleMotor.gearRatio;
     }
 
+    public SparkMaxSwerveModule(SwerveModuleConfig config, boolean isDriveMotor){
+        this.encoder = config.encoder;
+        encoderOffsetDegrees = config.canCoderOffsetDegrees;
+
+        if(isDriveMotor) {
+            driveMotorConfig = config.driveMotor.getSparkMaxConfig();
+        } else {
+            angleMotorConfig = config.angleMotor.getSparkMaxConfig();
+        }
+        
+        driveMotor = new SparkMax(config.driveMotor.id, MotorType.kBrushless);
+        driveEncoder = driveMotor.getEncoder();
+        driveFeedforward = config.driveMotor.ff;//new SimpleMotorFeedforward(SwerveConstants.driveKS, SwerveConstants.driveKV, SwerveConstants.driveKA);
+        drivePID = driveMotor.getClosedLoopController();
+        driveGearRatio = config.driveMotor.gearRatio;
+        altDrivePID = config.driveMotor.pid;
+        altDrivePID = new PIDController(altDrivePID.getP(), altDrivePID.getI(), altDrivePID.getD());
+
+        angleMotor = new SparkMax(config.angleMotor.id, MotorType.kBrushless);
+        angleEncoder = angleMotor.getEncoder();
+        anglePID = angleMotor.getClosedLoopController(); 
+        angleGearRatio = config.angleMotor.gearRatio;
+
+    }
+
     @Override
     public void setOpenDriveState(SwerveModuleState state) {
         double speed = state.speedMetersPerSecond / SwerveConstants.maxDriveVelocity;

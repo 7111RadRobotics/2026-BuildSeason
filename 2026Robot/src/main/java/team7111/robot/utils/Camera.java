@@ -10,6 +10,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -38,7 +39,7 @@ public class Camera extends PhotonCamera{
     private Pose2d newPose = new Pose2d();
     {
         try {
-            apriltagMap = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+            apriltagMap = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2026RebuiltWelded.m_resourceFile);
         } catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -57,7 +58,7 @@ public class Camera extends PhotonCamera{
         this.cameraToRobotCenter = cameraToRobotCenter;
         this.vision = vision;
         this.estRobotPose = estRobotPose;
-        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, PoseStrategy.AVERAGE_BEST_TARGETS, cameraToRobotCenter); //WAS ERRORED OUT
+        photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, estRobotPose.strategy, cameraToRobotCenter); //WAS ERRORED OUT
     }
     
     public void periodic(){
@@ -82,14 +83,14 @@ public class Camera extends PhotonCamera{
     }
 
     public boolean updatePose(){
-        return getLatestResult().hasTargets();
+        return latestResult.hasTargets();
     }
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
         return photonPoseEstimator.update(latestResult);
     }
     public Pose2d getRobotPose(){
-        newPose = estRobotPose.estimatedPose.transformBy(cameraToRobotCenter).toPose2d();
+        newPose = estRobotPose.estimatedPose.toPose2d();
         return newPose;
     }
     public Matrix<N3, N1> getPoseAmbiguity(){
@@ -129,6 +130,11 @@ public class Camera extends PhotonCamera{
      */
     public Transform3d getCamToTarget() {
         return bestCameraToTarget;
+    }
+
+    public Pose3d getApriltagPos(int apriltag) {
+
+        return apriltagMap.getTagPose(apriltag).get();
     }
 }
 

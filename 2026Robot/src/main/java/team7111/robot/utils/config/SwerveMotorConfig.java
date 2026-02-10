@@ -49,8 +49,9 @@ public class SwerveMotorConfig {
         
         if (isBrakeMode) {
             sparkMaxConfig.idleMode(IdleMode.kBrake);
+        } else {
+            sparkMaxConfig.idleMode(IdleMode.kCoast);
         }
-        else {sparkMaxConfig.idleMode(IdleMode.kCoast);}
             
 
         sparkMaxConfig.inverted(Inverted)

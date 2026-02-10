@@ -9,15 +9,16 @@ public class TwoMotors implements Motor {
     private Motor motor1;
     private Motor motor2;
 
-    public TwoMotors(Motor motor1, Motor motor2){
+    public TwoMotors(Motor motor1, Motor motor2, int leaderID,  boolean isFollowerInverted){
         this.motor1 = motor1;
         this.motor2 = motor2;
-   
+        
+        motor2.setFollower(true, leaderID, isFollowerInverted);
     }
     
     public void setDutyCycle(double speed){
         motor1.setDutyCycle(speed);
-        motor2.setDutyCycle(speed);
+        //motor2.setDutyCycle(speed);
     }
 
     public double getDutyCycle(){
@@ -26,7 +27,7 @@ public class TwoMotors implements Motor {
 
     public void setVelocity(double rpm){
         motor1.setVelocity(rpm);
-        motor2.setVelocity(rpm);
+        //motor2.setVelocity(rpm);
     }
 
     public double getVelocity(){
@@ -44,7 +45,7 @@ public class TwoMotors implements Motor {
     
     public void setSetpoint(double setPoint, boolean useFF){
         motor1.setSetpoint(setPoint, useFF);
-        motor2.setSetpoint(setPoint, useFF);
+        //motor2.setSetpoint(setPoint, useFF);
     }
 
     /** Must be called by the subystems periodic method */
@@ -72,7 +73,7 @@ public class TwoMotors implements Motor {
 
     public void setVoltage(double volts){
         motor1.setVoltage(volts);
-        motor2.setVoltage(volts);
+        //motor2.setVoltage(volts);
     }
 
     public boolean isAtSetpoint(double deadzone){

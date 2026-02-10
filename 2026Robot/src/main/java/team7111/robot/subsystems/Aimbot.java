@@ -54,7 +54,7 @@ public class Aimbot extends SubsystemBase{
     private final double lowestShooterAngle = minShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
-    private final double maxShooterSpeed = 2000;
+    private final double maxShooterSpeed = 3000;
     /** Minimum rotations per minute allowable on the shooter (Overrided in off state, in RPM) */
     private final double minShooterSpeed = 0;
 
@@ -68,7 +68,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 1;
+    private final double RPMMult = 1.72;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -249,7 +249,7 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putNumber("Distance to target", distanceToTarget);
         //Subtracts a meter from the distance to get a 2nd target point
         double distanceToHubEdge = distanceToTarget - 0.5;
-        double targetHeightAboveHubEdge = 2.286; //90 inches above the floor, settable to anything desired for angle adjustment
+        double targetHeightAboveHubEdge = Units.inchesToMeters(80); //90 inches above the floor, settable to anything desired for angle adjustment
 
         double calculatedRatio = 
             ((distanceToTarget*distanceToTarget*heightDifference) - (distanceToHubEdge*distanceToHubEdge*targetHeightAboveHubEdge)) /
@@ -296,8 +296,8 @@ public class Aimbot extends SubsystemBase{
             calculatedAngle = calculatedAngle + cameraAngleOffset;
         }
         calculatedAngle = calculatedAngle + shooterAngleOffset;
-
-        calculatedAngle = calculatedAngle * RPMMult;
+        
+        calculatedSpeed = calculatedSpeed *RPMMult;
 
         calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
         calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;

@@ -2,6 +2,7 @@ package team7111.robot.utils.motor;
 
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -27,6 +28,7 @@ import team7111.robot.utils.encoder.GenericEncoder;
 
 public class REVMotor implements Motor {
     private SparkMax motor;
+    private SparkBaseConfig sparkConfig;
     private PIDController pid;
     private GenericEncoder encoder = null;
     private double gearRatio = 1;
@@ -40,6 +42,7 @@ public class REVMotor implements Motor {
     private double negativeVoltageLimit = -100;
     private double positiveVelocityLimit = 5000;
     private double negativeVelocityLimit = -5000;
+    private boolean isFollower = false;
     
     public REVMotor (int id) {
         motor = new SparkMax(id, MotorType.kBrushless);
@@ -53,17 +56,18 @@ public class REVMotor implements Motor {
         this.armFeedforward = config.armFF;
         this.elevatorFeedforward = config.elevatorFF;
         this.simpleMotorFeedforward = config.simpleFF;
+        this.sparkConfig = config.sparkConfig;
     
         motor = new SparkMax(id, MotorType.kBrushless);
 
-        config.sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
-        //config.sparkConfig.closedLoop.feedForward.sva(config.simpleFF.getKs(), config.simpleFF.getKs(), config.simpleFF.getKs(), ClosedLoopSlot.kSlot1);
-        config.sparkConfig.inverted(config.isInverted);
+        sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
+        sparkConfig.closedLoop.feedForward.sva(config.simpleFF.getKs(), config.simpleFF.getKs(), config.simpleFF.getKs(), ClosedLoopSlot.kSlot1);
+        sparkConfig.inverted(config.isInverted);
         IdleMode idleMode = config.isBreakMode
             ? IdleMode.kBrake
             : IdleMode.kCoast;
-        config.sparkConfig.idleMode(idleMode);
-        motor.configure(config.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        sparkConfig.idleMode(idleMode);
+        motor.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Voltage", () -> motor.getBusVoltage()).withWidget("");
         Shuffleboard.getTab("DeviceOutputs").addDouble("Motor" + id + " Speed", () -> motor.get()).withWidget("");
@@ -143,6 +147,19 @@ public class REVMotor implements Motor {
         if (encoder != null){
             encoder.periodic();
         }
+    }
+
+    public void setFollower(boolean isFollower, int id, boolean isInverted){
+        if(isFollower && !this.isFollower){
+            sparkConfig.follow(id, isInverted);
+            motor.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        }
+
+        if(!isFollower && this.isFollower){
+            sparkConfig.disableFollowerMode();
+            motor.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        }
+        this.isFollower = isFollower;
     }
 
     public void setPID(double p, double i, double d){

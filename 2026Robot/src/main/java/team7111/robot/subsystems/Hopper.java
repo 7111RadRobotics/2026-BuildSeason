@@ -39,7 +39,7 @@ public class Hopper extends SubsystemBase {
 
     public Hopper() {
         hopperMotor = RobotBase.isReal()
-            ? new REVMotor(30, null, hopperMotorConfig)
+            ? null //new REVMotor(30, null, hopperMotorConfig)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, hopperMotorConfig.gearRatio), DCMotor.getNEO(1), 0.1),
