@@ -37,8 +37,6 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
     private double wheelCircumference;
     private double driveRotationsToMeters;
 
-    private boolean isDriveMotor;
-
     public TalonFXSwerveModule(SwerveModuleConfig config){
         driveMotor = new TalonFX(config.driveMotor.id, Constants.canbus);
         angleMotor = new TalonFX(config.angleMotor.id, Constants.canbus);
@@ -56,8 +54,13 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
     }
 
     public TalonFXSwerveModule(SwerveModuleConfig config, boolean isDriveMotor){
-        driveMotor = new TalonFX(config.driveMotor.id, Constants.canbus);
-        angleMotor = new TalonFX(config.angleMotor.id, Constants.canbus);
+        
+        if(isDriveMotor) {
+            driveMotor = new TalonFX(config.driveMotor.id, Constants.canbus);
+        } else {
+            angleMotor = new TalonFX(config.angleMotor.id, Constants.canbus);
+        }
+        
         encoder = config.encoder;
 
         driveFF = new SimpleMotorFeedforward(config.driveMotor.ff.getKs(), config.driveMotor.ff.getKv(), config.driveMotor.ff.getKa());
@@ -69,8 +72,6 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
         driveRotationsToMeters = wheelCircumference/driveGearRatio;
 
         encoderOffsetDegrees = config.canCoderOffsetDegrees;
-
-        this.isDriveMotor = isDriveMotor;
     }
 
     @Override
