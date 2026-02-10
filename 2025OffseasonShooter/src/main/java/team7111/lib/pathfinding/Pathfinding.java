@@ -66,15 +66,14 @@ public class Pathfinding {
     double d1;
     double d2;
     double dis;
-    double slopeX1;
-    double slopeX2;
-    double slopeY1;
-    double slopeY2;
-    double slope1;
-    double slope2;
-    double slopeX3;
-    double slopeY3;
+    Pose2d positionOne;
+    Pose2d positionTwo;
+    Pose2d positionThree;
     double radius;
+    double area;
+    int running;
+
+    List<Translation2d> interiorWaypoints;
 
     private void setAvoidPose(FieldElement fieldElements) {
             Pose2d[] poses;
@@ -96,14 +95,7 @@ public class Pathfinding {
         avoidPoses.clear();
         iterations = 0;
         dis = 0;
-        double slopeX1;
-        double slopeX2 = 0;
-        double slopeY1 = 0;
-        double slopeY2 = 0;
-        double slope1 = 0;
-        double slope2 = 0;
-        double slopeX3 = 0;
-        double slopeY3 = 0;
+        running = 1;
         
         robotPose = swerve.getPose();
         gridPosition = robotPose.getTranslation();
@@ -167,19 +159,24 @@ public class Pathfinding {
             return new Waypoint[] { waypoint };
         }
     
-        List<Translation2d> interiorWaypoints = new ArrayList<>();
+        interiorWaypoints = new ArrayList<>();
 
         for (int i = 0; i < storedPosition.size() - 1; i++) {
-            slopeX1 = storedPosition.get(i).getX();
-            slopeY1 = storedPosition.get(i).getX();
-            slopeX2 = storedPosition.get(i + 2).getX();
-            slopeY2 = storedPosition.get(i + 2).getX();
-            slopeX3 = storedPosition.get(i + 1).getX();
-            slopeY3 = storedPosition.get(i + 1).getX();
-            slope1 = ((slopeY1 - slopeY2)/(slopeX1 - slopeX2));
-            slope2 = ((slopeY1 - slopeY3)/(slopeX1 - slopeX3));
-            if (slope1 == slope2) {
-                storedPosition.remove(i + 1);
+            interiorWaypoints.add(storedPosition.get(i).getTranslation());
+
+            while (i + 2 < storedPosition.size()) {
+                positionOne = storedPosition.get(i);
+                positionTwo = storedPosition.get(i + 1);
+                positionThree = storedPosition.get(i + 2);
+
+                area = (positionTwo.getY() - positionOne.getY()) * (positionThree.getX() - positionTwo.getX()) - 
+                (positionTwo.getX() - positionOne.getX()) * (positionThree.getY() - positionTwo.getY());
+
+                if (Math.abs(area) < 1e-9) {
+                    storedPosition.remove(i + 1);
+                } else {
+                    break;
+                }
             }
             interiorWaypoints.add(storedPosition.get(i).getTranslation());
         }
