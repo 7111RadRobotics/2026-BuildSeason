@@ -86,7 +86,9 @@ public class SuperStructure extends SubsystemBase {
             swerve.zeroGyro();
             swerve.resetOdometry(new Pose2d(0, 0 , swerve.getYaw()));
         }
-        //swerve.addVisionMeasurement(vision.getRobotPose().toPose2d());
+        if(vision.getRobotPose() != null){
+            swerve.addVisionMeasurement(vision.getRobotPose().toPose2d());
+        }
 
         // Operator controller commands
         if(operatorController.getStartButtonPressed()) {

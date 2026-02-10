@@ -27,7 +27,7 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0)),
+        new Transform3d(0, 0, 0, new Rotation3d(0, 0, -90)),
     };
 
     //private final AHRS gyro;
@@ -92,6 +92,7 @@ public class Vision extends SubsystemBase{
      * returns the position of the robot averaged between all cameras
      */
     public Pose3d getRobotPose() {
+        boolean hasPose = false;
         double averageX = 0;
         double averageY = 0;
         double averageZ = 0;
@@ -99,6 +100,7 @@ public class Vision extends SubsystemBase{
         int numOfCamerasSeen = 0;
         for(int i = 0; i < cameraList.length; i++) {
             if(cameraList[i].estRobotPose != null) {
+                hasPose = true;
                 averageX += cameraList[i].estRobotPose.estimatedPose.getX();
                 averageY += cameraList[i].estRobotPose.estimatedPose.getY();
                 averageZ += cameraList[i].estRobotPose.estimatedPose.getZ();
@@ -114,7 +116,9 @@ public class Vision extends SubsystemBase{
 
         Pose3d estPose = new Pose3d(averageX, averageY, averageZ, new Rotation3d(new Rotation2d(averageRot)));
 
-        return estPose;
+        return hasPose 
+            ? estPose
+            : null;
     }
 
     /**

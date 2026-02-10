@@ -19,6 +19,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,7 +46,7 @@ public class CTREMotor implements Motor {
     private boolean isFollowerInverted = false;
     private int leaderID;
 
-    private VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
+    private VelocityVoltage velocityVoltage = new VelocityVoltage(0);
 
     private GenericEntry motorPEntry;
     private GenericEntry motorIEntry;
@@ -107,11 +108,11 @@ public class CTREMotor implements Motor {
         if(rpm < negativeVelocityLimit){
             rpm = negativeVelocityLimit;
         }
-        motor.setControl(velocityDutyCycle.withVelocity(rpm * gearRatio));
+        motor.setControl(velocityVoltage.withVelocity(rpm * gearRatio));
     }
 
     public double getVelocity(){
-        return motor.getVelocity().getValueAsDouble() / gearRatio;
+        return motor.getVelocity().getValueAsDouble() * 60 / gearRatio;
     }
     
     public void setPositionReadout(double position){

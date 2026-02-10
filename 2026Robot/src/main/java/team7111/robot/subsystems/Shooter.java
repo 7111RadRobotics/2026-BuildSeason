@@ -91,10 +91,11 @@ public class Shooter extends SubsystemBase {
                 hoodConfig.armFF);
         
         flywheels = RobotBase.isReal()
-            ? new TwoMotors(
+            ? new CTREMotor(16, null, flywheelConfig)
+            /*new TwoMotors(
                 new REVMotor(12, null, flywheelConfig), 
                 new REVMotor(10, null, flywheelConfig),
-                12, true)
+                12, true)*/
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
@@ -116,9 +117,14 @@ public class Shooter extends SubsystemBase {
             hood.setSetpoint(maxHoodPos, false);
         }else if(90 - hoodTrajSetpoint < minHoodPos){
             hood.setSetpoint(minHoodPos, false);
-        }else
+        }else{
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
-        flywheels.setVelocity(flywheelSpeed * 1.2715);
+        }
+        if(flywheelSpeed == 0){
+            flywheels.setDutyCycle(0);
+        }else
+            flywheels.setVelocity(flywheelSpeed * 1.2715);
+        
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
         hoodPositionLigament.setAngle(-hood.getPosition() + 180);
