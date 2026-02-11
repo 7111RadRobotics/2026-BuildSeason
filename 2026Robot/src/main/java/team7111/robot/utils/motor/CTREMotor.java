@@ -68,6 +68,9 @@ public class CTREMotor implements Motor {
         config.talonConfig.Slot0.kP = pid.getP();
         config.talonConfig.Slot0.kI = pid.getI();
         config.talonConfig.Slot0.kD = pid.getD();
+        config.talonConfig.Slot0.kS = feedforward.getKs();
+        config.talonConfig.Slot0.kV = feedforward.getKv();
+        config.talonConfig.Slot0.kA = feedforward.getKa();
         config.talonConfig.MotorOutput.Inverted = config.isInverted
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive; 

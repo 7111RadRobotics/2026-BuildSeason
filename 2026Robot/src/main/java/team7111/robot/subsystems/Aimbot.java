@@ -30,7 +30,7 @@ public class Aimbot extends SubsystemBase{
     /** How far the stick can override the angle in non manual shots (degrees) */
     private double angleOverrideRange = 10;
     /** How far the operator can override the speed in non manual shots (rpm) */
-    private double speedOverrideRange = 500;
+    private double speedOverrideRange = 1000;
 
 
     /** For apriltag detection and targetting */

@@ -59,8 +59,8 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.001, 0.001, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, false, false, new PIDController(0.0005, 0.0000, 0.1), 
-        MechanismType.flywheel, 0.179, 0.38, 0.25, 0);
+        1, true, false, new PIDController(0.00202, 0.0000, 0.0), 
+        MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
     private Motor flywheels;
@@ -120,10 +120,11 @@ public class Shooter extends SubsystemBase {
         }else{
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
         }
-        if(flywheelSpeed == 0){
-            flywheels.setDutyCycle(0);
-        }else
-            flywheels.setVelocity(flywheelSpeed * 1.2715);
+        if(flywheelSpeed == 0 || flywheels.getVelocity() >= 500 + flywheelSpeed){
+            flywheels.setVoltage(0);
+        }else 
+            flywheels.setVelocity(flywheelSpeed);
+        
         
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
