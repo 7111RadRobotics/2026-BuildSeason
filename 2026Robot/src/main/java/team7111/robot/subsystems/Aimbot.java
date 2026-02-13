@@ -44,6 +44,9 @@ public class Aimbot extends SubsystemBase{
     /** Only used with camera, distance to the center of the target from the apriltag */
     private final double camToTargetHeightOffset = 2/3;
 
+    /** Offset between rio yaw and direction the robot shoots */
+    private final double rioToShooterOffset = 0.0;
+
     /** shooter wheel diameter, in meters */
     private final double shooterDiameter = Units.inchesToMeters(4);
     /** Auto calculated based on shooter diameter, in inches */
@@ -81,7 +84,7 @@ public class Aimbot extends SubsystemBase{
 
     /** Enables/disables the math calculations (saves calculation time)
      *  <p> If disabled, sets angle to minimum shooter angle and speed to 0 */
-    private boolean isEnabled = false;
+    private boolean isEnabled = true;
 
     /** Defines if we want to use vision */
     private boolean isUsingVision = false;
@@ -136,7 +139,7 @@ public class Aimbot extends SubsystemBase{
     }
 
     public double getCalculatedDirection() {
-        return this.degreeToTarget;
+        return this.degreeToTarget  + rioToShooterOffset;
     }
 
     /** Enables or disables the autoshooting calculations */
@@ -373,6 +376,8 @@ public class Aimbot extends SubsystemBase{
                 }
             }
 
+            rotation = 90 - rotation;
+
             double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
             Transform3d returnedTrans = new Transform3d(distance,
                 0.0,
@@ -410,6 +415,9 @@ public class Aimbot extends SubsystemBase{
                 rotation = Math.atan(-xdif/-ydif) * 180/Math.PI + 180;
             }
         }
+
+        rotation = 90 - rotation;
+
 
         double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
         Transform3d returnedTrans = new Transform3d(

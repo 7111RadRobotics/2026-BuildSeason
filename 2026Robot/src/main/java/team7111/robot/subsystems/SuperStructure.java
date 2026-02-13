@@ -83,11 +83,15 @@ public class SuperStructure extends SubsystemBase {
         long startTime = System.nanoTime();
         manageSuperState(superState);
         SmartDashboard.putString("SuperState", superState.name());
+
         // Driver controller commands
         if (driverController.getStartButton()) {
             swerve.zeroGyro();
             swerve.resetOdometry(new Pose2d(0, 0 , swerve.getYaw()));
         }
+
+        SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
+
         if(vision.getRobotPose() != null){
             swerve.addVisionMeasurement(vision.getRobotPose().toPose2d());
         }
@@ -113,6 +117,7 @@ public class SuperStructure extends SubsystemBase {
         if(driverController.getAButtonPressed()) {
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
+
         } else if(driverController.getAButtonReleased()) {
             swerve.setSwerveState(SwerveState.manual);
         }
@@ -165,7 +170,7 @@ public class SuperStructure extends SubsystemBase {
      * Mainly used for autonomous routines.
      */
     private boolean temp1(){
-        shooter.setState(ShooterState.idle);
+        shooter.setState(ShooterState.stopped);
         if(operatorController.getLeftBumperButtonPressed()){
             setSuperState(SuperState.temp2);
         }

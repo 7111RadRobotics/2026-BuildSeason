@@ -92,6 +92,7 @@ public class Vision extends SubsystemBase{
      * returns the position of the robot averaged between all cameras
      */
     public Pose3d getRobotPose() {
+        
         boolean hasPose = false;
         double averageX = 0;
         double averageY = 0;
@@ -99,7 +100,7 @@ public class Vision extends SubsystemBase{
         double averageRot = 0;
         int numOfCamerasSeen = 0;
         for(int i = 0; i < cameraList.length; i++) {
-            if(cameraList[i].estRobotPose != null) {
+            if(cameraList[i].getLatestResult().hasTargets()) {
                 hasPose = true;
                 averageX += cameraList[i].estRobotPose.estimatedPose.getX();
                 averageY += cameraList[i].estRobotPose.estimatedPose.getY();
@@ -107,6 +108,10 @@ public class Vision extends SubsystemBase{
                 averageRot += cameraList[i].estRobotPose.estimatedPose.getRotation().getAngle();
                 numOfCamerasSeen++;
             }
+        }
+
+        if(!hasPose) {
+            return null;
         }
 
         averageX /= numOfCamerasSeen;

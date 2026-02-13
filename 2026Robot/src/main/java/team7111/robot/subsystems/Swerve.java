@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.drive.RobotDriveBase;
 import team7111.lib.pathfinding.*;
 import team7111.robot.Constants.SwerveConstants;
 import team7111.robot.utils.SwerveModule;
@@ -92,11 +94,16 @@ public class Swerve extends SubsystemBase {
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
             getPositions(), new Pose2d(4.666-3.7846,4.03, Rotation2d.fromDegrees(0)));
         
-        snapAnglePID = new PIDController(1.0, 0.0, 0.0);
+        snapAnglePID = new PIDController(0.5, 0.0, 0.0);
     }
 
     @Override 
     public void periodic() {
+
+        SmartDashboard.putNumber("Snap angle", snapAngleSetpoint);
+
+        SmartDashboard.putNumber("Rotation", getYaw().getDegrees());
+
         gyro.update();
         swerveOdometry.update(getYaw(), getPositions());
         commandedStatePublisher.set(states);
@@ -167,7 +174,7 @@ public class Swerve extends SubsystemBase {
                 manual(0, 0, 0, false, false);
                 break;
             case snapAngle:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(snapAngleSetpoint), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(new Rotation2d(Units.degreesToRadians(snapAngleSetpoint)).minus(getYaw()).getDegrees()), isDriveFieldRelative, false);
                 break;
             default:
                 break;

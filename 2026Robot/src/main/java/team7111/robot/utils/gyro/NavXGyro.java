@@ -19,6 +19,7 @@ public class NavXGyro implements GenericGyro{
     private double pitchInversion = 1;
     private double rollInversion = 1;
 
+    private double permaOffset = 0;
     public NavXGyro(){
         
     }
@@ -42,7 +43,7 @@ public class NavXGyro implements GenericGyro{
 
     public void setYaw(Rotation2d rotation){
         gyro.reset();
-        //yawOffset = rotation;
+        yawOffset = new Rotation2d(Units.degreesToRadians(rotation.getDegrees() + permaOffset));
     }
 
     public void setPitch(Rotation2d rotation){
