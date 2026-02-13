@@ -185,9 +185,9 @@ public class Shooter extends SubsystemBase {
     private void score(){}
 
     private void scoreAimbot(){
+        aimbot.setShotType(shotType.Parabolic);
         hoodTrajSetpoint = aimbot.getCalculatedAngle();
         flywheelSpeed = aimbot.getCalculatedSpeed();
-        aimbot.setShotType(shotType.Parabolic);
     }
 
     private void stopped(){
