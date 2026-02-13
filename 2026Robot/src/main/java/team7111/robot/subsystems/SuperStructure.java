@@ -2,6 +2,8 @@ package team7111.robot.subsystems;
 
 import java.util.List;
 
+import javax.print.attribute.standard.RequestingUserName;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -27,6 +29,12 @@ public class SuperStructure extends SubsystemBase {
      */
     public enum SuperState {
         //TODO: decide and create more states (and remove examples)
+        intake,
+        passing,
+        scoring,
+        snowBlowerPass,
+        snowBlowerScore,
+        prepareShot,
         temp1,
         temp2,
         aimAtTarget,
@@ -153,6 +161,18 @@ public class SuperStructure extends SubsystemBase {
                 return autonomousEnter();
             case autonomousExit:
                 return autonomousExit();
+            case scoring:
+                return scoring();
+            case intake:
+                return intake();
+            case passing:
+                return passing();
+            case snowBlowerPass:
+                return snowBlowerPass();
+            case snowBlowerScore:
+                return snowBlowerScore();
+            case prepareShot:
+                return prepareShot();
             default:
                 return defaultState(state);
         }
@@ -189,6 +209,36 @@ public class SuperStructure extends SubsystemBase {
             setSuperState(SuperState.temp1);
             targeting.setToggle(false);
         }
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean scoring(){
+        
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean passing(){
+
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean intake(){
+        
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean snowBlowerPass(){
+
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean snowBlowerScore(){
+
+        return shooter.isAtSetpoint();
+    }
+
+    private boolean prepareShot(){
+        
         return shooter.isAtSetpoint();
     }
 
