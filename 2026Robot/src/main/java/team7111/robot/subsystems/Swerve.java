@@ -224,7 +224,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void addVisionMeasurement(Pose2d pose){
-        swerveOdometry.addVisionMeasurement(pose, Timer.getFPGATimestamp());
+        swerveOdometry.addVisionMeasurement(new Pose2d(pose.getX(), pose.getY(), getYaw()), Timer.getFPGATimestamp());
     }
 
     /** To be used by auto. Use the drive method during teleop. */
