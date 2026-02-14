@@ -138,7 +138,7 @@ public class DrivebaseConfig {
         boolean driveBrakeMode = true;
         boolean angleBrakeMode = false;
         PIDController drivePID = new PIDController(0.1, 0.0, 0.0);
-        PIDController anglePID = new PIDController(0.2, 0.0, 0.0);
+        PIDController anglePID = new PIDController(50, 0.0, 0.0);
         SimpleMotorFeedforward driveFF = new SimpleMotorFeedforward(0.001, 0.0);
         SimpleMotorFeedforward angleFF = new SimpleMotorFeedforward(0.001, 0.0);
         SwerveMotorConfig driveMotorConfig = new SwerveMotorConfig(DCMotor.getKrakenX60(1), driveInversion, driveBrakeMode, driveGearing, driveMOI, driveCurrentLimit, drivePID, driveFF);
@@ -220,7 +220,7 @@ public class DrivebaseConfig {
         boolean driveBrakeMode = true;
         boolean angleBrakeMode = false;
         PIDController drivePID = new PIDController(0.1, 0.0, 0.0);
-        PIDController anglePID = new PIDController(50, 0.0, 0.0);
+        PIDController anglePID = new PIDController(0.2, 0.0, 0.0);
         SimpleMotorFeedforward driveFF = new SimpleMotorFeedforward(0.001, 0.0);
         SimpleMotorFeedforward angleFF = new SimpleMotorFeedforward(0.001, 0.0);
         SwerveMotorConfig driveMotorConfig = new SwerveMotorConfig(DCMotor.getKrakenX60(1), driveInversion, driveBrakeMode, driveGearing, driveMOI, driveCurrentLimit, drivePID, driveFF);
