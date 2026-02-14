@@ -48,7 +48,7 @@ public class Intake extends SubsystemBase {
 
     private double pivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(12, false, false, new PIDController(0.15500259, 0.039, 0.0011), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(20, false, false, new PIDController(0.15500259, 0.039, 0.0011), MechanismType.arm, 0, 0, 0, 0);
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
 
@@ -65,13 +65,13 @@ public class Intake extends SubsystemBase {
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getKrakenX60(1), pivotConfig.gearRatio, 0.01, 0.2, 
+                    DCMotor.getKrakenX60(1), pivotConfig.gearRatio, 370.726, 0.2, 
                     Degrees.of(0).in(Radians), Degrees.of(90).in(Radians), true, Degrees.of(37).in(Radians)), 
                 pivotConfig.pid, 
                 pivotConfig.armFF);
 
         //TODO set REV motor ID to a real ID
-        flyWheel = RobotBase.isReal()
+        flyWheel = RobotBase.isReal()n
             ? null //new REVMotor(20, null, flyWheelConfig)
             : new FlywheelSimMotor(
                 null, 
