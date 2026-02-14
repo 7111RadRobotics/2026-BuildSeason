@@ -68,7 +68,8 @@ public class Swerve extends SubsystemBase {
         runPath,
         manual,
         stationary,
-        snapAngle
+        snapAngle,
+        bumpAlign,
     };
 
     public Swerve() {
@@ -174,7 +175,21 @@ public class Swerve extends SubsystemBase {
                 manual(0, 0, 0, false, false);
                 break;
             case snapAngle:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(new Rotation2d(Units.degreesToRadians(snapAngleSetpoint)).minus(getYaw()).getDegrees()), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
+                break;
+            case bumpAlign:
+                double angle = joystickYaw.getAsDouble();
+                Pose2d pose = getPose();
+
+                if ((pose.getY() > 1.4 && pose.getY() < 3.4) 
+                 || (pose.getY() > 4.5 && pose.getY() < 6.5)){
+                    if ((pose.getX() > 3.6 && pose.getX() < 5.5) 
+                     || (pose.getX() > 11 && pose.getX() < 12.98)){
+                        angle = snapAnglePID.calculate(-getYaw().getDegrees(), 45);
+                    }
+                }
+
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), angle, isDriveFieldRelative, false);
                 break;
             default:
                 break;
