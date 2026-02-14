@@ -357,6 +357,8 @@ public class Aimbot extends SubsystemBase{
                 visionResults.getZ() + camToTargetHeightOffset, //Height of the target (from 0)
                 null);
 
+
+            //FOR ROTATION CALUCLATION
             //X difference and y difference
             double xdif = targetPose.getX() - robotPose.get().getX();
             double ydif = targetPose.getY() - robotPose.get().getY();
@@ -377,6 +379,8 @@ public class Aimbot extends SubsystemBase{
             }
 
             rotation = 90 - rotation;
+
+            //ROTATION CALCULATION
 
             double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
             Transform3d returnedTrans = new Transform3d(distance,

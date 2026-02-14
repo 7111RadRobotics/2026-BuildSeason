@@ -6,7 +6,7 @@ import team7111.robot.utils.config.SwerveModuleConfig;
 import team7111.robot.utils.encoder.GenericEncoder;
 
 
-class CombinedSwerveModule implements GenericSwerveModule {
+public class CombinedSwerveModule implements GenericSwerveModule {
 
     private GenericSwerveModule driveMotor;
     private GenericSwerveModule angleMotor;
