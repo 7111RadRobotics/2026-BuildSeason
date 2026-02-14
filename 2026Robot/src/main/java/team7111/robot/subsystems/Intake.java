@@ -71,7 +71,7 @@ public class Intake extends SubsystemBase {
                 pivotConfig.armFF);
 
         //TODO set REV motor ID to a real ID
-        flyWheel = RobotBase.isReal()n
+        flyWheel = RobotBase.isReal()
             ? null //new REVMotor(20, null, flyWheelConfig)
             : new FlywheelSimMotor(
                 null, 
