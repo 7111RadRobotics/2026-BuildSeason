@@ -90,13 +90,13 @@ public class Shooter extends SubsystemBase {
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
-        flywheels = RobotBase.isReal()
+        flywheels = /*RobotBase.isReal()
             ? new CTREMotor(16, null, flywheelConfig)
             /*new TwoMotors(
                 new REVMotor(12, null, flywheelConfig), 
                 new REVMotor(10, null, flywheelConfig),
-                12, true)*/
-            : new FlywheelSimMotor(
+                12, true)*
+            :*/ new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
                 flywheelConfig.pid,

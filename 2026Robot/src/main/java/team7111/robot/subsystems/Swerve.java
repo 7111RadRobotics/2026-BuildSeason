@@ -87,15 +87,19 @@ public class Swerve extends SubsystemBase {
         zeroGyro();
 
         pathMaster = new PathMaster(this::getPose, () -> getYaw());
-        pathMaster.setTranslationPID(3, 0.015215, 0.1012);
-        pathMaster.setRotationPID(0.1425, 0.000, 0.00240225);
+        // Senior frog PID
+        /*pathMaster.setTranslationPID(3, 0.015215, 0.1012);
+        pathMaster.setRotationPID(0.1425, 0.000, 0.00240225);*/
+
+        pathMaster.setTranslationPID(10, 0.0, 0);
+        pathMaster.setRotationPID(0.5, 0, 0);
         pathMaster.setInversions(false, false, true, false);
 
         
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
-            getPositions(), new Pose2d(4.666-3.7846,4.03, Rotation2d.fromDegrees(0)));
+            getPositions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         
-        snapAnglePID = new PIDController(0.5, 0.0, 0.0);
+        snapAnglePID = new PIDController(0.04, 0.0, 0.001);
     }
 
     @Override 

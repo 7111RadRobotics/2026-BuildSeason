@@ -78,7 +78,7 @@ public class SuperStructure extends SubsystemBase {
         this.shooter = shooter;
 
         DriverStation.silenceJoystickConnectionWarning(true);
-        this.swerve.setJoysickInputs(() -> -driverController.getLeftY(), () -> driverController.getLeftX(), () -> driverController.getRightX());
+        this.swerve.setJoysickInputs(() -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
         this.swerve.setSwerveState(SwerveState.manual);
 
