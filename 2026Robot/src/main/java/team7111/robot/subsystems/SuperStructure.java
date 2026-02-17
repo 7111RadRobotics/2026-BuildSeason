@@ -240,6 +240,7 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
         }else
+            swerve.setSwerveState(SwerveState.bumpAlign);
             shooter.setState(ShooterState.score);
         return shooter.isAtSetpoint();
     }
