@@ -60,8 +60,8 @@ public class Constants {
         public static final double closedLoopRamp = 0.0;
         
         /** Swerve constraints. */
-        public static final double maxDriveVelocity = 5;
-        public static final double maxAngularVelocity = 7;
+        public static final double maxDriveVelocity = 2;
+        public static final double maxAngularVelocity = 2;
         public static final double sensitivity = 1;
 
         /** 
