@@ -129,6 +129,9 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getYButtonPressed()) {
             targeting.setShotType(shotType.Manual);
         }
+        if(operatorController.getLeftBumperButtonPressed()) {
+            targeting.setShotType(shotType.Apriltag);
+        }
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();
         }
@@ -140,6 +143,12 @@ public class SuperStructure extends SubsystemBase {
 
         } else if(driverController.getAButtonReleased()) {
             swerve.setSwerveState(SwerveState.manual);
+        }
+
+        if(driverController.getBButtonPressed()) {
+            setSuperState(SuperState.score);
+        } else if(driverController.getBButtonReleased()) {
+            setSuperState(SuperState.manual);
         }
 
 

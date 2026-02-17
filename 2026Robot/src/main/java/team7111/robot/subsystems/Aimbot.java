@@ -2,6 +2,7 @@ package team7111.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -94,12 +95,14 @@ public class Aimbot extends SubsystemBase{
      * Parabolic - Aims to indirectly hit the target, arcing the ball <p>
      * Transport - Sets speed to 0, angle to the lowest possible <p>
      * Manual - Uses operator controls to aim and fire <p>
+     * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled
     */
     public enum shotType {
         Direct,
         Parabolic,
         Transport,
         Manual,
+        Apriltag,
     }
 
     /** Current type of shot to calculate */
@@ -191,6 +194,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("ShootPara", false);
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
                 break;
             case Parabolic:
                 parabolicShot();
@@ -198,6 +202,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("ShootPara", true);
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
                 break;
             case Transport:
                 transport();
@@ -205,6 +210,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("ShootPara", false);
                 SmartDashboard.putBoolean("Transport", true);
                 SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
                 break;
             case Manual:
                 manual();
@@ -212,7 +218,15 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("ShootPara", false);
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", true);
+                SmartDashboard.putBoolean("ShootApril", false);
                 break;
+            case Apriltag:
+                apriltag();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", true);
         }
 
         useOffsets();
@@ -325,6 +339,19 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putNumber("calculated angle untampered", calculatedAngle);
     }
 
+    //Shoots towards apriltag, or last variables if apriltags are null/disabled
+    void apriltag() {
+        if(!isUsingVision) {
+            return;
+        }
+
+        if(getTransToTarget() == null) {
+            return;
+        }
+
+        directShot();
+    }
+    
     /** Ensures the angles are within the min and max physical angles on the shooter */
     private void useRestraints() {
         SmartDashboard.putNumber("CalculatedAngle before clamped", calculatedAngle);
