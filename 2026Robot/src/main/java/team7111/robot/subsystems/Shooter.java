@@ -41,6 +41,7 @@ public class Shooter extends SubsystemBase {
         idle,
         score,
         scoreAimbot,
+        prepareShot,
         pass,
         stopped,
         manual,
@@ -143,6 +144,11 @@ public class Shooter extends SubsystemBase {
     // or change a state/value in another subsystem.
     public boolean isAtSetpoint(){
         boolean isAtSetpoint = hood.isAtSetpoint(2); 
+        return isAtSetpoint;
+    }
+
+    public boolean isAtSpeedSetpoint(){
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(250);
         return isAtSetpoint;
     }
 

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
+import team7111.robot.subsystems.Autonomous.Paths;
 import team7111.robot.subsystems.Intake.IntakeState;
 import team7111.robot.subsystems.Shooter.ShooterState;
 import team7111.robot.subsystems.Swerve.SwerveState;
@@ -30,11 +31,13 @@ public class SuperStructure extends SubsystemBase {
     public enum SuperState {
         //TODO: decide and create more states (and remove examples)
         intake,
-        passing,
-        scoring,
+        pass,
+        score,
+        idle,
         snowBlowerPass,
         snowBlowerScore,
-        prepareShot,
+        prepareHubShot,
+        preparePass,
         temp1,
         temp2,
         aimAtTarget,
@@ -64,6 +67,10 @@ public class SuperStructure extends SubsystemBase {
     private int autoIndex = 0;
     private List<AutoAction> autoActions;
 
+    private Path nearestHubSetpoint;
+    private boolean useAimbot = false;
+    private boolean alignToHub = false;
+
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -83,6 +90,8 @@ public class SuperStructure extends SubsystemBase {
         this.swerve.setSwerveState(SwerveState.manual);
 
         targeting.giveResources(operatorController);
+
+        nearestHubSetpoint = auto.getPath(Paths.hubSetpointL);
     }
 
     /**
@@ -90,13 +99,15 @@ public class SuperStructure extends SubsystemBase {
      */
     public void periodic(){
         long startTime = System.nanoTime();
-        manageSuperState(superState);
         SmartDashboard.putString("SuperState", superState.name());
 
         // Driver controller commands
+        useAimbot = driverController.getRightBumperButton();
+        alignToHub = driverController.getLeftBumperButton();
+
         if (driverController.getStartButton()) {
             swerve.zeroGyro();
-            swerve.resetOdometry(new Pose2d(0, 0 , swerve.getYaw()));
+            swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
         }
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
@@ -130,6 +141,10 @@ public class SuperStructure extends SubsystemBase {
         } else if(driverController.getAButtonReleased()) {
             swerve.setSwerveState(SwerveState.manual);
         }
+
+
+
+        manageSuperState(superState);
 
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
@@ -167,18 +182,18 @@ public class SuperStructure extends SubsystemBase {
                 return autonomousEnter();
             case autonomousExit:
                 return autonomousExit();
-            case scoring:
-                return scoring();
+            case score:
+                return score();
             case intake:
                 return intake();
-            case passing:
-                return passing();
+            case pass:
+                return pass();
             case snowBlowerPass:
                 return snowBlowerPass();
             case snowBlowerScore:
                 return snowBlowerScore();
-            case prepareShot:
-                return prepareShot();
+            case prepareHubShot:
+                return prepareHubShot();
             default:
                 return defaultState(state);
         }
@@ -218,19 +233,27 @@ public class SuperStructure extends SubsystemBase {
         return shooter.isAtSetpoint();
     }
 
-    private boolean scoring(){
-        
+    private boolean score(){
+        targeting.setToggle(true);
+        if(useAimbot){
+            shooter.setState(ShooterState.scoreAimbot);
+            swerve.setSnapAngle(targeting.getCalculatedDirection());
+            swerve.setSwerveState(SwerveState.snapAngle);
+        }else
+            shooter.setState(ShooterState.score);
         return shooter.isAtSetpoint();
     }
 
-    private boolean passing(){
+    private boolean pass(){
+        shooter.setState(ShooterState.pass);
 
         return shooter.isAtSetpoint();
     }
 
     private boolean intake(){
         
-        return shooter.isAtSetpoint();
+
+        return intake.isAtSetpoint();
     }
 
     private boolean snowBlowerPass(){
@@ -243,9 +266,17 @@ public class SuperStructure extends SubsystemBase {
         return shooter.isAtSetpoint();
     }
 
-    private boolean prepareShot(){
-        
-        return shooter.isAtSetpoint();
+    private boolean prepareHubShot(){
+        targeting.setToggle(true);
+        shooter.setState(ShooterState.prepareShot);
+        if(useAimbot){
+            swerve.setSnapAngle(targeting.getCalculatedDirection());
+            swerve.setSwerveState(SwerveState.snapAngle);
+        }else if(alignToHub) {
+            swerve.setPath(auto.getPath(null));
+            swerve.setSwerveState(SwerveState.initializePath);
+        }
+        return shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint();
     }
 
 

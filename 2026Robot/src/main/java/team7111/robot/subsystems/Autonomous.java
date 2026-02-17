@@ -27,19 +27,30 @@ public class Autonomous extends SubsystemBase {
 
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
 
+    private final Waypoint[] trenchLWaypoints = new Waypoint[]{
+        new Waypoint(new Pose2d(3.8, 7.446, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
+        new Waypoint(new Pose2d(5.9, 7.446, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
+    };
+    private final Waypoint[] trenchRWaypoints = new Waypoint[]{
+        new Waypoint(new Pose2d(3.8, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
+        new Waypoint(new Pose2d(5.9, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
+    };
+
     public enum Autos {
-        shootPreload,
         forwardTest,
-        rotateTest,
-        multiPoint,
-        forward180,
+        leftNeutral,
     }
 
     public enum Paths {
         forward,
-        rotate90,
-        forward2,
-        forwardRotate180
+
+        hubSetpointL,
+        hubSetpointM,
+        hubSetpointR,
+        trenchLNeutral,
+        trenchRNeutral,
+        trenchLAlliance,
+        trenchRAlliance,
     }
 
     public Autonomous(){
@@ -64,20 +75,20 @@ public class Autonomous extends SubsystemBase {
             case forwardTest:
                 auto.add(new AutoAction(getPath(Paths.forward)));
                 break;
-            case rotateTest:
-                auto.add(new AutoAction(getPath(Paths.rotate90)));
-                break;
-            case multiPoint:
-                auto.add(new AutoAction(SuperState.temp2).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.forward)));
-                auto.add(new AutoAction(SuperState.temp1).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.forward2)));
-                break;
-            case forward180:
-                auto.add(new AutoAction(getPath(Paths.forwardRotate180)));
+
+            case leftNeutral:
+                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
+                //auto.add(new AutoAction(SuperState.prepareHubShot));
+                //auto.add(new AutoAction(SuperState.score));
+                //auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.trenchLNeutral)));
+                auto.add(new AutoAction(getPath(Paths.trenchLAlliance)));
+                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
+                auto.add(new AutoAction(SuperState.score));
                 break;
             default:
-
                 break;
         }
         return auto;
@@ -90,15 +101,33 @@ public class Autonomous extends SubsystemBase {
             case forward:
                 waypoints.add(balancedPoint(1, 0, 0));
                 break;
-            case rotate90:
-                waypoints.add(balancedPoint(0, 0, 90));
+            
+            case hubSetpointL:
+                waypoints.add(balancedPoint(2.266, 5.946, -30.65));
                 break;
-            case forward2:
-                waypoints.add(slowPoint(2, 0, 90));
+            case hubSetpointM:
+                waypoints.add(balancedPoint(2.267, 4.021, 0));
                 break;
-            case forwardRotate180:
-                waypoints.add(balancedPoint(1, 0, 90));
-                waypoints.add(balancedPoint(2, 0, 180));
+            case hubSetpointR:
+                waypoints.add(balancedPoint(1.975, 1.986, 38.21));
+                break;
+            case trenchLAlliance:
+                waypoints.add(trenchLWaypoints[1]);
+                waypoints.add(trenchLWaypoints[0]);
+                break;
+            case trenchLNeutral:
+                waypoints.add(trenchLWaypoints[0]);
+                waypoints.add(trenchLWaypoints[1]);
+                break;
+            case trenchRAlliance:
+                waypoints.add(trenchRWaypoints[1]);
+                waypoints.add(trenchRWaypoints[0]);
+                break;
+            case trenchRNeutral:
+                waypoints.add(trenchRWaypoints[0]);
+                waypoints.add(trenchRWaypoints[1]);
+                break;
+            default:
                 break;
         }
         return new Path(waypoints);

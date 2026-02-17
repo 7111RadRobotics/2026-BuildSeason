@@ -142,6 +142,10 @@ public class Aimbot extends SubsystemBase{
         return this.degreeToTarget  + rioToShooterOffset;
     }
 
+    public boolean getToggle(){
+        return isEnabled;
+    }
+
     /** Enables or disables the autoshooting calculations */
     public void setToggle(boolean isEnabled) {
         this.isEnabled = isEnabled;

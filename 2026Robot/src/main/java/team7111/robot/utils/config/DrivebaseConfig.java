@@ -186,6 +186,8 @@ public class DrivebaseConfig {
 
         GenericSwerveModule[] moduleTypes;
         if(isSim){
+            drivePID.setPID(1, 0, 0);
+            anglePID.setPID(50, 0, 0);
             moduleTypes = new GenericSwerveModule[]{
                 new SimSwerveModule(moduleConstants[0]),
                 new SimSwerveModule(moduleConstants[1]),
@@ -267,6 +269,8 @@ public class DrivebaseConfig {
 
         GenericSwerveModule[] moduleTypes;
         if(isSim){
+            drivePID.setPID(1, 0, 0);
+            anglePID.setPID(50, 0, 0);
             moduleTypes = new GenericSwerveModule[]{
                 new SimSwerveModule(moduleConstants[0]),
                 new SimSwerveModule(moduleConstants[1]),
