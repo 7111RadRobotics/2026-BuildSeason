@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.subsystems.Autonomous.Paths;
+import team7111.robot.subsystems.Hopper.HopperState;
 import team7111.robot.subsystems.Intake.IntakeState;
 import team7111.robot.subsystems.Shooter.ShooterState;
 import team7111.robot.subsystems.Swerve.SwerveState;
@@ -39,9 +40,6 @@ public class SuperStructure extends SubsystemBase {
         snowBlowerScore,
         prepareHubShot,
         preparePass,
-        temp1,
-        temp2,
-        aimAtTarget,
         autonomousEnter,
         autonomous,
         autonomousExit,
@@ -62,15 +60,18 @@ public class SuperStructure extends SubsystemBase {
     private final XboxController operatorController = new XboxController(1);
 
     /** This represents the current superstate of the robot */
-    private SuperState superState = SuperState.temp1;
+    private SuperState superState = SuperState.idle;
 
     private boolean inAuto = false;
     private int autoIndex = 0;
     private List<AutoAction> autoActions;
 
-    private Path nearestHubSetpoint;
     private boolean useAimbot = false;
     private boolean alignToHub = false;
+    private boolean moveThroughTrench = false;
+    private boolean orientWithBump = false;
+    private boolean useObjectDetection = false;
+    private boolean useSnowblowing = false;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
@@ -91,8 +92,6 @@ public class SuperStructure extends SubsystemBase {
         this.swerve.setSwerveState(SwerveState.manual);
 
         targeting.giveResources(operatorController);
-
-        nearestHubSetpoint = auto.getPath(Paths.hubSetpointL);
     }
 
     /**
@@ -177,12 +176,6 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean manageSuperState(SuperState state){
         switch(state){
-            case temp1:
-                return temp1();
-            case temp2:
-                return temp2();
-            case aimAtTarget:
-                return aimAtTarget();
             case manual:
                 return manual();
             case autonomous:
@@ -209,38 +202,11 @@ public class SuperStructure extends SubsystemBase {
     }
 
     /**
-     * Each of these methods, called "state methods" (temp1-autonomousExit), represent a defined state.
+     * Each of these methods, called "state methods" (score-autonomousExit), represent a defined state.
      * When called by the state manager, it will set the states of different subsystems.
      * @return true if the state is complete. The condition could represent mechanisms at a setpoint, a beambreak trigger, a timer, etc.
      * Mainly used for autonomous routines.
      */
-    private boolean temp1(){
-        shooter.setState(ShooterState.stopped);
-        if(operatorController.getLeftBumperButtonPressed()){
-            setSuperState(SuperState.temp2);
-        }
-        intake.setState(IntakeState.intake);
-        return shooter.isAtSetpoint();
-    }
-
-    private boolean temp2(){
-        shooter.setState(ShooterState.stopped);
-        if(operatorController.getLeftBumperButtonPressed()){
-            setSuperState(SuperState.aimAtTarget);
-        }
-        intake.setState(IntakeState.stow);
-        return shooter.isAtSetpoint();
-    }
-
-    private boolean aimAtTarget(){
-        shooter.setState(ShooterState.scoreAimbot);
-        targeting.setToggle(true);
-        if(operatorController.getLeftBumperButtonPressed()){
-            setSuperState(SuperState.temp1);
-            targeting.setToggle(false);
-        }
-        return shooter.isAtSetpoint();
-    }
 
     private boolean score(){
         targeting.setToggle(true);
@@ -249,24 +215,47 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
         }else
-            swerve.setSwerveState(SwerveState.bumpAlign);
+            if(alignToHub){
+                swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
+                swerve.setSwerveState(SwerveState.initializePath);
+            }
+
+            swerve.setSwerveState(SwerveState.manual);
             shooter.setState(ShooterState.score);
         return shooter.isAtSetpoint();
     }
 
     private boolean pass(){
         shooter.setState(ShooterState.pass);
-
+        intake.setState(IntakeState.deploy);
+        hopper.setState(HopperState.idle);
+        if(useSnowblowing){
+            setSuperState(SuperState.snowBlowerPass);
+        }
         return shooter.isAtSetpoint();
     }
 
     private boolean intake(){
+        intake.setState(IntakeState.intake);
+        shooter.setState(ShooterState.idle);
+        hopper.setState(HopperState.intake);
         
-
+        if(useObjectDetection){
+            
+        }
         return intake.isAtSetpoint();
     }
 
     private boolean snowBlowerPass(){
+        intake.setState(IntakeState.intake);
+        shooter.setState(ShooterState.pass);
+        hopper.setState(HopperState.intake);
+        if(!useSnowblowing){
+            setSuperState(SuperState.pass);
+        }
+        if(useObjectDetection){
+
+        }
 
         return shooter.isAtSetpoint();
     }
@@ -283,7 +272,7 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
         }else if(alignToHub) {
-            swerve.setPath(auto.getPath(null));
+            swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
         }
         return shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint();
@@ -377,7 +366,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomousExit(){
         inAuto = false;
         swerve.setSwerveState(SwerveState.manual);
-        setSuperState(SuperState.temp1);
+        setSuperState(SuperState.idle);
         
         //TODO: Code for setting up teleop goes here.
         // this may include setting swerve to manual control, setting the superState to a different state, etc.
