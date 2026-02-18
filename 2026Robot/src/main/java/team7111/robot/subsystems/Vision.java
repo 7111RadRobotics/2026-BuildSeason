@@ -1,5 +1,10 @@
 package team7111.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +32,7 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(0, 0, 0, new Rotation3d(0, 0, -90)),
+        new Transform3d(Inches.of(14).in(Meters), Inches.of(8).in(Meters), 0, new Rotation3d(0, Degrees.of(15).in(Radians), 0)),
     };
 
     //private final AHRS gyro;
@@ -47,6 +52,8 @@ public class Vision extends SubsystemBase{
     public final Camera orangepi2;
 
     public Camera[] cameraList;
+
+    private double allowedPoseAmbiguity = 1;
 
     /** Constructor */
     public Vision(){
@@ -68,7 +75,7 @@ public class Vision extends SubsystemBase{
 
 
         cameraList = new Camera[] {
-            orangepi1,
+            orangepi2,
         };
     }
 
@@ -78,7 +85,7 @@ public class Vision extends SubsystemBase{
 
         for(Camera camera : cameraList){
             estPose = camera.getEstimatedGlobalPose(robotPose);
-            robotPose = camera.estRobotPose.estimatedPose.transformBy(camera.getCameraToRobot()).toPose2d();
+            robotPose = camera.estRobotPose.estimatedPose.toPose2d();
             if(estPose.isPresent()){
                 if(estPose.get() != null)
                     camera.estRobotPose = estPose.get();
@@ -164,7 +171,12 @@ public class Vision extends SubsystemBase{
     }
 
     /** Gets the robot position from a specific camera*/
-    public Pose3d getRobotPose(Camera camera) {
+    public Pose3d getRobotPose(Camera camera, double ambiguityThreshold) {
+        for(PhotonTrackedTarget target : camera.estRobotPose.targetsUsed){
+            if(target.poseAmbiguity > ambiguityThreshold){
+                return null;
+            }
+        }
         return camera.estRobotPose.estimatedPose;
     }
 }

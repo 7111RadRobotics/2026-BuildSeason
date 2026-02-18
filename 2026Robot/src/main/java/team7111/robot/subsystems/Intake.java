@@ -65,7 +65,7 @@ public class Intake extends SubsystemBase {
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getKrakenX60(1), pivotConfig.gearRatio, 370.726, 0.2, 
+                    DCMotor.getKrakenX60(1), pivotConfig.gearRatio, 0.10849, 0.2, 
                     Degrees.of(0).in(Radians), Degrees.of(90).in(Radians), true, Degrees.of(37).in(Radians)), 
                 pivotConfig.pid, 
                 pivotConfig.armFF);

@@ -56,8 +56,8 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        48/12 * 24/15 * 210/12, false, false, new PIDController(0.2, 0, 0), 
-        MechanismType.arm, 0.001, 0.001, 0, 0);
+        105.6, false, false, new PIDController(0.2, 0, 0), 
+        MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
         1, true, false, new PIDController(0.00202, 0.0000, 0.0), 
@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
     public Shooter(Aimbot aimbot) {
         this.aimbot = aimbot;
 
-        double hoodMOI = Inches.of(15.5).in(Meters) * Inches.of(15.5).in(Meters) * Pounds.of(3.953).in(Kilograms) / 3.0; // referenced from YAMS
+        double hoodMOI = 0.06244;
 
         hood = RobotBase.isReal()
             ? new REVMotor(15, new RelativeThroughBore(1, 2, false, 17.5, 37), hoodConfig)
@@ -91,13 +91,12 @@ public class Shooter extends SubsystemBase {
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
-        flywheels = /*RobotBase.isReal()
-            ? new CTREMotor(16, null, flywheelConfig)
-            /*new TwoMotors(
+        flywheels = RobotBase.isReal()
+            ? new TwoMotors(
                 new REVMotor(12, null, flywheelConfig), 
                 new REVMotor(10, null, flywheelConfig),
-                12, true)*
-            :*/ new FlywheelSimMotor(
+                12, true)
+            : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, 1), DCMotor.getNEO(2), 0.1),
                 flywheelConfig.pid,

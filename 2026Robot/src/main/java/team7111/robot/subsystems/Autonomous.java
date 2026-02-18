@@ -1,6 +1,7 @@
 package team7111.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +27,7 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.3);
 
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
+    private SuperStructure superStructure;
 
     private final Waypoint[] trenchLWaypoints = new Waypoint[]{
         new Waypoint(new Pose2d(3.8, 7.446, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
@@ -35,6 +37,14 @@ public class Autonomous extends SubsystemBase {
         new Waypoint(new Pose2d(3.8, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
         new Waypoint(new Pose2d(5.9, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
     };
+
+    private final Pose2d[] hubScoringPoses = new Pose2d[]{
+        new Pose2d(2.266, 5.946, Rotation2d.fromDegrees(-30.65)),        //L
+        new Pose2d(2.267, 4.021, Rotation2d.fromDegrees(0)),     //W
+        new Pose2d(1.975, 1.986, Rotation2d.fromDegrees(38.21)), //R
+    };
+
+    public final List<Pose2d> hubPoseList = new ArrayList<>();
 
     public enum Autos {
         forwardTest,
@@ -57,11 +67,13 @@ public class Autonomous extends SubsystemBase {
         for (Autos auto : Autos.values()) {
             autoChooser.addOption(auto.name(), auto);
         }
+
+        for (Pose2d pose2d : hubPoseList) {
+            hubPoseList.add(pose2d);
+        }
         
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
     }
-
-    
 
     public void periodic(){}
 
@@ -103,13 +115,13 @@ public class Autonomous extends SubsystemBase {
                 break;
             
             case hubSetpointL:
-                waypoints.add(balancedPoint(2.266, 5.946, -30.65));
+                waypoints.add(balancedPoint(hubScoringPoses[0].getX(), hubScoringPoses[0].getY(), hubScoringPoses[0].getRotation().getDegrees()));
                 break;
             case hubSetpointM:
-                waypoints.add(balancedPoint(2.267, 4.021, 0));
+                waypoints.add(balancedPoint(hubScoringPoses[1].getX(), hubScoringPoses[1].getY(), hubScoringPoses[1].getRotation().getDegrees()));
                 break;
             case hubSetpointR:
-                waypoints.add(balancedPoint(1.975, 1.986, 38.21));
+                waypoints.add(balancedPoint(hubScoringPoses[1].getX(), hubScoringPoses[1].getY(), hubScoringPoses[1].getRotation().getDegrees()));
                 break;
             case trenchLAlliance:
                 waypoints.add(trenchLWaypoints[1]);
@@ -147,5 +159,13 @@ public class Autonomous extends SubsystemBase {
 
     public Autos getSelectedAuto(){
         return autoChooser.getSelected();
+    }
+
+    public Path getNearestHubScoringPose(Pose2d robotPose){
+
+    }
+
+    public void giveResources(SuperStructure superStructure){
+        this.superStructure = superStructure;
     }
 }

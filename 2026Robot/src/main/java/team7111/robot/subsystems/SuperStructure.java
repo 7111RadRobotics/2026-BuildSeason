@@ -5,6 +5,7 @@ import java.util.List;
 import javax.print.attribute.standard.RequestingUserName;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -112,8 +113,9 @@ public class SuperStructure extends SubsystemBase {
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
 
-        if(vision.getRobotPose() != null){
-            swerve.addVisionMeasurement(vision.getRobotPose().toPose2d());
+        Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
+        if(visionRobotPose != null){
+            swerve.addVisionMeasurement(visionRobotPose.toPose2d());
         }
 
         // Operator controller commands
@@ -150,8 +152,6 @@ public class SuperStructure extends SubsystemBase {
         } else if(driverController.getBButtonReleased()) {
             setSuperState(SuperState.manual);
         }
-
-
 
         manageSuperState(superState);
 
