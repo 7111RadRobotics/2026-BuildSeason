@@ -69,8 +69,8 @@ public class Shooter extends SubsystemBase {
     private double hoodTrajSetpoint = 37;
     private double flywheelSpeed = 0;
 
-    private final double maxHoodPos = 67;
-    private final double minHoodPos = 37;
+    private final double maxHoodPos = 30.962;
+    private final double minHoodPos = 7;
     private final double maxHoodTraj = 90 - minHoodPos; // 53
     private final double minHoodTraj = 90 - maxHoodPos; // 23
 
