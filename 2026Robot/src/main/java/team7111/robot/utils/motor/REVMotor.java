@@ -62,6 +62,7 @@ public class REVMotor implements Motor {
 
         sparkConfig.closedLoop.pid(pid.getP(), pid.getI(), pid.getD());
         sparkConfig.closedLoop.feedForward.sva(config.simpleFF.getKs(), config.simpleFF.getKs(), config.simpleFF.getKs(), ClosedLoopSlot.kSlot1);
+        sparkConfig.smartCurrentLimit(config.currentLimit);
         sparkConfig.inverted(config.isInverted);
         IdleMode idleMode = config.isBreakMode
             ? IdleMode.kBrake

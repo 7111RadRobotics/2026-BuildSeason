@@ -32,7 +32,7 @@ public class Hopper extends SubsystemBase {
     private HopperState currentState = HopperState.idle;
 
     private MotorConfig hopperMotorConfig = new MotorConfig(
-        1, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+        1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
 
     private Motor hopperMotor;

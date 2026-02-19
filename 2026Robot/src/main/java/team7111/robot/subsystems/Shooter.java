@@ -55,23 +55,23 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        105.6, false, false, new PIDController(0.2, 0, 0), 
+        105.6, 20, false, false, new PIDController(0.2, 0, 0), 
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, true, false, new PIDController(0.00202, 0.0000, 0.0), 
+        1, 20, true, false, new PIDController(0.00202, 0.0000, 0.0), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
     private Motor flywheels;
 
-    private double hoodTrajSetpoint = 37;
+    private double hoodTrajSetpoint = 60;
     private double flywheelSpeed = 0;
 
     private final double maxHoodPos = 30.962;
     private final double minHoodPos = 7;
-    private final double maxHoodTraj = 90 - minHoodPos; // 53
-    private final double minHoodTraj = 90 - maxHoodPos; // 23
+    private final double maxHoodTraj = 90 - minHoodPos; // 83
+    private final double minHoodTraj = 90 - maxHoodPos; // 59.038
 
     private ShooterState currentState = ShooterState.stopped;
 
@@ -81,11 +81,11 @@ public class Shooter extends SubsystemBase {
         double hoodMOI = 0.06244;
 
         hood = RobotBase.isReal()
-            ? new REVMotor(15, new RelativeThroughBore(1, 2, false, 17.5, 37), hoodConfig)
+            ? new REVMotor(15, new RelativeThroughBore(1, 2, false, 17.5, minHoodPos), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getKrakenX60(1), hoodConfig.gearRatio, hoodMOI, 0.2, 
+                    DCMotor.getNEO(1), hoodConfig.gearRatio, hoodMOI, 0.2, 
                     Degrees.of(minHoodPos).in(Radians), Degrees.of(maxHoodPos).in(Radians), true, Degrees.of(minHoodPos).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
@@ -112,9 +112,9 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        if(90 - hoodTrajSetpoint > maxHoodPos){
+        if(hoodTrajSetpoint > maxHoodTraj){
             hood.setSetpoint(maxHoodPos, false);
-        }else if(90 - hoodTrajSetpoint < minHoodPos){
+        }else if(hoodTrajSetpoint < minHoodTraj){
             hood.setSetpoint(minHoodPos, false);
         }else{
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
@@ -123,7 +123,6 @@ public class Shooter extends SubsystemBase {
             flywheels.setVoltage(0);
         }else 
             flywheels.setVelocity(flywheelSpeed);
-        
         
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());

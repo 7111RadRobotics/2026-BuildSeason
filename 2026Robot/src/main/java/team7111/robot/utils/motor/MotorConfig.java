@@ -12,6 +12,7 @@ import team7111.robot.utils.motor.Motor.MechanismType;
 
 public class MotorConfig {
     public double gearRatio;
+    public int currentLimit;
     public boolean isInverted;
     public boolean isBreakMode;
     public PIDController pid;
@@ -23,10 +24,11 @@ public class MotorConfig {
     public SparkBaseConfig sparkConfig = new SparkMaxConfig();
 
     public MotorConfig(
-        double gearRatio, boolean isInverted, boolean isBreakMode, 
+        double gearRatio, int currentLimit, boolean isInverted, boolean isBreakMode, 
         PIDController pid, MechanismType mechanism, double kS, double kV, double kA, double Kg
     ) {
         this.gearRatio = gearRatio;
+        this.currentLimit = currentLimit;
         this.isInverted = isInverted;
         this.isBreakMode = isBreakMode;
         this.pid = pid;
@@ -50,6 +52,11 @@ public class MotorConfig {
 
     public MotorConfig withInverted(boolean isInverted){
         this.isInverted = isInverted;
+        return this;
+    }
+
+    public MotorConfig withCurrentLimit(int limit){
+        this.currentLimit = limit;
         return this;
     }
 }
