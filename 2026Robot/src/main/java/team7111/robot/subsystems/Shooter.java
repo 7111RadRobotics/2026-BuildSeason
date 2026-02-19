@@ -41,7 +41,6 @@ public class Shooter extends SubsystemBase {
         idle,
         score,
         scoreAimbot,
-        prepareShot,
         pass,
         stopped,
         manual,

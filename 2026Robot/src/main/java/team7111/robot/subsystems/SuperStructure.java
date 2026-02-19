@@ -31,11 +31,11 @@ public class SuperStructure extends SubsystemBase {
      * The top 2 state names are temporary states for testing 
      */
     public enum SuperState {
-        //TODO: decide and create more states (and remove examples)
+        stowed,
+        deployed,
         intake,
         pass,
         score,
-        idle,
         snowBlowerPass,
         snowBlowerScore,
         prepareHubShot,
@@ -60,7 +60,8 @@ public class SuperStructure extends SubsystemBase {
     private final XboxController operatorController = new XboxController(1);
 
     /** This represents the current superstate of the robot */
-    private SuperState superState = SuperState.idle;
+    private SuperState superState = SuperState.deployed;
+    private boolean hasAcheivedState = false;
 
     private boolean inAuto = false;
     private int autoIndex = 0;
@@ -72,6 +73,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
     private boolean useSnowblowing = false;
+
+    private boolean deployIntake = false;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
@@ -152,7 +155,7 @@ public class SuperStructure extends SubsystemBase {
             setSuperState(SuperState.manual);
         }
 
-        manageSuperState(superState);
+        hasAcheivedState = manageSuperState(superState);
 
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
@@ -176,14 +179,10 @@ public class SuperStructure extends SubsystemBase {
      */
     private boolean manageSuperState(SuperState state){
         switch(state){
-            case manual:
-                return manual();
-            case autonomous:
-                return autonomous();
-            case autonomousEnter:
-                return autonomousEnter();
-            case autonomousExit:
-                return autonomousExit();
+            case stowed:
+                return stowed();
+            case deployed:
+                return deployed();
             case score:
                 return score();
             case intake:
@@ -196,17 +195,39 @@ public class SuperStructure extends SubsystemBase {
                 return snowBlowerScore();
             case prepareHubShot:
                 return prepareHubShot();
+            case manual:
+                return manual();
+            case autonomous:
+                return autonomous();
+            case autonomousEnter:
+                return autonomousEnter();
+            case autonomousExit:
+                return autonomousExit();
+            
             default:
                 return defaultState(state);
         }
     }
 
     /**
-     * Each of these methods, called "state methods" (score-autonomousExit), represent a defined state.
+     * Each of these methods, called "state methods", represent a defined state.
      * When called by the state manager, it will set the states of different subsystems.
      * @return true if the state is complete. The condition could represent mechanisms at a setpoint, a beambreak trigger, a timer, etc.
      * Mainly used for autonomous routines.
      */
+
+    private boolean stowed(){
+        targeting.setShotType(shotType.Transport);
+        intake.setState(IntakeState.stow);
+        hopper.setState(HopperState.idle);
+        return intake.isAtSetpoint() && shooter.isAtSetpoint();
+    }
+
+    private boolean deployed(){
+        targeting.setShotType(shotType.Transport);
+        intake.setState(IntakeState.deploy);
+        return intake.isAtSetpoint() && shooter.isAtSetpoint();
+    }
 
     private boolean score(){
         targeting.setToggle(true);
@@ -228,7 +249,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean pass(){
         shooter.setState(ShooterState.pass);
         intake.setState(IntakeState.deploy);
-        hopper.setState(HopperState.idle);
+        hopper.setState(HopperState.shoot);
         if(useSnowblowing){
             setSuperState(SuperState.snowBlowerPass);
         }
@@ -267,14 +288,16 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean prepareHubShot(){
         targeting.setToggle(true);
-        shooter.setState(ShooterState.prepareShot);
+        ShooterState shooterState = ShooterState.score;
         if(useAimbot){
+            shooterState = ShooterState.scoreAimbot;
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
         }else if(alignToHub) {
             swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
         }
+        shooter.setState(shooterState);
         return shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint();
     }
 
@@ -366,7 +389,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomousExit(){
         inAuto = false;
         swerve.setSwerveState(SwerveState.manual);
-        setSuperState(SuperState.idle);
+        setSuperState(SuperState.deployed);
         
         //TODO: Code for setting up teleop goes here.
         // this may include setting swerve to manual control, setting the superState to a different state, etc.
