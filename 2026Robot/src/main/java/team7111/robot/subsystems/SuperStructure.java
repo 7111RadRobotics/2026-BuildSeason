@@ -60,7 +60,7 @@ public class SuperStructure extends SubsystemBase {
     private final XboxController operatorController = new XboxController(1);
 
     /** This represents the current superstate of the robot */
-    private SuperState superState = SuperState.deployed;
+    private SuperState superState = SuperState.stowed;
     private boolean hasAcheivedState = false;
 
     private boolean inAuto = false;
@@ -76,6 +76,11 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean deployIntake = false;
 
+    private boolean intaking = false;
+    private boolean scoring = false;
+    private boolean passing = false;
+
+    private shotType currentShot = shotType.Transport;
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -101,6 +106,13 @@ public class SuperStructure extends SubsystemBase {
      * This method runs every iteration (every 20ms). Actions like state management and stateless logic are run here.
      */
     public void periodic(){
+        /**
+         * intake right trigger
+         * score left trigger
+         * pass left bumper
+         */
+        
+        //Timer for the periodic
         long startTime = System.nanoTime();
         SmartDashboard.putString("SuperState", superState.name());
 
@@ -125,19 +137,38 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggle();
         }
         if(operatorController.getAButtonPressed()) {
-            targeting.setShotType(shotType.Direct);
+            currentShot =shotType.Direct;
         }
         if(operatorController.getBButtonPressed()) {
-            targeting.setShotType(shotType.Parabolic);
+            currentShot = shotType.Parabolic;
         }
         if(operatorController.getYButtonPressed()) {
-            targeting.setShotType(shotType.Manual);
+            currentShot = shotType.Manual;
         }
         if(operatorController.getLeftBumperButtonPressed()) {
-            targeting.setShotType(shotType.Apriltag);
+            currentShot = shotType.Apriltag;
         }
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();
+        }
+
+        //Operator state commands
+        if(operatorController.getLeftBumperButton()) {
+            passing = true;
+        } else {
+            passing = false;
+        }
+
+        if(operatorController.rightTrigger(.15, null).getAsBoolean()) {
+            intaking = true;
+        } else {
+            intaking = false;
+        }
+
+        if(operatorController.leftTrigger(0.15, null).getAsBoolean()) {
+            scoring = true;
+        } else {
+            scoring = false;
         }
 
         //While a button held, point swerve towards target
@@ -187,6 +218,8 @@ public class SuperStructure extends SubsystemBase {
                 return score();
             case intake:
                 return intake();
+            case preparePass:
+                return preparePass();
             case pass:
                 return pass();
             case snowBlowerPass:
@@ -220,41 +253,90 @@ public class SuperStructure extends SubsystemBase {
         targeting.setShotType(shotType.Transport);
         intake.setState(IntakeState.stow);
         hopper.setState(HopperState.idle);
+
+        if(intaking) {
+            setSuperState(SuperState.deployed);
+        }
         return intake.isAtSetpoint() && shooter.isAtSetpoint();
     }
 
     private boolean deployed(){
+        targeting.setToggle(false);
+
+        if(beam.isBroken()) {
+            setSuperState(SuperState.stowed);
+            return false;
+        }
         targeting.setShotType(shotType.Transport);
         intake.setState(IntakeState.deploy);
+
+        if(passing) {
+            setSuperState(SuperState.preparePass);
+        }
+        else if(scoring) {
+            setSuperState(SuperState.prepareHubShot);
+        }
+
         return intake.isAtSetpoint() && shooter.isAtSetpoint();
     }
+
 
     private boolean score(){
         targeting.setToggle(true);
         if(useAimbot){
+            targeting.setShotType(currentShot);
             shooter.setState(ShooterState.scoreAimbot);
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
-        }else
+        }else {
             if(alignToHub){
                 swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
                 swerve.setSwerveState(SwerveState.initializePath);
             }
+        }
+        
+        swerve.setSwerveState(SwerveState.manual);
+        shooter.setState(ShooterState.score);
+        
+        if(intaking) {
+            setSuperState(SuperState.snowBlowerScore);
+        }
+        if(!scoring) {
+            setSuperState(SuperState.deployed);
+        }
 
-            swerve.setSwerveState(SwerveState.manual);
-            shooter.setState(ShooterState.score);
         return shooter.isAtSetpoint();
     }
+
 
     private boolean pass(){
         shooter.setState(ShooterState.pass);
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
-        if(useSnowblowing){
+        if(intaking){
             setSuperState(SuperState.snowBlowerPass);
         }
         return shooter.isAtSetpoint();
     }
+
+    private boolean preparePass() {
+        shooter.setState(ShooterState.pass);
+        intake.setState(IntakeState.deploy);
+        hopper.setState(HopperState.idle);
+        if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
+            if(intaking) {
+                setSuperState(SuperState.snowBlowerPass);
+            }
+            setSuperState(SuperState.pass);
+            return true;
+        }
+
+        if(!passing) {
+            setSuperState(SuperState.deployed);
+        }
+        return false;
+    }
+
 
     private boolean intake(){
         intake.setState(IntakeState.intake);
@@ -264,33 +346,65 @@ public class SuperStructure extends SubsystemBase {
         if(useObjectDetection){
             
         }
+
+        if(!intaking) {
+            setSuperState(SuperState.deployed);
+        }
+
+        if(passing) {
+            setSuperState(SuperState.preparePass);
+        } else if(scoring) {
+            setSuperState(SuperState.prepareHubShot);
+        }
+        
         return intake.isAtSetpoint();
     }
 
+
     private boolean snowBlowerPass(){
+        targeting.setToggle(true);
         intake.setState(IntakeState.intake);
         shooter.setState(ShooterState.pass);
         hopper.setState(HopperState.intake);
-        if(!useSnowblowing){
+        if(!intaking){
             setSuperState(SuperState.pass);
         }
         if(useObjectDetection){
 
         }
 
+        if(!passing) {
+            setSuperState(SuperState.deployed);
+        }
         return shooter.isAtSetpoint();
     }
+
 
     private boolean snowBlowerScore(){
+        targeting.setToggle(true);
+        intake.setState(IntakeState.intake);
+        targeting.setShotType(currentShot);
+        shooter.setState(ShooterState.scoreAimbot);
+        hopper.setState(HopperState.intake);
+        swerve.setSnapAngle(targeting.getCalculatedDirection());
+        swerve.setSwerveState(SwerveState.snapAngle);
+        if(!intaking) {
+            setSuperState(SuperState.score);
+        }
 
+        if(!scoring) {
+            setSuperState(SuperState.deployed);
+        }
         return shooter.isAtSetpoint();
     }
+
 
     private boolean prepareHubShot(){
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.score;
         if(useAimbot){
             shooterState = ShooterState.scoreAimbot;
+            targeting.setShotType(currentShot);
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
         }else if(alignToHub) {
@@ -298,7 +412,17 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSwerveState(SwerveState.initializePath);
         }
         shooter.setState(shooterState);
-        return shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint();
+
+        if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
+            if(intaking) {
+                setSuperState(SuperState.snowBlowerScore);
+            }
+            setSuperState(SuperState.score);
+        }
+        if(!scoring) {
+            setSuperState(SuperState.deployed);
+        }
+        return false;
     }
 
 
