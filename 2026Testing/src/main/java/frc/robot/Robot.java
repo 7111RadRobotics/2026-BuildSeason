@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -22,7 +23,8 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  private final SparkMax motor = new SparkMax(11, MotorType.kBrushless);
+  //private final SparkMax motor = new SparkMax(11, MotorType.kBrushless);
+  private TalonFX talon = new TalonFX(9);
   private final XboxController controller = new XboxController(0);
 
   /**
@@ -84,9 +86,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (controller.getAButton()) {
-    motor.set(0.5);
+      talon.set(0.8);
     } else {
-      motor.set(0);
+      talon.set(0);
     }
   }
 
