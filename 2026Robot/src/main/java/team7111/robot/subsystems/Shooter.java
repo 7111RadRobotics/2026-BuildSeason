@@ -55,7 +55,7 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        105.6, 20, false, false, new PIDController(0.2, 0, 0), 
+        105.6, 20, false, false, new PIDController(2, 0.052, 0.015), 
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
