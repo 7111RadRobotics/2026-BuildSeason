@@ -56,6 +56,11 @@ public class Hopper extends SubsystemBase {
 
     }
 
+    public boolean getBeamBreak(){
+        //TODO add beam break object to hopper and return it's value here
+        return false;
+    }
+
     /**
      * This is the subsystem's state manager.
      * It calls the state method of the variable representing the subsystem's state.

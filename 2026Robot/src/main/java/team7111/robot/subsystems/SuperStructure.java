@@ -263,7 +263,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean deployed(){
         targeting.setToggle(false);
 
-        if(beam.isBroken()) {
+        if(!hopper.getBeamBreak()){
             setSuperState(SuperState.stowed);
             return false;
         }
