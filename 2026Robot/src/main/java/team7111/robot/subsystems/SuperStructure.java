@@ -159,7 +159,7 @@ public class SuperStructure extends SubsystemBase {
             passing = false;
         }
 
-        if(operatorController.rightTrigger(.15, null).getAsBoolean()) {
+        /**if(operatorController.rightTrigger(0.15, null).getAsBoolean()) {
             intaking = true;
         } else {
             intaking = false;
@@ -169,7 +169,7 @@ public class SuperStructure extends SubsystemBase {
             scoring = true;
         } else {
             scoring = false;
-        }
+        }*/
 
         //While a button held, point swerve towards target
         if(driverController.getAButtonPressed()) {
@@ -184,6 +184,12 @@ public class SuperStructure extends SubsystemBase {
             setSuperState(SuperState.score);
         } else if(driverController.getBButtonReleased()) {
             setSuperState(SuperState.manual);
+        }
+
+        if(driverController.getXButtonPressed()) {
+            setSuperState(SuperState.intake);
+        } else if(driverController.getXButtonReleased()) {
+            setSuperState(SuperState.stowed);
         }
 
         hasAcheivedState = manageSuperState(superState);

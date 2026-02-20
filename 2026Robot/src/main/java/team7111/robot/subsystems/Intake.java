@@ -54,7 +54,7 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.15500259, 0.039, 0.0011), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.5, 0.039, 0.002), MechanismType.arm, 0, 0, 0, 0);
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
 
