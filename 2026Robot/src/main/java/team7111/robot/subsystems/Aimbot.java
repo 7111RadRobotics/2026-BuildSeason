@@ -100,6 +100,7 @@ public class Aimbot extends SubsystemBase{
     public enum shotType {
         Direct,
         Parabolic,
+        Predetermined,
         Transport,
         Manual,
         Apriltag,
@@ -204,6 +205,14 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
                 break;
+            case Predetermined:
+                predetermined();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
+                break;
             case Transport:
                 transport();
                 SmartDashboard.putBoolean("ShootDirect", false);
@@ -301,6 +310,11 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putNumber("VelocityToRotationsPerMinute", velocityReq);
 
         calculatedSpeed = velocityReq * 60;
+    }
+    /** A predetermined angle and speed. will need to be tuned */
+    private void predetermined(){
+        calculatedAngle = 70;
+        calculatedSpeed = 2000;
     }
     
     /** Sets angle to as close to horizontal as possible, and speed to 0 */

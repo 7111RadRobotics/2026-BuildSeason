@@ -67,20 +67,19 @@ public class SuperStructure extends SubsystemBase {
     private int autoIndex = 0;
     private List<AutoAction> autoActions;
 
-    private boolean useAimbot = false;
+    private boolean aimAtHub = false;
     private boolean alignToHub = false;
     private boolean moveThroughTrench = false;
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
-    private boolean useSnowblowing = false;
-
-    private boolean deployIntake = false;
+    private boolean defaultDrive = true;
 
     private boolean intaking = false;
     private boolean scoring = false;
     private boolean passing = false;
 
     private shotType currentShot = shotType.Transport;
+    private shotType scoringState = shotType.Predetermined;
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -116,20 +115,56 @@ public class SuperStructure extends SubsystemBase {
         long startTime = System.nanoTime();
         SmartDashboard.putString("SuperState", superState.name());
 
+        SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
+        Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
+        if(visionRobotPose != null){
+            swerve.addVisionMeasurement(visionRobotPose.toPose2d());
+        }
+
         // Driver controller commands
-        useAimbot = driverController.getRightBumperButton();
-        alignToHub = driverController.getLeftBumperButton();
+        aimAtHub = driverController.getRightBumperButton();
+        alignToHub = driverController.getRightTriggerAxis() > 0.15;
+        moveThroughTrench = driverController.getLeftTriggerAxis() > 0.15;
+        orientWithBump = driverController.getLeftBumperButton();
+        useObjectDetection = driverController.getRightStickButton();
+        defaultDrive = !aimAtHub && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
 
         if (driverController.getStartButton()) {
             swerve.zeroGyro();
             swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
         }
 
-        SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
+        //While a button held, point swerve towards target
+        if(aimAtHub){
+            swerve.setSnapAngle(targeting.getCalculatedAngle());
+            swerve.setSwerveState(SwerveState.snapAngle);
+            scoringState = shotType.Parabolic;
+        }else {
+            scoringState = shotType.Predetermined;
+        }
 
-        Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
-        if(visionRobotPose != null){
-            swerve.addVisionMeasurement(visionRobotPose.toPose2d());
+        if(alignToHub){
+            swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
+            swerve.setSwerveState(SwerveState.initializePath);
+        }
+
+        if(moveThroughTrench){
+            swerve.setPath(auto.getNearestTrenchPath(swerve.getPose()));
+            swerve.setSwerveState(SwerveState.initializePath);
+        }
+
+        if(orientWithBump){
+            swerve.setSnapAngle(45);
+            swerve.setSwerveState(SwerveState.snapAngle);
+        }
+
+        if(useObjectDetection){
+            swerve.setSnapAngle(0); //TODO vvalue will be retrieved from vision object camera
+            swerve.setSwerveState(SwerveState.followGamePiece);
+        }
+
+        if(defaultDrive){
+            swerve.setSwerveState(SwerveState.manual);
         }
 
         // Operator controller commands
@@ -137,7 +172,7 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggle();
         }
         if(operatorController.getAButtonPressed()) {
-            currentShot =shotType.Direct;
+            currentShot = shotType.Direct;
         }
         if(operatorController.getBButtonPressed()) {
             currentShot = shotType.Parabolic;
@@ -145,7 +180,7 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getYButtonPressed()) {
             currentShot = shotType.Manual;
         }
-        if(operatorController.getLeftBumperButtonPressed()) {
+        if(operatorController.getXButtonPressed()) {
             currentShot = shotType.Apriltag;
         }
         if(operatorController.getBackButtonPressed()) {
@@ -159,37 +194,16 @@ public class SuperStructure extends SubsystemBase {
             passing = false;
         }
 
-        /**if(operatorController.rightTrigger(0.15, null).getAsBoolean()) {
+        if(operatorController.getRightTriggerAxis() > 0.15) {
             intaking = true;
         } else {
             intaking = false;
         }
 
-        if(operatorController.leftTrigger(0.15, null).getAsBoolean()) {
+        if(operatorController.getLeftTriggerAxis() > 0.15) {
             scoring = true;
         } else {
             scoring = false;
-        }*/
-
-        //While a button held, point swerve towards target
-        if(driverController.getAButtonPressed()) {
-            swerve.setSnapAngle(targeting.getCalculatedDirection());
-            swerve.setSwerveState(SwerveState.snapAngle);
-
-        } else if(driverController.getAButtonReleased()) {
-            swerve.setSwerveState(SwerveState.manual);
-        }
-
-        if(driverController.getBButtonPressed()) {
-            setSuperState(SuperState.score);
-        } else if(driverController.getBButtonReleased()) {
-            setSuperState(SuperState.manual);
-        }
-
-        if(driverController.getXButtonPressed()) {
-            setSuperState(SuperState.intake);
-        } else if(driverController.getXButtonReleased()) {
-            setSuperState(SuperState.stowed);
         }
 
         hasAcheivedState = manageSuperState(superState);
@@ -289,7 +303,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean score(){
         targeting.setToggle(true);
-        if(useAimbot){
+        if(aimAtHub){
             targeting.setShotType(currentShot);
             shooter.setState(ShooterState.scoreAimbot);
             swerve.setSnapAngle(targeting.getCalculatedDirection());
@@ -408,7 +422,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean prepareHubShot(){
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.score;
-        if(useAimbot){
+        if(aimAtHub){
             shooterState = ShooterState.scoreAimbot;
             targeting.setShotType(currentShot);
             swerve.setSnapAngle(targeting.getCalculatedDirection());

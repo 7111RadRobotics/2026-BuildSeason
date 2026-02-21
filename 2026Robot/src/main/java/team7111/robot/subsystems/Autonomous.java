@@ -163,7 +163,34 @@ public class Autonomous extends SubsystemBase {
         Pose2d pose = robotPose.nearest(hubPoses);
 
         for (Path path : hubPaths) {
-            if(pose == path.getCurrentWaypoint().getPose()){
+            if(pose.getX() == path.getCurrentWaypoint().getPose().getX()
+             && pose.getY() == path.getCurrentWaypoint().getPose().getY()){
+                return path;
+            }
+        }
+        return null;
+    }
+
+    public Path getNearestTrenchPath(Pose2d robotPose){
+        List<Path> trenchPaths = new ArrayList<>();
+        List<Pose2d> trenchPoses = new ArrayList<>();
+        if(robotPose.getX() > 5 && robotPose.getX() < 15){
+            trenchPaths.add(getPath(Paths.trenchLAlliance));
+            trenchPaths.add(getPath(Paths.trenchRAlliance));
+        }else{
+            trenchPaths.add(getPath(Paths.trenchLNeutral));
+            trenchPaths.add(getPath(Paths.trenchRNeutral));
+        }
+
+        for (Path path : trenchPaths) {
+            trenchPoses.add(path.getCurrentWaypoint().getPose());
+        }
+
+        Pose2d pose = robotPose.nearest(trenchPoses);
+
+        for (Path path : trenchPaths) {
+            if(pose.getX() == path.getCurrentWaypoint().getPose().getX()
+             && pose.getY() == path.getCurrentWaypoint().getPose().getY()){
                 return path;
             }
         }

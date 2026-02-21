@@ -61,6 +61,9 @@ public class Swerve extends SubsystemBase {
     private double snapAngleSetpoint = 45;
     private PIDController snapAnglePID;
 
+    private PIDController gamepieceAnglePID;
+    private double gamepieceYaw = 0;
+
     private final double controllerDeadzone = 0.0;
 
     public enum SwerveState{
@@ -70,6 +73,7 @@ public class Swerve extends SubsystemBase {
         stationary,
         snapAngle,
         bumpAlign,
+        followGamePiece
     };
 
     public Swerve() {
@@ -100,6 +104,7 @@ public class Swerve extends SubsystemBase {
             getPositions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         
         snapAnglePID = new PIDController(0.04, 0.0, 0.001);
+        gamepieceAnglePID = new PIDController(0.01, 0, 0);
     }
 
     @Override 
@@ -180,6 +185,9 @@ public class Swerve extends SubsystemBase {
                 break;
             case snapAngle:
                 manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
+                break;
+            case followGamePiece:
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false);
                 break;
             case bumpAlign:
                 double angle = joystickYaw.getAsDouble();
