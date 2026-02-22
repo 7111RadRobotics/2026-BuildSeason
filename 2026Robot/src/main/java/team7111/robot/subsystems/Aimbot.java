@@ -55,9 +55,9 @@ public class Aimbot extends SubsystemBase{
 
     //ANGLE CONSTRAINTS
     /** Minimum shooter angle in degrees, from horizontal */
-    private final double minShooterAngle = 37.0;
+    private final double minShooterAngle = 59.038;
     /** Maximum shooter angle in degrees, from horizontal */
-    private final double maxShooterAngle = 67.0;
+    private final double maxShooterAngle = 83;
     
     private final double lowestShooterAngle = minShooterAngle;
     //SPEED CONSTRAINTS
@@ -100,7 +100,8 @@ public class Aimbot extends SubsystemBase{
     public enum shotType {
         Direct,
         Parabolic,
-        Predetermined,
+        RegHubShot,
+        Pass,
         Transport,
         Manual,
         Apriltag,
@@ -205,8 +206,16 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
                 break;
-            case Predetermined:
-                predetermined();
+            case RegHubShot:
+                RegHubShot();
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
+                break;
+            case Pass:
+
                 SmartDashboard.putBoolean("ShootDirect", false);
                 SmartDashboard.putBoolean("ShootPara", false);
                 SmartDashboard.putBoolean("Transport", false);
@@ -311,10 +320,15 @@ public class Aimbot extends SubsystemBase{
 
         calculatedSpeed = velocityReq * 60;
     }
-    /** A predetermined angle and speed. will need to be tuned */
-    private void predetermined(){
+    /** A RegHubShot angle and speed. will need to be tuned */
+    private void RegHubShot(){
         calculatedAngle = 70;
         calculatedSpeed = 2000;
+    }
+
+    private void pass(){
+        calculatedAngle = maxShooterAngle;
+        calculatedSpeed = 2000; //TODO tune this
     }
     
     /** Sets angle to as close to horizontal as possible, and speed to 0 */

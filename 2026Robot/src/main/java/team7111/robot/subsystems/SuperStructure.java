@@ -7,6 +7,7 @@ import javax.print.attribute.standard.RequestingUserName;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -79,7 +80,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean passing = false;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.Predetermined;
+    private shotType scoringState = shotType.RegHubShot;
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -117,17 +118,12 @@ public class SuperStructure extends SubsystemBase {
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
         Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
-        if(visionRobotPose != null){
+        if(visionRobotPose != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPose.toPose2d());
         }
 
         // Driver controller commands
-        aimAtHub = driverController.getRightBumperButton();
-        alignToHub = driverController.getRightTriggerAxis() > 0.15;
-        moveThroughTrench = driverController.getLeftTriggerAxis() > 0.15;
-        orientWithBump = driverController.getLeftBumperButton();
-        useObjectDetection = driverController.getRightStickButton();
-        defaultDrive = !aimAtHub && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
+        
 
         if (driverController.getStartButton()) {
             swerve.zeroGyro();
@@ -135,35 +131,51 @@ public class SuperStructure extends SubsystemBase {
         }
 
         //While a button held, point swerve towards target
-        if(aimAtHub){
-            swerve.setSnapAngle(targeting.getCalculatedAngle());
+        if(driverController.getRightBumperButtonPressed()){
+            aimAtHub = true;
+            swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
             scoringState = shotType.Parabolic;
-        }else {
-            scoringState = shotType.Predetermined;
+        }else if(driverController.getRightBumperButtonReleased()){
+            scoringState = shotType.RegHubShot;
+            aimAtHub = false;
         }
 
-        if(alignToHub){
+        if(driverController.getRightTriggerAxis() > 0.15 && !alignToHub){
+            alignToHub = true;
             swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
+        }else if(driverController.getRightTriggerAxis() <= 0.15 && alignToHub){
+            alignToHub = false;
         }
 
-        if(moveThroughTrench){
+        if(driverController.getLeftTriggerAxis() > 0.15 && !moveThroughTrench){
+            moveThroughTrench = true;
             swerve.setPath(auto.getNearestTrenchPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
+        }else if(driverController.getLeftTriggerAxis() <= 0.15 && moveThroughTrench){
+            moveThroughTrench = false;
         }
 
-        if(orientWithBump){
+        if(driverController.getLeftBumperButtonPressed()){
+            orientWithBump = true;
             swerve.setSnapAngle(45);
             swerve.setSwerveState(SwerveState.snapAngle);
+        }else if(driverController.getLeftBumperButtonReleased()){
+            orientWithBump = false;
         }
 
-        if(useObjectDetection){
+        if(driverController.getRightStickButtonPressed()){
+            useObjectDetection = true;
             swerve.setSnapAngle(0); //TODO vvalue will be retrieved from vision object camera
             swerve.setSwerveState(SwerveState.followGamePiece);
+        }else if(driverController.getRightStickButtonReleased()){
+            useObjectDetection = false;
         }
 
-        if(defaultDrive){
+        defaultDrive = !aimAtHub && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
+
+        if(defaultDrive && !inAuto){
             swerve.setSwerveState(SwerveState.manual);
         }
 
@@ -270,7 +282,7 @@ public class SuperStructure extends SubsystemBase {
      */
 
     private boolean stowed(){
-        targeting.setShotType(shotType.Transport);
+        targeting.setToggle(false);
         intake.setState(IntakeState.stow);
         hopper.setState(HopperState.idle);
 
@@ -285,7 +297,7 @@ public class SuperStructure extends SubsystemBase {
 
         if(!hopper.getBeamBreak()){
             setSuperState(SuperState.stowed);
-            return false;
+            return true;
         }
         targeting.setShotType(shotType.Transport);
         intake.setState(IntakeState.deploy);
@@ -303,20 +315,9 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean score(){
         targeting.setToggle(true);
-        if(aimAtHub){
-            targeting.setShotType(currentShot);
-            shooter.setState(ShooterState.scoreAimbot);
-            swerve.setSnapAngle(targeting.getCalculatedDirection());
-            swerve.setSwerveState(SwerveState.snapAngle);
-        }else {
-            if(alignToHub){
-                swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
-                swerve.setSwerveState(SwerveState.initializePath);
-            }
-        }
+        targeting.setShotType(scoringState);
         
-        swerve.setSwerveState(SwerveState.manual);
-        shooter.setState(ShooterState.score);
+        shooter.setState(ShooterState.followAimbot);
         
         if(intaking) {
             setSuperState(SuperState.snowBlowerScore);
@@ -330,17 +331,23 @@ public class SuperStructure extends SubsystemBase {
 
 
     private boolean pass(){
-        shooter.setState(ShooterState.pass);
+        targeting.setToggle(true);
+        targeting.setShotType(shotType.RegHubShot);
+        shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
         if(intaking){
             setSuperState(SuperState.snowBlowerPass);
         }
+        if(!passing){
+            setSuperState(SuperState.deployed);
+        }
         return shooter.isAtSetpoint();
     }
 
     private boolean preparePass() {
-        shooter.setState(ShooterState.pass);
+        targeting.setToggle(true);
+        targeting.setShotType(shotType.RegHubShot);
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
@@ -359,8 +366,8 @@ public class SuperStructure extends SubsystemBase {
 
 
     private boolean intake(){
+        targeting.setToggle(false);
         intake.setState(IntakeState.intake);
-        shooter.setState(ShooterState.idle);
         hopper.setState(HopperState.intake);
         
         if(useObjectDetection){
@@ -384,13 +391,9 @@ public class SuperStructure extends SubsystemBase {
     private boolean snowBlowerPass(){
         targeting.setToggle(true);
         intake.setState(IntakeState.intake);
-        shooter.setState(ShooterState.pass);
         hopper.setState(HopperState.intake);
         if(!intaking){
             setSuperState(SuperState.pass);
-        }
-        if(useObjectDetection){
-
         }
 
         if(!passing) {

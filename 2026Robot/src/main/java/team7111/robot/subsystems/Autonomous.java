@@ -174,7 +174,7 @@ public class Autonomous extends SubsystemBase {
     public Path getNearestTrenchPath(Pose2d robotPose){
         List<Path> trenchPaths = new ArrayList<>();
         List<Pose2d> trenchPoses = new ArrayList<>();
-        if(robotPose.getX() > 5 && robotPose.getX() < 15){
+        if(robotPose.getX() > 4.7 && robotPose.getX() < 11.957){
             trenchPaths.add(getPath(Paths.trenchLAlliance));
             trenchPaths.add(getPath(Paths.trenchRAlliance));
         }else{

@@ -41,6 +41,7 @@ public class Shooter extends SubsystemBase {
         idle,
         score,
         scoreAimbot,
+        followAimbot,
         pass,
         stopped,
         manual,
@@ -167,6 +168,9 @@ public class Shooter extends SubsystemBase {
             case scoreAimbot:
                 scoreAimbot();
                 break;
+            case followAimbot:
+                followAimbot();
+                break;
             case stopped:
                 stopped();
                 break;
@@ -189,6 +193,11 @@ public class Shooter extends SubsystemBase {
 
     private void scoreAimbot(){
         aimbot.setShotType(shotType.Parabolic);
+        hoodTrajSetpoint = aimbot.getCalculatedAngle();
+        flywheelSpeed = aimbot.getCalculatedSpeed();
+    }
+
+    private void followAimbot(){
         hoodTrajSetpoint = aimbot.getCalculatedAngle();
         flywheelSpeed = aimbot.getCalculatedSpeed();
     }
