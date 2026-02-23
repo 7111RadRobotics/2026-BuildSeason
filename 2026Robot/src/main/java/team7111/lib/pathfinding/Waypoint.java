@@ -70,8 +70,23 @@ public class Waypoint {
         return this;
     }
 
+    public Waypoint withPose(Pose2d pose){
+        this.pose = pose;
+        return this;
+    }
+
     public Waypoint withRotation(double degrees){
         this.pose = new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(degrees));
+        return this;
+    }
+
+    public Waypoint withX(double meters){
+        this.pose = new Pose2d(meters, pose.getY(), pose.getRotation());
+        return this;
+    }
+
+    public Waypoint withY(double meters){
+        this.pose = new Pose2d(pose.getX(), meters, pose.getRotation());
         return this;
     }
 }

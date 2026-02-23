@@ -79,8 +79,8 @@ public class Autonomous extends SubsystemBase {
             case leftNeutral:
                 auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                //auto.add(new AutoAction(SuperState.prepareHubShot));
-                //auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score));
                 //auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.trenchLNeutral)));
                 auto.add(new AutoAction(getPath(Paths.trenchLAlliance)));
