@@ -1,6 +1,7 @@
 package team7111.lib.pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Waypoint {
     private Pose2d pose;
@@ -59,5 +60,18 @@ public class Waypoint {
         return pose;
     }
 
+    public Waypoint withTranslationConstraints(WaypointConstraints constraints){
+        this.transConstraints = constraints;
+        return this;
+    }
 
+    public Waypoint withRotationConstraints(WaypointConstraints constraints){
+        this.rotConstraints = constraints;
+        return this;
+    }
+
+    public Waypoint withRotation(double degrees){
+        this.pose = new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(degrees));
+        return this;
+    }
 }

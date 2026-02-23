@@ -268,4 +268,28 @@ public class Path {
             currentWaypointIndex++;
         }
     }
+
+    /**
+     * Decorates every Waypoint of the Path with new translation constraints
+     * @param constraints -the new translation constraints to use
+     * @return itself for method chaining
+     */
+    public Path withTranslationConstraints(WaypointConstraints constraints){
+        for (Waypoint waypoint : waypoints) {
+            waypoint.withTranslationConstraints(constraints);
+        }
+        return this;
+    }
+
+    /**
+     * Decorates every Waypoint of the Path with new rotation constraints
+     * @param constraints -the new rotation constraints to use
+     * @return itself for method chaining
+     */
+    public Path withRotationConstraints(WaypointConstraints constraints){
+        for (Waypoint waypoint : waypoints) {
+            waypoint.withRotationConstraints(constraints);
+        }
+        return this;
+    }
 }
