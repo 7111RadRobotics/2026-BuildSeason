@@ -22,6 +22,7 @@ import team7111.robot.utils.motor.CTREMotor;
 import team7111.robot.utils.motor.FlywheelSimMotor;
 import team7111.robot.utils.motor.Motor.MechanismType;
 import team7111.robot.utils.motor.Motor;
+import team7111.robot.utils.motor.TwoMotors;
 
 /**
  * This class is an example to how a subsystem looks and functions.
@@ -54,9 +55,12 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.5, 0.039, 0.002), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.1, 0.0, 0.0), MechanismType.arm, 0, 0, 0, 0);
+    private int pivotID = 11;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
+    private int flywheelLeadID = 12;
+    private int flywheelFollowID = 13;
 
     private Motor pivot;
 
@@ -67,18 +71,18 @@ public class Intake extends SubsystemBase {
     public Intake() {
         //TODO set CTRE motor ID to a real ID
         pivot = RobotBase.isReal()
-            ? new CTREMotor(21, null, pivotConfig)
+            ? new REVMotor(pivotID, null, pivotConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getKrakenX60(1), pivotConfig.gearRatio, 0.10849, 0.2, 
-                    Degrees.of(0).in(Radians), Degrees.of(90).in(Radians), true, Degrees.of(37).in(Radians)), 
+                    DCMotor.getNEO(1), pivotConfig.gearRatio, 0.10849, 0.2, 
+                    Degrees.of(minPivotPos).in(Radians), Degrees.of(maxPivotPos).in(Radians), true, Degrees.of(minPivotPos).in(Radians)), 
                 pivotConfig.pid, 
                 pivotConfig.armFF);
 
         //TODO set REV motor ID to a real ID
         flyWheel = RobotBase.isReal()
-            ? null //new REVMotor(20, null, flyWheelConfig)
+            ? new TwoMotors(new REVMotor(flywheelLeadID, null, flyWheelConfig), new REVMotor(flywheelFollowID, null, flyWheelConfig), flywheelLeadID, false)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(1), 0.1),
@@ -143,15 +147,16 @@ public class Intake extends SubsystemBase {
 
     private void stow(){
         //System.out.println("Runs code for the stow state");
-        pivotPos = 45;
+        pivotPos = minPivotPos;
+        
     }
 
     private void deploy(){
-        //System.out.println("Runs code for the deploy state");
+        pivotPos = maxPivotPos;
     }
 
     private void intake(){
-        pivotPos = 5;
+        pivotPos = maxPivotPos;
     }
 
     private void manual(){
@@ -164,5 +169,16 @@ public class Intake extends SubsystemBase {
 
     public IntakeState getState(){
         return currentState;
+    }
+
+    public double getPosition(){
+        return pivot.getPosition();
+    }
+    public double getSetpoint(){
+        return pivotPos;
+    }
+
+    public void setPosition(double pos){
+        pivotPos = pos;
     }
 }
