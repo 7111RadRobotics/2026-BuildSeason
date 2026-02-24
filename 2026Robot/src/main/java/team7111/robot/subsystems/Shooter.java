@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -102,8 +103,8 @@ public class Shooter extends SubsystemBase {
                 flywheelConfig.pid,
                 flywheelConfig.simpleFF);
 
-        mechanism2d.getRoot("Shooter hood", 0.5, 0.5).append(hoodTrajectoryLigament);
-        mechanism2d.getRoot("Shooter hood", 0.5, 0.5).append(hoodPositionLigament);
+        mechanism2d.getRoot("Shooter hood", 0.25, 0.35).append(hoodTrajectoryLigament);
+        mechanism2d.getRoot("Shooter hood", 0.25, 0.5).append(hoodPositionLigament);
 
         Shuffleboard.getTab("Mechanisms").add("Shooter", mechanism2d);
     }

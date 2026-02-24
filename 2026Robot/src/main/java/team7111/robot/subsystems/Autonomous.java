@@ -106,7 +106,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 auto.add(new AutoAction(SuperState.intake).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
-                auto.add(new AutoAction(SuperState.stowed).withNoConditions());
+                auto.add(new AutoAction(SuperState.deployed).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.hubSetpointLT)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
@@ -117,7 +117,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 auto.add(new AutoAction(SuperState.intake).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
-                auto.add(new AutoAction(SuperState.stowed).withNoConditions());
+                auto.add(new AutoAction(SuperState.deployed).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.hubSetpointRT)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
@@ -163,12 +163,12 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(trenchRWaypoints[1]);
                 break;
             case RNsweep:
-                waypoints.add(balancedPoint(8.182, 0.875, 0));
+                waypoints.add(balancedPoint(8.182, 0.875, 90));
                 waypoints.add(balancedPoint(8.2, 7.3, 0));
                 //waypoints.add(balancedPoint(4.27, 7.484, -90));
                 break;
             case LNsweep:
-                waypoints.add(balancedPoint(8.2, 7.3, 180));
+                waypoints.add(balancedPoint(8.2, 7.3, -90));
                 waypoints.add(balancedPoint(8.2, 0.875, 180));
                 //waypoints.add(balancedPoint(4.217, 0.521, 90));
                 break;

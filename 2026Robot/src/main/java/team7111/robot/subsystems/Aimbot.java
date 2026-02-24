@@ -59,7 +59,7 @@ public class Aimbot extends SubsystemBase{
     /** Maximum shooter angle in degrees, from horizontal */
     private final double maxShooterAngle = 83;
     
-    private final double lowestShooterAngle = minShooterAngle;
+    private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
     private final double maxShooterSpeed = 3000;
@@ -215,7 +215,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("ShootApril", false);
                 break;
             case Pass:
-
+                pass();
                 SmartDashboard.putBoolean("ShootDirect", false);
                 SmartDashboard.putBoolean("ShootPara", false);
                 SmartDashboard.putBoolean("Transport", false);

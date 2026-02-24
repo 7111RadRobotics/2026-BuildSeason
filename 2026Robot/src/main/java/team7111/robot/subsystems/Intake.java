@@ -31,7 +31,7 @@ import team7111.robot.utils.motor.TwoMotors;
 public class Intake extends SubsystemBase {
     
     private Mechanism2d mechanism2d = new Mechanism2d(1, 1);
-    private MechanismLigament2d intakeLigament = new MechanismLigament2d("Arm", 1.5, 37, 6, new Color8Bit(Color.kOrange));
+    private MechanismLigament2d intakeLigament = new MechanismLigament2d("Arm", 0.5, 37, 6, new Color8Bit(Color.kBlue));
 
 
     /**
@@ -85,11 +85,11 @@ public class Intake extends SubsystemBase {
             ? new TwoMotors(new REVMotor(flywheelLeadID, null, flyWheelConfig), new REVMotor(flywheelFollowID, null, flyWheelConfig), flywheelLeadID, false)
             : new FlywheelSimMotor(
                 null, 
-                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(1), 0.1),
+                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(2), 0.1),
                 flyWheelConfig.pid,
                 flyWheelConfig.simpleFF);
         
-        mechanism2d.getRoot("Intake", 0.5, 0.5).append(intakeLigament);
+        mechanism2d.getRoot("Intake", 0.7, 0.3).append(intakeLigament);
         Shuffleboard.getTab("Mechanisms").add("intake", mechanism2d);
     }
 
@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
 
         
         pivot.periodic();
-        intakeLigament.setAngle(pivot.getPosition());
+        intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
     }
 
     public void simulationPeriodic(){}
