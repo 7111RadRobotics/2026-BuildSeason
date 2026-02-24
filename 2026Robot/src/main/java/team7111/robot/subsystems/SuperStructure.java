@@ -475,6 +475,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean manual(){
         // code for direct control of mechanisms goes here
         intake.setState(IntakeState.manual);
+        targeting.setShotType(shotType.Manual);
+        hopper.setState(HopperState.manual);  
         
         if(!operatorController.getAButton()){
             intake.setPosition(Math.abs(operatorController.getRightY() * 128));

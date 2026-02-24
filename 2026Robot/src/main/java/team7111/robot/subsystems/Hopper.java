@@ -6,6 +6,8 @@ import team7111.robot.utils.motor.Motor;
 import team7111.robot.utils.motor.Motor.MechanismType;
 import team7111.robot.utils.motor.MotorConfig;
 import team7111.robot.utils.motor.REVMotor;
+import team7111.robot.utils.motor.TwoMotors;
+import team7111.robot.utils.motor.CTREMotor;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -31,25 +33,43 @@ public class Hopper extends SubsystemBase {
 
     private HopperState currentState = HopperState.idle;
 
-    private MotorConfig hopperMotorConfig = new MotorConfig(
+    private MotorConfig spindexerConfig = new MotorConfig(
+        1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+    );
+    private MotorConfig shooterIndexerConfig = new MotorConfig(
         1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
 
-    private Motor hopperMotor;
+    private Motor spindexer;
+    private Motor shooterIndexer;
+
+    private double spindexerSpeed = 0;
+    private double shooterIndexerSpeed = 0;
 
     public Hopper() {
-        hopperMotor = RobotBase.isReal()
-            ? null //new REVMotor(30, null, hopperMotorConfig)
+        spindexer = RobotBase.isReal()
+            ? new TwoMotors(new CTREMotor(13, null, spindexerConfig), new CTREMotor(14, null, spindexerConfig), 0, false)
             : new FlywheelSimMotor(
                 null, 
-                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, hopperMotorConfig.gearRatio), DCMotor.getNEO(1), 0.1),
-                hopperMotorConfig.pid,
-                hopperMotorConfig.simpleFF
+                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60(2), 0.01, spindexerConfig.gearRatio), DCMotor.getNEO(1), 0.1),
+                spindexerConfig.pid,
+                spindexerConfig.simpleFF
+            );
+        shooterIndexer = RobotBase.isReal()
+            ? new REVMotor(15, null, shooterIndexerConfig)
+            : new FlywheelSimMotor(
+                null, 
+                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, shooterIndexerConfig.gearRatio), DCMotor.getNEO(1), 0.1),
+                shooterIndexerConfig.pid,
+                shooterIndexerConfig.simpleFF
             );
     }
 
     public void periodic(){
         manageState();
+
+        spindexer.setDutyCycle(spindexerSpeed);
+        shooterIndexer.setDutyCycle(shooterIndexerSpeed);
     }
 
     public void simulationPeriodic(){
@@ -86,15 +106,18 @@ public class Hopper extends SubsystemBase {
 
     // named differently to not overide a different method
     private void idleMode(){
-
+        shooterIndexerSpeed = 0;
+        spindexerSpeed = 0;
     }
 
     private void intake(){
-
+        shooterIndexerSpeed = 0;
+        spindexerSpeed = 0.0;
     }
 
     private void shoot(){
-
+        shooterIndexerSpeed = 0.8;
+        spindexerSpeed = 0.8;
     }
 
     private void manual(){
@@ -107,5 +130,14 @@ public class Hopper extends SubsystemBase {
 
     public HopperState getState(){
         return currentState;
+    }
+
+    public void setSpeed(double speed){
+        spindexerSpeed = speed;
+        shooterIndexerSpeed = speed;
+    }
+
+    public double getSpeed(){
+        return spindexer.getDutyCycle();
     }
 }

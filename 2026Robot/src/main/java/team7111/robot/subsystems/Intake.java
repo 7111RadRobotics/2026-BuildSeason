@@ -56,11 +56,11 @@ public class Intake extends SubsystemBase {
     private final double minPivotPos = 0;
 
     private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
-    private int pivotID = 11;
+    private int pivotID = 10;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
-    private int flywheelLeadID = 12;
-    private int flywheelFollowID = 13;
+    private int flywheelLeadID = 11;
+    private int flywheelFollowID = 12;
 
     private Motor pivot;
 
