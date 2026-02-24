@@ -21,6 +21,8 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
+
 import team7111.robot.subsystems.Vision;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
@@ -44,6 +46,8 @@ public class Camera extends PhotonCamera{
             throw new RuntimeException(e);
         }
     }
+
+    final int fuelObjID = -1;
 
     //From 2025 on season code
     private final Matrix<N3,N1> visionStandardDeviation = MatBuilder.fill(Nat.N3(), Nat.N1(),1,1,1 * Math.PI);
@@ -85,14 +89,17 @@ public class Camera extends PhotonCamera{
     public boolean updatePose(){
         return latestResult.hasTargets();
     }
+
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
         return photonPoseEstimator.update(latestResult);
     }
+
     public Pose2d getRobotPose(){
         newPose = estRobotPose.estimatedPose.toPose2d();
         return newPose;
     }
+
     public Matrix<N3, N1> getPoseAmbiguity(){
         double smallestDistance = Double.POSITIVE_INFINITY;
         double confidenceMultiplier = 0;
@@ -136,5 +143,17 @@ public class Camera extends PhotonCamera{
 
         return apriltagMap.getTagPose(apriltag).get();
     }
+
+    /**Gets all targets of the type specified as "fuelObjID" and returns in a vector :)*/
+    public Vector<PhotonTrackedTarget> objectDetection() {
+        Vector<PhotonTrackedTarget> targets = new Vector<>(0);
+        for(int i = 0; i < this.getLatestResult().getTargets().size(); i++) {
+            if(this.getLatestResult().getTargets().get(i).getDetectedObjectClassID() == fuelObjID) {
+                targets.add(this.getLatestResult().getTargets().get(i));
+            }
+        }
+        return targets;
+    }
+
 }
 
