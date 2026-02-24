@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,6 +17,9 @@ import team7111.robot.subsystems.SuperStructure.SuperState;
 import team7111.robot.utils.AutoAction;
 
 public class Autonomous extends SubsystemBase {
+
+    Timer timer = new Timer();
+    
 
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
     private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
@@ -37,10 +41,13 @@ public class Autonomous extends SubsystemBase {
         new Waypoint(new Pose2d(3.8, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
         new Waypoint(new Pose2d(5.9, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
     };
-
+    //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
+     
     public enum Autos {
         forwardTest,
         leftNeutral,
+        Rhub2IN,
+        Lhub2IN,
     }
 
     public enum Paths {
@@ -49,10 +56,15 @@ public class Autonomous extends SubsystemBase {
         hubSetpointL,
         hubSetpointM,
         hubSetpointR,
+        hubSetpointRT,
+        hubSetpointLT,
         trenchLNeutral,
         trenchRNeutral,
         trenchLAlliance,
         trenchRAlliance,
+
+        RNsweep,
+        LNsweep,
     }
 
     public Autonomous(){
@@ -88,6 +100,29 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
                 auto.add(new AutoAction(SuperState.score));
                 break;
+
+            case Rhub2IN:
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.RNsweep)));
+                auto.add(new AutoAction(SuperState.stowed).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.hubSetpointLT)));
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                break;
+            
+            case Lhub2IN:
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.LNsweep)));
+                auto.add(new AutoAction(SuperState.stowed).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.hubSetpointRT)));
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                break;
+
             default:
                 break;
         }
@@ -127,6 +162,21 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(trenchRWaypoints[0]);
                 waypoints.add(trenchRWaypoints[1]);
                 break;
+            case RNsweep:
+                waypoints.add(balancedPoint(8.182, 0.875, 0));
+                waypoints.add(balancedPoint(8.2, 7.3, 0));
+                //waypoints.add(balancedPoint(4.27, 7.484, -90));
+                break;
+            case LNsweep:
+                waypoints.add(balancedPoint(8.2, 7.3, 180));
+                waypoints.add(balancedPoint(8.2, 0.875, 180));
+                //waypoints.add(balancedPoint(4.217, 0.521, 90));
+                break;
+            case hubSetpointRT:
+                waypoints.add(balancedPoint(4.25, 0.625, 90));
+                break;
+            case hubSetpointLT:
+                waypoints.add(balancedPoint(4.25, 7.45, -90));
             default:
                 break;
         }
@@ -199,5 +249,15 @@ public class Autonomous extends SubsystemBase {
 
     public void giveResources(SuperStructure superStructure){
         this.superStructure = superStructure;
+    }
+
+    private boolean timeDelay(int delay){
+        timer.start();
+        if (timer.hasElapsed(delay)) {
+            timer.reset();
+            timer.stop();
+            return true;
+        }
+        return false;
     }
 }
