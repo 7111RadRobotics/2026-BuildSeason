@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.1, 0.0, 0.0), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
     private int pivotID = 11;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
@@ -85,7 +85,7 @@ public class Intake extends SubsystemBase {
             ? new TwoMotors(new REVMotor(flywheelLeadID, null, flyWheelConfig), new REVMotor(flywheelFollowID, null, flyWheelConfig), flywheelLeadID, false)
             : new FlywheelSimMotor(
                 null, 
-                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(1), 0.1),
+                new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(1), 0.1),
                 flyWheelConfig.pid,
                 flyWheelConfig.simpleFF);
         

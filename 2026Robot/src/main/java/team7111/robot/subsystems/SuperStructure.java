@@ -475,16 +475,11 @@ public class SuperStructure extends SubsystemBase {
     private boolean manual(){
         // code for direct control of mechanisms goes here
         intake.setState(IntakeState.manual);
-        if(operatorController.getAButtonPressed()){
+        
+        if(!operatorController.getAButton()){
+            intake.setPosition(Math.abs(operatorController.getRightY() * 128));
+        }else
             intake.setPosition(128);
-        }else if(operatorController.getAButtonReleased()){
-            intake.setPosition(0);
-        }else{
-            if(!operatorController.getAButton()){
-                intake.setPosition(Math.abs(operatorController.getRightY() * 128));
-            }else
-                intake.setPosition(128);
-        }
 
         return true;
     }
