@@ -250,6 +250,10 @@ public class Swerve extends SubsystemBase {
         snapAngleSetpoint = snapNumber;
     }
 
+    public void setGamepieceYaw(double yaw){
+        gamepieceYaw = yaw;
+    }
+
     public void addVisionMeasurement(Pose2d pose){
         swerveOdometry.addVisionMeasurement(new Pose2d(pose.getX(), pose.getY(), getYaw()), Timer.getFPGATimestamp());
     }

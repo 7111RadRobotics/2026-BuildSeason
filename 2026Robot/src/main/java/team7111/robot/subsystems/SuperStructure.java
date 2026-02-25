@@ -124,8 +124,16 @@ public class SuperStructure extends SubsystemBase {
         }
 
         // Driver controller commands
-        
-
+        /* Current plan for driver controls:
+            Left Trigger: Intake
+            Left Bumper: Intake with Object Detection
+            Left Back: Retract Intake
+            Right Trigger: Shoot in Hub (with aiming)
+            Right Bumper: Pass/HubPreset
+            Right Back: Align to hub preset (nearest of 5)
+            A button: Bump Align
+         * 
+         */
         if(driverController.getStartButton()) {
             swerve.zeroGyro();
             swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
@@ -180,6 +188,10 @@ public class SuperStructure extends SubsystemBase {
             useObjectDetection = false;
         }
 
+        if(useObjectDetection){
+            swerve.setGamepieceYaw(vision.getGamepieceYaw());
+        }
+
         defaultDrive = !aimAtHub && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
 
         if(defaultDrive && !inAuto){
@@ -195,9 +207,6 @@ public class SuperStructure extends SubsystemBase {
         }
         if(operatorController.getBButtonPressed()) {
             currentShot = shotType.Parabolic;
-        }
-        if(operatorController.getYButtonPressed()) {
-            currentShot = shotType.Manual;
         }
         if(operatorController.getXButtonPressed()) {
             currentShot = shotType.Apriltag;

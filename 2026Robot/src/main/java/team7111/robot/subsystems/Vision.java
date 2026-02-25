@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import team7111.robot.utils.Camera;
@@ -50,10 +53,12 @@ public class Vision extends SubsystemBase{
         );*/
     public final Camera orangepi1;
     public final Camera orangepi2;
+    public final Camera driverCam;
 
     public Camera[] cameraList;
 
     private double allowedPoseAmbiguity = 1;
+    private double objectDetectionYaw = 0;
 
     /** Constructor */
     public Vision(){
@@ -73,6 +78,13 @@ public class Vision extends SubsystemBase{
             this
         );
 
+        driverCam = new Camera(
+            "MicrosoftLifeCam-3000", 
+            cameraPositionsToCenter[0], 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            this
+        );
+
 
         cameraList = new Camera[] {
             orangepi2,
@@ -82,7 +94,12 @@ public class Vision extends SubsystemBase{
     public void periodic(){
 
         Optional<EstimatedRobotPose> estPose;
-
+        PhotonPipelineResult objectResult = driverCam.getLatestResult();
+        if(objectResult != null){
+            if(objectResult.hasTargets()){
+                objectDetectionYaw = objectResult.getBestTarget().getYaw();
+            }
+        }
         for(Camera camera : cameraList){
             estPose = camera.getEstimatedGlobalPose(robotPose);
             robotPose = camera.estRobotPose.estimatedPose.toPose2d();
@@ -178,5 +195,9 @@ public class Vision extends SubsystemBase{
             }
         }
         return camera.estRobotPose.estimatedPose;
+    }
+
+    public double getGamepieceYaw(){
+        return objectDetectionYaw;
     }
 }
