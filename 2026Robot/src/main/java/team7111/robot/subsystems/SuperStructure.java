@@ -300,7 +300,7 @@ public class SuperStructure extends SubsystemBase {
      */
 
     private boolean stowed(){
-        targeting.setToggle(false);
+        targeting.setToggle(true);
         targeting.setShotType(shotType.Transport);
         shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.stow);
@@ -313,7 +313,7 @@ public class SuperStructure extends SubsystemBase {
     }
 
     private boolean deployed(){
-        targeting.setToggle(false);
+        targeting.setToggle(true);
         targeting.setShotType(shotType.Transport);
         shooter.setState(ShooterState.followAimbot);
         if(intaking){
@@ -341,7 +341,7 @@ public class SuperStructure extends SubsystemBase {
     }
 
     private boolean intake(){
-        targeting.setToggle(false);
+        targeting.setToggle(true);
         intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);
         
@@ -483,6 +483,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean manual(){
         // code for direct control of mechanisms goes here
+        targeting.setToggle(true);
         intake.setState(IntakeState.manual);
         targeting.setShotType(shotType.Manual);
         hopper.setState(HopperState.manual);  

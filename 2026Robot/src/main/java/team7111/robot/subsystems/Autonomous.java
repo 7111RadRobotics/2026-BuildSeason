@@ -41,6 +41,15 @@ public class Autonomous extends SubsystemBase {
         new Waypoint(new Pose2d(3.8, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
         new Waypoint(new Pose2d(5.9, 0.675, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
     };
+
+    public final Pose2d[] hubPresetPoses = new Pose2d[]{
+        // TODO get coordinates for poses near trench
+        new Pose2d(4.25, 0.625, Rotation2d.fromDegrees(90)),
+        new Pose2d(4.25, 7.45, Rotation2d.fromDegrees(-90)),
+        new Pose2d(2.266, 5.946, Rotation2d.fromDegrees(-30.65)),
+        new Pose2d(2.267, 4.021, Rotation2d.fromDegrees(0)),
+        new Pose2d(1.975, 1.986, Rotation2d.fromDegrees(38.21)),
+    };
     //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
      
     public enum Autos {
@@ -136,15 +145,20 @@ public class Autonomous extends SubsystemBase {
             case forward:
                 waypoints.add(balancedPoint(1, 0, 0));
                 break;
-            
+            case hubSetpointRT:
+                waypoints.add(balancedPoint(4.25, 0.625, 90));
+                break;
+            case hubSetpointLT:
+                waypoints.add(balancedPoint(4.25, 7.45, -90));
+                break;
             case hubSetpointL:
-                waypoints.add(balancedPoint(2.266, 5.946, -30.65));
+                waypoints.add(balancedPoint(hubPresetPoses[2].getX(), hubPresetPoses[2].getY(), hubPresetPoses[2].getRotation().getDegrees()));
                 break;
             case hubSetpointM:
-                waypoints.add(balancedPoint(2.267, 4.021, 0));
+                waypoints.add(balancedPoint(hubPresetPoses[3].getX(), hubPresetPoses[3].getY(), hubPresetPoses[3].getRotation().getDegrees()));
                 break;
             case hubSetpointR:
-                waypoints.add(balancedPoint(1.975, 1.986, 38.21));
+                waypoints.add(balancedPoint(hubPresetPoses[4].getX(), hubPresetPoses[4].getY(), hubPresetPoses[4].getRotation().getDegrees()));
                 break;
             case trenchLAlliance:
                 waypoints.add(trenchLWaypoints[1]);
@@ -172,11 +186,7 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(balancedPoint(8.2, 0.875, 180));
                 //waypoints.add(balancedPoint(4.217, 0.521, 90));
                 break;
-            case hubSetpointRT:
-                waypoints.add(balancedPoint(4.25, 0.625, 90));
-                break;
-            case hubSetpointLT:
-                waypoints.add(balancedPoint(4.25, 7.45, -90));
+            
             default:
                 break;
         }
@@ -200,25 +210,14 @@ public class Autonomous extends SubsystemBase {
     }
 
     public Path getNearestHubScoringPath(Pose2d robotPose){
-        List<Path> hubPaths = new ArrayList<>();
+        //TODO this function will return the nearest Pose2d to robotPose from hubPresetPoses on line 45.
+        // If it is one of the trench poses (one of the first 2 poses in the array), it will check if it is closest to
+        // that same pose, the pose with 1.5 x added, or the pose with 1.5 x subtracted.
+        // Use the nearest() method in the Pose2d class to find the nearest pose.
+        List<Waypoint> waypoints = new ArrayList<>();
         List<Pose2d> hubPoses = new ArrayList<>();
-        hubPaths.add(getPath(Paths.hubSetpointL));
-        hubPaths.add(getPath(Paths.hubSetpointM));
-        hubPaths.add(getPath(Paths.hubSetpointR));
 
-        for (Path path : hubPaths) {
-            hubPoses.add(path.getCurrentWaypoint().getPose());
-        }
-
-        Pose2d pose = robotPose.nearest(hubPoses);
-
-        for (Path path : hubPaths) {
-            if(pose.getX() == path.getCurrentWaypoint().getPose().getX()
-             && pose.getY() == path.getCurrentWaypoint().getPose().getY()){
-                return path;
-            }
-        }
-        return null;
+        return new Path(waypoints);
     }
 
     public Path getNearestTrenchPath(Pose2d robotPose){

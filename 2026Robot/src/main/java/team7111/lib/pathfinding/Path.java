@@ -292,4 +292,11 @@ public class Path {
         }
         return this;
     }
+
+    public Path withRotation(double degrees){
+        for (Waypoint waypoint : waypoints) {
+            waypoint.withRotation(degrees);
+        }
+        return this;
+    }
 }
