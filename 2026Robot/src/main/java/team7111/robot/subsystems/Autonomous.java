@@ -19,7 +19,9 @@ import team7111.robot.utils.AutoAction;
 public class Autonomous extends SubsystemBase {
 
     Timer timer = new Timer();
-    
+
+    Zones zone;
+
 
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
     private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
@@ -76,10 +78,11 @@ public class Autonomous extends SubsystemBase {
         LNsweep,
     }
 
-    public Autonomous(){
+    public Autonomous(Zones zone){
         for (Autos auto : Autos.values()) {
             autoChooser.addOption(auto.name(), auto);
         }
+        this.zone = zone;
         
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
     }
@@ -216,7 +219,15 @@ public class Autonomous extends SubsystemBase {
         // Use the nearest() method in the Pose2d class to find the nearest pose.
         List<Waypoint> waypoints = new ArrayList<>();
         List<Pose2d> hubPoses = new ArrayList<>();
-
+        if (zone.inAllianceZone(robotPose)) {
+            for (Pose2d pose: hubPresetPoses) {
+                hubPoses.add(pose);
+            }
+        } else {
+            hubPoses.add(hubPresetPoses[0]);
+            hubPoses.add(hubPresetPoses[1]);
+        }
+        waypoints.add(new Waypoint(robotPose.nearest(hubPoses), balancedTransConstraints, balancedRotConstraints));
         return new Path(waypoints);
     }
 

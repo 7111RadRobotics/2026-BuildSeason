@@ -7,7 +7,9 @@ package team7111.robot;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import team7111.robot.subsystems.Aimbot;
@@ -18,6 +20,7 @@ import team7111.robot.subsystems.Shooter;
 import team7111.robot.subsystems.SuperStructure;
 import team7111.robot.subsystems.Swerve;
 import team7111.robot.subsystems.Vision;
+import team7111.robot.subsystems.Zones;
 import team7111.robot.subsystems.SuperStructure.SuperState;
 
 /**
@@ -27,14 +30,15 @@ import team7111.robot.subsystems.SuperStructure.SuperState;
  */
 public class Robot extends TimedRobot {
 
-    private Autonomous auto = new Autonomous();
+    private Zones zone = new Zones(DriverStation.getAlliance().get() == Alliance.Red);
+    private Autonomous auto = new Autonomous(zone);
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
     private Aimbot aimbot = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()));
     private Intake intake = new Intake();
     private Hopper hopper = new Hopper();
     private Shooter shooter = new Shooter(aimbot);
-    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter);
+    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, zone);
 
     /**
      * This function is run when the robot is first started up and should be used for any
