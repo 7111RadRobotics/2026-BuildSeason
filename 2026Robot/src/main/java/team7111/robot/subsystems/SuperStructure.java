@@ -198,6 +198,41 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSwerveState(SwerveState.manual);
         }
 
+        // Driver controller commands
+        if(driverController.getLeftBumperButtonPressed()) {
+            intaking = true;
+            useObjectDetection = true;
+        } else if(driverController.getLeftBumperButtonReleased()) {
+            intaking = false;
+            useObjectDetection = false;
+        }
+        if(driverController.getLeftTriggerAxis() > 0.1) {
+            intaking = true;
+        }
+        if(driverController.getBackButton()){
+            intaking = false;
+        }
+        if(driverController.getRightBumperButtonPressed()) {
+            passing = true;
+        } else if(driverController.getRightBumperButtonReleased()) {
+            passing = false;
+        }
+        if(driverController.getRightTriggerAxis() > 0.1) {
+            aimAtHub = true;
+            scoring = true;
+        }
+        if(driverController.getAButtonPressed()) {
+            orientWithBump = true;
+        } else if(driverController.getAButtonReleased()) {
+            orientWithBump = false;
+        }
+        if(driverController.getYButtonPressed()) {
+            alignToHub = true;
+        } else if(driverController.getYButtonReleased()) {
+            alignToHub = false;
+        }
+
+
         // Operator controller commands
         if(operatorController.getStartButtonPressed()) {
             targeting.toggle();
