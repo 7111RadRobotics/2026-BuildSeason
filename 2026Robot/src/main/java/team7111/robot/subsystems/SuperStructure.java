@@ -146,7 +146,7 @@ public class SuperStructure extends SubsystemBase {
         }
 
         //While a button held, point swerve towards target
-        if(driverController.getRightBumperButtonPressed()){
+        /*if(driverController.getRightBumperButtonPressed()){
             aimAtHub = true;
             swerve.setSnapAngle(targeting.getCalculatedDirection());
             swerve.setSwerveState(SwerveState.snapAngle);
@@ -178,7 +178,7 @@ public class SuperStructure extends SubsystemBase {
             swerve.setSwerveState(SwerveState.snapAngle);
         }else if(driverController.getLeftBumperButtonReleased()){
             orientWithBump = false;
-        }
+        }*/
 
         if(driverController.getRightStickButtonPressed()){
             useObjectDetection = true;
@@ -226,9 +226,9 @@ public class SuperStructure extends SubsystemBase {
         } else if(driverController.getAButtonReleased()) {
             orientWithBump = false;
         }
-        if(driverController.getYButtonPressed()) {
+        if(driverController.getXButtonPressed()) {
             alignToHub = true;
-        } else if(driverController.getYButtonReleased()) {
+        } else if(driverController.getXButtonReleased()) {
             alignToHub = false;
         }
 
