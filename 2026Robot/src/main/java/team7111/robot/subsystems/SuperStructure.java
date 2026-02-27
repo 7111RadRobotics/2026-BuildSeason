@@ -180,12 +180,46 @@ public class SuperStructure extends SubsystemBase {
             orientWithBump = false;
         }*/
 
-        if(driverController.getRightStickButtonPressed()){
+        // Driver controller commands
+        if(driverController.getLeftBumperButtonPressed()) {
+            intaking = true;
             useObjectDetection = true;
-            swerve.setSnapAngle(0); //TODO vvalue will be retrieved from vision object camera
-            swerve.setSwerveState(SwerveState.followGamePiece);
-        }else if(driverController.getRightStickButtonReleased()){
+        } else if(driverController.getLeftBumperButtonReleased()) {
+            intaking = false;
             useObjectDetection = false;
+        }
+        if(driverController.getLeftTriggerAxis() > 0.1 && !intaking) {
+            intaking = true;
+        }else if(driverController.getLeftTriggerAxis() <= 0.1 && intaking){
+            intaking = false;
+        }
+        if(driverController.getLeftStickButton()){
+            intaking = false;
+        }
+        if(driverController.getRightBumperButtonPressed()) {
+            passing = true;
+            scoring = false;
+        } else if(driverController.getRightBumperButtonReleased()) {
+            passing = false;
+        }
+        if(driverController.getRightTriggerAxis() > 0.1 && !aimAtHub) {
+            aimAtHub = true;
+            scoring = true;
+            passing = false;
+        }else if(driverController.getRightTriggerAxis() <= 0.1 && aimAtHub){
+            aimAtHub = false;
+            scoring = false;
+        }
+
+        if(driverController.getAButtonPressed()) {
+            orientWithBump = true;
+        } else if(driverController.getAButtonReleased()) {
+            orientWithBump = false;
+        }
+        if(driverController.getXButtonPressed()) {
+            alignToHub = true;
+        } else if(driverController.getXButtonReleased()) {
+            alignToHub = false;
         }
 
         if(useObjectDetection){
@@ -196,40 +230,6 @@ public class SuperStructure extends SubsystemBase {
 
         if(defaultDrive && !inAuto){
             swerve.setSwerveState(SwerveState.manual);
-        }
-
-        // Driver controller commands
-        if(driverController.getLeftBumperButtonPressed()) {
-            intaking = true;
-            useObjectDetection = true;
-        } else if(driverController.getLeftBumperButtonReleased()) {
-            intaking = false;
-            useObjectDetection = false;
-        }
-        if(driverController.getLeftTriggerAxis() > 0.1) {
-            intaking = true;
-        }
-        if(driverController.getBackButton()){
-            intaking = false;
-        }
-        if(driverController.getRightBumperButtonPressed()) {
-            passing = true;
-        } else if(driverController.getRightBumperButtonReleased()) {
-            passing = false;
-        }
-        if(driverController.getRightTriggerAxis() > 0.1) {
-            aimAtHub = true;
-            scoring = true;
-        }
-        if(driverController.getAButtonPressed()) {
-            orientWithBump = true;
-        } else if(driverController.getAButtonReleased()) {
-            orientWithBump = false;
-        }
-        if(driverController.getXButtonPressed()) {
-            alignToHub = true;
-        } else if(driverController.getXButtonReleased()) {
-            alignToHub = false;
         }
 
 
