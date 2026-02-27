@@ -148,9 +148,7 @@ public class SuperStructure extends SubsystemBase {
         //While a button held, point swerve towards target
         /*if(driverController.getRightBumperButtonPressed()){
             aimAtHub = true;
-            swerve.setSnapAngle(targeting.getCalculatedDirection());
-            swerve.setSwerveState(SwerveState.snapAngle);
-            scoringState = shotType.Parabolic;
+            
         }else if(driverController.getRightBumperButtonReleased()){
             scoringState = shotType.RegHubShot;
             aimAtHub = false;
@@ -158,8 +156,7 @@ public class SuperStructure extends SubsystemBase {
 
         if(driverController.getRightTriggerAxis() > 0.15 && !alignToHub){
             alignToHub = true;
-            swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
-            swerve.setSwerveState(SwerveState.initializePath);
+            
         }else if(driverController.getRightTriggerAxis() <= 0.15 && alignToHub){
             alignToHub = false;
         }
@@ -206,6 +203,11 @@ public class SuperStructure extends SubsystemBase {
             aimAtHub = true;
             scoring = true;
             passing = false;
+
+            swerve.setSnapAngle(targeting.getCalculatedDirection());
+            swerve.setSwerveState(SwerveState.snapAngle);
+            scoringState = shotType.Parabolic;
+
         }else if(driverController.getRightTriggerAxis() <= 0.1 && aimAtHub){
             aimAtHub = false;
             scoring = false;
@@ -218,6 +220,8 @@ public class SuperStructure extends SubsystemBase {
         }
         if(driverController.getXButtonPressed()) {
             alignToHub = true;
+            swerve.setPath(auto.getNearestHubScoringPath(swerve.getPose()));
+            swerve.setSwerveState(SwerveState.initializePath);
         } else if(driverController.getXButtonReleased()) {
             alignToHub = false;
         }
