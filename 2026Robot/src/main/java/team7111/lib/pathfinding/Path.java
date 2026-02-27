@@ -211,7 +211,11 @@ public class Path {
 
                 if(!isMirrored){
                     newWayY = -waypointY + width;
-                    newWayRot = (waypointRot + 180) % 180;
+                    if(waypointRot > 0){
+                        newWayRot = waypointRot - 180;
+                    }else{
+                        newWayRot = waypointRot + 180;
+                    }
 
                     if(!isRedAlliance){
                         newWayRot -= 180;

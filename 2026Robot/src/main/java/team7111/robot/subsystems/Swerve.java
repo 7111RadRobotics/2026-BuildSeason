@@ -138,7 +138,7 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putString("swerveState", currentSwerveState.name());
 
         if(DriverStation.getAlliance().isPresent()){
-            pathMaster.useAllianceFlipping(DriverStation.getAlliance().get() == Alliance.Red, true);
+            pathMaster.useAllianceFlipping(DriverStation.getAlliance().get() == Alliance.Red, false);
         }
     }
 
