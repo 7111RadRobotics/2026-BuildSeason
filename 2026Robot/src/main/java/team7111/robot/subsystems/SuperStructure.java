@@ -145,23 +145,8 @@ public class SuperStructure extends SubsystemBase {
                 setSuperState(SuperState.deployed);
         }
 
-        //While a button held, point swerve towards target
-        /*if(driverController.getRightBumperButtonPressed()){
-            aimAtHub = true;
-            
-        }else if(driverController.getRightBumperButtonReleased()){
-            scoringState = shotType.RegHubShot;
-            aimAtHub = false;
-        }
 
-        if(driverController.getRightTriggerAxis() > 0.15 && !alignToHub){
-            alignToHub = true;
-            
-        }else if(driverController.getRightTriggerAxis() <= 0.15 && alignToHub){
-            alignToHub = false;
-        }
-
-        if(driverController.getLeftTriggerAxis() > 0.15 && !moveThroughTrench){
+        /*if(driverController.getLeftTriggerAxis() > 0.15 && !moveThroughTrench){
             moveThroughTrench = true;
             swerve.setPath(auto.getNearestTrenchPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
