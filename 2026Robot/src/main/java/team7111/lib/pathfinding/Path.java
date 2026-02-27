@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Path {
 
-    private double mapLengthX = 17.55; // width of field in meters
-    private double mapLengthY = 8.05; // length of field in meters
+    private double mapLengthX = 16.5354; // width of field in meters
+    private double mapLengthY = 8.001; // length of field in meters
 
     private boolean isflipped = false;
 

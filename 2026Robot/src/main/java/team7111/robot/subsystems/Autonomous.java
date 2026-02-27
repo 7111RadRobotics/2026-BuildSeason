@@ -6,7 +6,9 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -219,6 +221,8 @@ public class Autonomous extends SubsystemBase {
         // Use the nearest() method in the Pose2d class to find the nearest pose.
         List<Waypoint> waypoints = new ArrayList<>();
         List<Pose2d> hubPoses = new ArrayList<>();
+        double mapLengthX = 16.5354;
+
         if (zone.inAllianceZone(robotPose)) {
             for (Pose2d pose: hubPresetPoses) {
                 hubPoses.add(pose);
@@ -227,22 +231,30 @@ public class Autonomous extends SubsystemBase {
             hubPoses.add(hubPresetPoses[0]);
             hubPoses.add(hubPresetPoses[1]);
         }
-        
-        Double robotPoseX = robotPose.nearest(hubPoses).getX();
-        Double robotPoseY = robotPose.nearest(hubPoses).getY();
-        Double robotPoseRot = robotPose.nearest(hubPoses).getRotation().getDegrees();
 
-        if (robotPoseX == hubPresetPoses[1].getX() && robotPoseY == hubPresetPoses[1].getY()) {
-            if (zone.inAllianceZone(robotPose)) {
-                waypoints.add(balancedPoint(robotPoseX - 1, robotPoseY, robotPoseRot));
-            } else {
-                waypoints.add(balancedPoint(robotPoseX + 1.5, robotPoseY, robotPoseRot));
+        if (DriverStation.getAlliance().isPresent()) {
+            if (DriverStation.getAlliance().get() == Alliance.Red) {
+                robotPose = new Pose2d(-robotPose.getX() + mapLengthX, robotPose.getY(), Rotation2d.fromDegrees(((robotPose.getRotation().getDegrees() +180) * -1) % 180));
             }
-        } else if (robotPoseX == hubPresetPoses[0].getX() && robotPoseY == hubPresetPoses[0].getY()) {
-            if (zone.inAllianceZone(robotPose)) {
-                waypoints.add(balancedPoint(robotPoseX - 1, robotPoseY, robotPoseRot));
+        }
+
+        double robotPoseX = robotPose.nearest(hubPoses).getX();
+        double robotPoseY = robotPose.nearest(hubPoses).getY();
+        double robotPoseRot = robotPose.nearest(hubPoses).getRotation().getDegrees();
+
+        if ((robotPoseX == hubPresetPoses[1].getX() && robotPoseY == hubPresetPoses[1].getY()) || (robotPoseX == hubPresetPoses[0].getX() && robotPoseY == hubPresetPoses[0].getY())) {
+            if (DriverStation.getAlliance().get() == Alliance.Red) {
+                if (zone.inAllianceZone(robotPose)) {
+                    waypoints.add(balancedPoint(robotPoseX + 1, robotPoseY, robotPoseRot));
+                } else {
+                    waypoints.add(balancedPoint(robotPoseX - 1.5, robotPoseY, robotPoseRot));
+                }
             } else {
-                waypoints.add(balancedPoint(robotPoseX + 1.5, robotPoseY, robotPoseRot));
+                if (zone.inAllianceZone(robotPose)) {
+                    waypoints.add(balancedPoint(robotPoseX - 1, robotPoseY, robotPoseRot));
+                } else {
+                    waypoints.add(balancedPoint(robotPoseX + 1.5, robotPoseY, robotPoseRot));
+                }
             }
         }
         waypoints.add(new Waypoint(robotPose.nearest(hubPoses), balancedTransConstraints, balancedRotConstraints));
