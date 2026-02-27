@@ -227,6 +227,19 @@ public class Autonomous extends SubsystemBase {
             hubPoses.add(hubPresetPoses[0]);
             hubPoses.add(hubPresetPoses[1]);
         }
+        if (robotPose.nearest(hubPoses).getX() == hubPresetPoses[1].getX() && robotPose.nearest(hubPoses).getY() == hubPresetPoses[1].getY()) {
+            if (zone.inAllianceZone(robotPose)) {
+                waypoints.add(balancedPoint(robotPose.nearest(hubPoses).getX() - 1, robotPose.nearest(hubPoses).getY(), robotPose.nearest(hubPoses).getRotation().getDegrees()));
+            } else {
+                waypoints.add(balancedPoint(robotPose.nearest(hubPoses).getX() + 1.5, robotPose.nearest(hubPoses).getY(), robotPose.nearest(hubPoses).getRotation().getDegrees()));
+            }
+        } else if (robotPose.nearest(hubPoses).getX() == hubPresetPoses[0].getX() && robotPose.nearest(hubPoses).getY() == hubPresetPoses[0].getY()) {
+            if (zone.inAllianceZone(robotPose)) {
+                waypoints.add(balancedPoint(robotPose.nearest(hubPoses).getX() - 1, robotPose.nearest(hubPoses).getY(), robotPose.nearest(hubPoses).getRotation().getDegrees()));
+            } else {
+                waypoints.add(balancedPoint(robotPose.nearest(hubPoses).getX() + 1.5, robotPose.nearest(hubPoses).getY(), robotPose.nearest(hubPoses).getRotation().getDegrees()));
+            }
+        }
         waypoints.add(new Waypoint(robotPose.nearest(hubPoses), balancedTransConstraints, balancedRotConstraints));
         return new Path(waypoints);
     }

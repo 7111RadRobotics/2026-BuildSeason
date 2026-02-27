@@ -30,22 +30,28 @@ import team7111.robot.subsystems.SuperStructure.SuperState;
  */
 public class Robot extends TimedRobot {
 
-    private Zones zone = new Zones(DriverStation.getAlliance().get() == Alliance.Red);
-    private Autonomous auto = new Autonomous(zone);
+    private Zones zone;
+    private Autonomous auto;
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
     private Aimbot aimbot = new Aimbot(vision, swerve::getPose, new Pose3d(4.635, 4.039, Units.inchesToMeters(72), new Rotation3d()));
     private Intake intake = new Intake();
     private Hopper hopper = new Hopper();
     private Shooter shooter = new Shooter(aimbot);
-    private SuperStructure superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, zone);
+    private SuperStructure superStructure;
 
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
      */
     public Robot() {
-        
+        if (DriverStation.getAlliance().isPresent()){
+        zone  = new Zones(DriverStation.getAlliance().get() == Alliance.Red);
+        } else {
+            zone = new Zones(false);
+        }
+        auto = new Autonomous(zone);
+        superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, zone);
     }
 
     /**
