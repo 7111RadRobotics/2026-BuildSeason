@@ -95,8 +95,9 @@ public class Aimbot extends SubsystemBase{
      * Parabolic - Aims to indirectly hit the target, arcing the ball <p>
      * Transport - Sets speed to 0, angle to the lowest possible <p>
      * Manual - Uses operator controls to aim and fire <p>
-     * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled
-     * Preset - aims at the current preset shot type
+     * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled <p>
+     * Preset - aims at the current preset shot type <p>
+     * ShotTable - uses a shot table and interpolates where it should aim <p>
     */
     public enum shotType {
         Direct,
@@ -107,6 +108,7 @@ public class Aimbot extends SubsystemBase{
         Manual,
         Apriltag,
         Preset,
+        ShotTable,
     }
 
     public enum presetShotType {

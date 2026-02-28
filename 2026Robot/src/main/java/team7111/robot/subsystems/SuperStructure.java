@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
+import team7111.robot.subsystems.Aimbot.presetShotType;
 import team7111.robot.subsystems.Autonomous.Paths;
 import team7111.robot.subsystems.Hopper.HopperState;
 import team7111.robot.subsystems.Intake.IntakeState;
@@ -164,8 +165,6 @@ public class SuperStructure extends SubsystemBase {
         }*/
 
         // Driver controller commands
-        stow = driverController.getBButton();
-
         if(driverController.getLeftBumperButtonPressed()) {
             intaking = true;
             useObjectDetection = true;
@@ -201,8 +200,8 @@ public class SuperStructure extends SubsystemBase {
             scoring = false;
         }
         if(driverController.getRightStickButtonPressed()) {
-            targeting.setPreset(presetShotType.trench);
-            targeting.setShotType(shotType.preset);
+            targeting.setPreset(presetShotType.Trench);
+            targeting.setShotType(shotType.Preset);
             scoring = true;
         } else if(driverController.getRightStickButtonReleased()) {
             targeting.setShotType(shotType.Manual);
@@ -250,6 +249,27 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();
         }
+
+        //Operator state commands
+        if(operatorController.getLeftBumperButton()) {
+            passing = true;
+        } else {
+            passing = false;
+        }
+
+        if(operatorController.getRightTriggerAxis() > 0.15) {
+            intaking = true;
+        } else {
+            intaking = false;
+        }
+
+        if(operatorController.getLeftTriggerAxis() > 0.15) {
+            scoring = true;
+        } else {
+            scoring = false;
+        }
+
+        stow = operatorController.getBButton();
 
         hasAcheivedState = manageSuperState(superState);
 
