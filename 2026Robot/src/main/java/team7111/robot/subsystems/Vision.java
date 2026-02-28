@@ -51,9 +51,9 @@ public class Vision extends SubsystemBase{
         new EstimatedRobotPose(estPose3d, 0.0, null, PoseStrategy.AVERAGE_BEST_TARGETS), 
         this
         );*/
-    public final Camera orangepi1;
-    public final Camera orangepi2;
-    public final Camera driverCam;
+    public final Camera shooterCam;
+    public final Camera climberCam;
+    public final Camera intakeCam;
 
     public Camera[] cameraList;
 
@@ -64,22 +64,22 @@ public class Vision extends SubsystemBase{
     public Vision(){
         targets.add(new PhotonTrackedTarget());
 
-        orangepi1 = new Camera(
+        shooterCam = new Camera(
+            "OV9281_4", 
+            cameraPositionsToCenter[0], 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            this
+        );
+
+        climberCam = new Camera(
             "OV9281_3", 
             cameraPositionsToCenter[0], 
             new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
             this
         );
 
-        orangepi2 = new Camera(
-            "OV9281_2", 
-            cameraPositionsToCenter[0], 
-            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
-            this
-        );
-
-        driverCam = new Camera(
-            "MicrosoftLifeCam-3000", 
+        intakeCam = new Camera(
+            "Microsoft_LifeCam_HD-3000", 
             cameraPositionsToCenter[0], 
             new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
             this
@@ -87,14 +87,15 @@ public class Vision extends SubsystemBase{
 
 
         cameraList = new Camera[] {
-            orangepi2,
+            shooterCam,
+            climberCam,
         };
     }
 
     public void periodic(){
 
         Optional<EstimatedRobotPose> estPose;
-        PhotonPipelineResult objectResult = driverCam.getLatestResult();
+        PhotonPipelineResult objectResult = intakeCam.getLatestResult();
         if(objectResult != null){
             if(objectResult.hasTargets()){
                 objectDetectionYaw = objectResult.getBestTarget().getYaw();

@@ -95,20 +95,75 @@ public class Aimbot extends SubsystemBase{
      * Parabolic - Aims to indirectly hit the target, arcing the ball <p>
      * Transport - Sets speed to 0, angle to the lowest possible <p>
      * Manual - Uses operator controls to aim and fire <p>
-     * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled
+     * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled <p>
+     * Preset - aims at the current preset shot type <p>
+     * ShotTable - uses a shot table and interpolates where it should aim <p>
     */
     public enum shotType {
         Direct,
         Parabolic,
-        RegHubShot,
-        Pass,
         Transport,
         Manual,
         Apriltag,
+        Preset,
+        ShotTable,
     }
+
+    public enum presetShotType {
+        Trench,
+        RegHubShot,
+        Pass,
+        Default,
+    }
+
+    /** each double is the angle per foot */
+    private double[] shotTableAngles = {
+        83.0, //1ft
+        78.8, //2ft
+        76.0, //3ft
+        73.0, //4ft
+        72.0, //5ft
+        70.8, //6ft
+        69.7, //7ft
+        68.8, //8ft
+        67.9, //9ft
+        67.2, //10ft
+        66.6, //11ft
+        66.1, //12ft
+        65.7, //13ft
+        65.3, //14ft
+        64.9, //15ft
+    };
+
+    /** each double is the speed per foot */
+    private double[] shotTableSpeeds = {
+        582.0, //1ft
+        551.0, //2ft
+        557.5, //3ft
+        573.1, //4ft
+        592.0, //5ft
+        612.2, //6ft
+        632.8, //7ft
+        653.4, //8ft
+        673.8, //9ft
+        693.9, //10ft
+        713.7, //11ft
+        733.1, //12ft
+        752.1, //13ft
+        770.8, //14ft
+        789.1, //15ft
+        };
+
+    /** max distance for the shot table in feet */
+    private int maxDist = 15; 
+    /** min distance for the shot table in feet */
+    private int minDist = 1;
 
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
+
+    /** Current preset to fire at if shot type is set to preset*/
+    private presetShotType presetShot = presetShotType.Default;
 
     /** Calculated angle set in periodic method, in degrees (includes shooter and camera offsets in calculation already) */
     private double calculatedAngle = 0.0;
@@ -176,6 +231,10 @@ public class Aimbot extends SubsystemBase{
         currentShotType = shotType;
     }
 
+    public void setPreset(presetShotType shotType) {
+        presetShot = shotType;
+    }
+
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
     public void periodic() {
         SmartDashboard.putBoolean("Is enabled", isEnabled);
@@ -206,22 +265,6 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
                 break;
-            case RegHubShot:
-                RegHubShot();
-                SmartDashboard.putBoolean("ShootDirect", false);
-                SmartDashboard.putBoolean("ShootPara", false);
-                SmartDashboard.putBoolean("Transport", false);
-                SmartDashboard.putBoolean("Manual", false);
-                SmartDashboard.putBoolean("ShootApril", false);
-                break;
-            case Pass:
-                pass();
-                SmartDashboard.putBoolean("ShootDirect", false);
-                SmartDashboard.putBoolean("ShootPara", false);
-                SmartDashboard.putBoolean("Transport", false);
-                SmartDashboard.putBoolean("Manual", false);
-                SmartDashboard.putBoolean("ShootApril", false);
-                break;
             case Transport:
                 transport();
                 SmartDashboard.putBoolean("ShootDirect", false);
@@ -245,10 +288,62 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", true);
+                break;
+            case Preset:
+                presetShot();
+                break;
+            case ShotTable:
+                shotTable();
+                break;
         }
 
         useOffsets();
         useRestraints();
+    }
+
+    /** Aims using presets */
+    private void presetShot() {
+
+        switch (presetShot) {
+            case Trench:
+                calculatedSpeed = 0;
+                calculatedAngle = 0;
+                break;
+            case RegHubShot:
+                calculatedAngle = 70;
+                calculatedSpeed = 2000;
+                break;
+            case Pass:
+                calculatedAngle = maxShooterAngle;
+                calculatedSpeed = shooterOptimalSpeed;
+                break;
+            case Default:
+                calculatedSpeed = 0;
+                calculatedAngle = 0;
+                break;
+        }
+    }
+
+    /** Interpolates closest based on a shot table and current distance to target */
+    private void shotTable() {
+            Transform3d distanceToTarget = getTransToTarget();
+
+            double distance = distanceToTarget.getX() + shooterXOffset;
+            distance = Units.metersToFeet(distance);
+            if(distance > maxDist || distance < minDist) {
+                return;
+            }
+
+            double angleDifference = shotTableAngles[(int) Math.ceil(distance)] - shotTableAngles[(int) distance];
+            double speedDifference = shotTableSpeeds[(int) Math.ceil(distance)] - shotTableSpeeds[(int) distance];
+
+            double interpMult = distance % 1;
+
+            angleDifference = angleDifference * interpMult;
+            speedDifference = speedDifference * interpMult;
+
+            calculatedAngle = shotTableAngles[(int) distance] + angleDifference;
+            calculatedSpeed = shotTableSpeeds[(int) distance] + speedDifference;
     }
 
     /** Aims directly at the target */
@@ -318,19 +413,9 @@ public class Aimbot extends SubsystemBase{
         velocityReq = velocityReq / wheelCircumference;
         SmartDashboard.putNumber("VelocityToRotationsPerMinute", velocityReq);
 
-        calculatedSpeed = velocityReq * 60;
-    }
-    /** A RegHubShot angle and speed. will need to be tuned */
-    private void RegHubShot(){
-        calculatedAngle = 70;
-        calculatedSpeed = 2000;
+        calculatedSpeed = velocityReq;
     }
 
-    private void pass(){
-        calculatedAngle = maxShooterAngle;
-        calculatedSpeed = 2000; //TODO tune this
-    }
-    
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;

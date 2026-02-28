@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
+import team7111.robot.subsystems.Aimbot.presetShotType;
 import team7111.robot.subsystems.Autonomous.Paths;
 import team7111.robot.subsystems.Hopper.HopperState;
 import team7111.robot.subsystems.Intake.IntakeState;
@@ -74,6 +75,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
     private boolean defaultDrive = true;
+    private boolean trenchShot = false;
 
     private boolean intaking = false;
     private boolean scoring = false;
@@ -81,7 +83,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean stow = false;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.RegHubShot;
+    private shotType scoringState = shotType.Direct;
+
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -118,7 +121,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putString("SuperState", superState.name());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
-        Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
+        Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPose.toPose2d());
         }
@@ -197,6 +200,15 @@ public class SuperStructure extends SubsystemBase {
             aimAtHub = false;
             scoring = false;
         }
+        if(driverController.getRightStickButtonPressed()) {
+            targeting.setPreset(presetShotType.Trench);
+            targeting.setShotType(shotType.Preset);
+            scoring = true;
+        } else if(driverController.getRightStickButtonReleased()) {
+            targeting.setShotType(shotType.Manual);
+            scoring = false;
+        }
+
 
         if(driverController.getAButtonPressed()) {
             orientWithBump = true;
@@ -391,7 +403,8 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setShotType(shotType.Pass);
+            targeting.setPreset(presetShotType.RegHubShot);
+            targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
@@ -411,7 +424,8 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean pass(){
         targeting.setToggle(true);
-        targeting.setShotType(shotType.RegHubShot);
+        targeting.setPreset(presetShotType.RegHubShot);
+        targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
@@ -429,7 +443,8 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setShotType(shotType.Pass);
+            targeting.setPreset(presetShotType.Pass);
+            targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);

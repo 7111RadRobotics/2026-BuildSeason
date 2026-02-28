@@ -45,11 +45,13 @@ public class Robot extends TimedRobot {
      * initialization code.
      */
     public Robot() {
-        if (DriverStation.getAlliance().isPresent()){
-        zone  = new Zones(DriverStation.getAlliance().get() == Alliance.Red);
-        } else {
-            zone = new Zones(false);
-        }
+        zone = new Zones(() -> {
+            var alliance = DriverStation.getAlliance();
+            if(alliance.isPresent()){
+                return alliance.get() == Alliance.Red;
+            }
+            return false;
+        });
         auto = new Autonomous(zone);
         superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, zone);
     }

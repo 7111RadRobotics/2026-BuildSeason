@@ -58,9 +58,9 @@ public class Autonomous extends SubsystemBase {
      
     public enum Autos {
         forwardTest,
-        leftNeutral,
         Rhub2IN,
         Lhub2IN,
+        RhubINIA,
     }
 
     public enum Paths {
@@ -102,17 +102,11 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.forward)));
                 break;
 
-            case leftNeutral:
-                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
+            case RhubINIA:
                 auto.add(new AutoAction(SuperState.prepareHubShot));
-                auto.add(new AutoAction(SuperState.score));
-                //auto.add(new AutoAction(SuperState.intake));
-                auto.add(new AutoAction(getPath(Paths.trenchLNeutral)));
-                auto.add(new AutoAction(getPath(Paths.trenchLAlliance)));
-                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(null)));
                 break;
 
             case Rhub2IN:
@@ -222,6 +216,8 @@ public class Autonomous extends SubsystemBase {
         List<Waypoint> waypoints = new ArrayList<>();
         List<Pose2d> hubPoses = new ArrayList<>();
         double mapLengthX = 16.5354;
+        double mapLengthY = 8.001;
+        Pose2d ogRobotPose = robotPose;
 
         if (zone.inAllianceZone(robotPose)) {
             for (Pose2d pose: hubPresetPoses) {
@@ -234,30 +230,33 @@ public class Autonomous extends SubsystemBase {
 
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Red) {
-                robotPose = new Pose2d(-robotPose.getX() + mapLengthX, robotPose.getY(), Rotation2d.fromDegrees(((robotPose.getRotation().getDegrees() +180) * -1) % 180));
+                robotPose = new Pose2d(-robotPose.getX() + mapLengthX, -robotPose.getY() + mapLengthY, Rotation2d.fromDegrees(((robotPose.getRotation().getDegrees() +180) * 1) % 180));
             }
         }
-
-        double robotPoseX = robotPose.nearest(hubPoses).getX();
-        double robotPoseY = robotPose.nearest(hubPoses).getY();
-        double robotPoseRot = robotPose.nearest(hubPoses).getRotation().getDegrees();
+        Pose2d nearestPose = robotPose.nearest(hubPoses);
+        double robotPoseX = nearestPose.getX();
+        double robotPoseY = nearestPose.getY();
+        double robotPoseRot = nearestPose.getRotation().getDegrees();
+        double flipMult = 1.0;
+        boolean flipBool = zone.inAllianceZone(ogRobotPose);
+        double allianceOffset = 1;
+        double neutralOffset = 1.5;
 
         if ((robotPoseX == hubPresetPoses[1].getX() && robotPoseY == hubPresetPoses[1].getY()) || (robotPoseX == hubPresetPoses[0].getX() && robotPoseY == hubPresetPoses[0].getY())) {
             if (DriverStation.getAlliance().get() == Alliance.Red) {
-                if (zone.inAllianceZone(robotPose)) {
-                    waypoints.add(balancedPoint(robotPoseX + 1, robotPoseY, robotPoseRot));
-                } else {
-                    waypoints.add(balancedPoint(robotPoseX - 1.5, robotPoseY, robotPoseRot));
-                }
-            } else {
-                if (zone.inAllianceZone(robotPose)) {
-                    waypoints.add(balancedPoint(robotPoseX - 1, robotPoseY, robotPoseRot));
-                } else {
-                    waypoints.add(balancedPoint(robotPoseX + 1.5, robotPoseY, robotPoseRot));
-                }
+                flipBool = !flipBool;
+                flipMult = -1.0;
+                allianceOffset = neutralOffset;
+                neutralOffset = 1;
             }
+            if (flipBool) {
+                waypoints.add(balancedPoint(robotPoseX - (allianceOffset * flipMult), robotPoseY, robotPoseRot));
+            } else {
+                waypoints.add(balancedPoint(robotPoseX + (neutralOffset * flipMult), robotPoseY, robotPoseRot));
+            }
+            
         }
-        waypoints.add(new Waypoint(robotPose.nearest(hubPoses), balancedTransConstraints, balancedRotConstraints));
+        waypoints.add(new Waypoint(nearestPose, balancedTransConstraints, balancedRotConstraints));
         return new Path(waypoints);
     }
 
