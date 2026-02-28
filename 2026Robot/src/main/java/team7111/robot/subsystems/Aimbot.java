@@ -96,6 +96,7 @@ public class Aimbot extends SubsystemBase{
      * Transport - Sets speed to 0, angle to the lowest possible <p>
      * Manual - Uses operator controls to aim and fire <p>
      * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled
+     * Preset - aims at the current preset shot type
     */
     public enum shotType {
         Direct,
@@ -105,10 +106,19 @@ public class Aimbot extends SubsystemBase{
         Transport,
         Manual,
         Apriltag,
+        Preset,
+    }
+
+    public enum presetShotType {
+        Trench,
+        Default,
     }
 
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
+
+    /** Current preset to fire at if shot type is set to preset*/
+    private presetShotType presetShot = presetShotType.Default;
 
     /** Calculated angle set in periodic method, in degrees (includes shooter and camera offsets in calculation already) */
     private double calculatedAngle = 0.0;
@@ -174,6 +184,10 @@ public class Aimbot extends SubsystemBase{
     /** Sets the current shot type to calculate */
     public void setShotType(shotType shotType) {
         currentShotType = shotType;
+    }
+
+    public void setPreset(presetShotType shotType) {
+        presetShot = shotType;
     }
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
@@ -245,10 +259,29 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", true);
+                break;
+            case Preset:
+                presetShot();
+                break;
         }
 
         useOffsets();
         useRestraints();
+    }
+
+    /** Aims using presets */
+    private void presetShot() {
+
+        switch (presetShot) {
+            case Trench:
+                calculatedSpeed = 0;
+                calculatedAngle = 0;
+                break;
+            case Default:
+                calculatedSpeed = 0;
+                calculatedAngle = 0;
+                break;
+        }
     }
 
     /** Aims directly at the target */

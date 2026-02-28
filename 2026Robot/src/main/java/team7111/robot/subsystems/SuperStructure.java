@@ -74,6 +74,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
     private boolean defaultDrive = true;
+    private boolean trenchShot = false;
 
     private boolean intaking = false;
     private boolean scoring = false;
@@ -197,6 +198,15 @@ public class SuperStructure extends SubsystemBase {
             aimAtHub = false;
             scoring = false;
         }
+        if(driverController.getRightStickButtonPressed()) {
+            targeting.setPreset(presetShotType.trench);
+            targeting.setShotType(shotType.preset);
+            scoring = true;
+        } else if(driverController.getRightStickButtonReleased()) {
+            targeting.setShotType(shotType.Manual);
+            scoring = false;
+        }
+
 
         if(driverController.getAButtonPressed()) {
             orientWithBump = true;
