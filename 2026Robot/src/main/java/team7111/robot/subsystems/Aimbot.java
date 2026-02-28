@@ -116,6 +116,49 @@ public class Aimbot extends SubsystemBase{
         Default,
     }
 
+    /** each double is the angle per foot */
+    private double[] shotTableAngles = {
+        83.0, //1ft
+        78.8, //2ft
+        76.0, //3ft
+        73.0, //4ft
+        72.0, //5ft
+        70.8, //6ft
+        69.7, //7ft
+        68.8, //8ft
+        67.9, //9ft
+        67.2, //10ft
+        66.6, //11ft
+        66.1, //12ft
+        65.7, //13ft
+        65.3, //14ft
+        64.9, //15ft
+    };
+
+    /** each double is the speed per foot */
+    private double[] shotTableSpeeds = {
+        582.0, //1ft
+        551.0, //2ft
+        557.5, //3ft
+        573.1, //4ft
+        592.0, //5ft
+        612.2, //6ft
+        632.8, //7ft
+        653.4, //8ft
+        673.8, //9ft
+        693.9, //10ft
+        713.7, //11ft
+        733.1, //12ft
+        752.1, //13ft
+        770.8, //14ft
+        789.1, //15ft
+        };
+
+    /** max distance for the shot table in feet */
+    private int maxDist = 15; 
+    /** min distance for the shot table in feet */
+    private int minDist = 1;
+
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
 
@@ -265,6 +308,9 @@ public class Aimbot extends SubsystemBase{
             case Preset:
                 presetShot();
                 break;
+            case ShotTable:
+                shotTable();
+                break;
         }
 
         useOffsets();
@@ -284,6 +330,28 @@ public class Aimbot extends SubsystemBase{
                 calculatedAngle = 0;
                 break;
         }
+    }
+
+    /** Interpolates closest based on a shot table and current distance to target */
+    private void shotTable() {
+            Transform3d distanceToTarget = getTransToTarget();
+
+            double distance = distanceToTarget.getX() + shooterXOffset;
+            distance = Units.metersToFeet(distance);
+            if(distance > maxDist || distance < minDist) {
+                return;
+            }
+
+            double angleDifference = shotTableAngles[(int) Math.ceil(distance)] - shotTableAngles[(int) distance];
+            double speedDifference = shotTableSpeeds[(int) Math.ceil(distance)] - shotTableSpeeds[(int) distance];
+
+            double interpMult = distance % 1;
+
+            angleDifference = angleDifference * interpMult;
+            speedDifference = speedDifference * interpMult;
+
+            calculatedAngle = shotTableAngles[(int) distance] + angleDifference;
+            calculatedSpeed = shotTableSpeeds[(int) distance] + speedDifference;
     }
 
     /** Aims directly at the target */
@@ -353,8 +421,9 @@ public class Aimbot extends SubsystemBase{
         velocityReq = velocityReq / wheelCircumference;
         SmartDashboard.putNumber("VelocityToRotationsPerMinute", velocityReq);
 
-        calculatedSpeed = velocityReq * 60;
+        calculatedSpeed = velocityReq;
     }
+
     /** A RegHubShot angle and speed. will need to be tuned */
     private void RegHubShot(){
         calculatedAngle = 70;
