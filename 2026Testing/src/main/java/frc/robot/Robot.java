@@ -24,7 +24,8 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   //private final SparkMax motor = new SparkMax(11, MotorType.kBrushless);
-  private TalonFX talon = new TalonFX(9);
+  private TalonFX talon = new TalonFX(16);
+  private TalonFX talon2 = new TalonFX(17);
   private final XboxController controller = new XboxController(0);
 
   /**
@@ -87,8 +88,10 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if (controller.getAButton()) {
       talon.set(0.8);
+      talon2.set(-0.8);
     } else {
       talon.set(0);
+      talon2.set(0);
     }
   }
 
