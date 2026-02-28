@@ -121,7 +121,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putString("SuperState", superState.name());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
-        Pose3d visionRobotPose = vision.getRobotPose(vision.orangepi2, 0.1);
+        Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPose.toPose2d());
         }

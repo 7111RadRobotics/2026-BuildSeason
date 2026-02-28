@@ -34,11 +34,12 @@ public class Camera extends PhotonCamera{
     private PhotonPoseEstimator photonPoseEstimator;
     private PhotonPipelineResult latestResult = new PhotonPipelineResult();
     private PhotonTrackedTarget bestTarget;
-    private Transform3d bestCameraToTarget;
+    private Transform3d bestCameraToTarget = new Transform3d();
     public EstimatedRobotPose estRobotPose;
     public int bestTargetId;
     private AprilTagFieldLayout apriltagMap;
     private Pose2d newPose = new Pose2d();
+    private boolean isObjectCam = false;
     {
         try {
             apriltagMap = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2026RebuiltWelded.m_resourceFile);
@@ -64,26 +65,38 @@ public class Camera extends PhotonCamera{
         this.estRobotPose = estRobotPose;
         photonPoseEstimator = new PhotonPoseEstimator(apriltagMap, estRobotPose.strategy, cameraToRobotCenter); //WAS ERRORED OUT
     }
+
+    public Camera(String cameraName){
+        super(cameraName);
+        isObjectCam = true;
+    }
     
     public void periodic(){
         //Gets the latest result of the unread results.
         List<PhotonPipelineResult> unreadResults = getAllUnreadResults();
-        for (PhotonPipelineResult result : unreadResults){
-            latestResult = result;
+        if(!unreadResults.isEmpty()){
+            for (PhotonPipelineResult result : unreadResults){
+                latestResult = result;
+            }
+            unreadResults.clear();
         }
+        
         
         if(latestResult.hasTargets()){
             bestTarget = latestResult.getBestTarget();
             bestCameraToTarget = bestTarget.getBestCameraToTarget();
             bestTargetId = bestTarget.getFiducialId();
         }
-        Optional<EstimatedRobotPose> estPose = getEstimatedGlobalPose(vision.robotPose);
-        if(estPose.isPresent()){
-            if(photonPoseEstimator.getRobotToCameraTransform() != cameraToRobotCenter){
-                photonPoseEstimator.setRobotToCameraTransform(cameraToRobotCenter);
+        if(!isObjectCam){
+            Optional<EstimatedRobotPose> estPose = getEstimatedGlobalPose(vision.robotPose);
+            if(estPose.isPresent()){
+                if(photonPoseEstimator.getRobotToCameraTransform() != cameraToRobotCenter){
+                    photonPoseEstimator.setRobotToCameraTransform(cameraToRobotCenter);
+                }
+                estRobotPose = estPose.get();
             }
-            estRobotPose = estPose.get();
         }
+        
     }
 
     public boolean updatePose(){
@@ -155,5 +168,8 @@ public class Camera extends PhotonCamera{
         return targets;
     }
 
+    public boolean isObjectCam(){
+        return isObjectCam;
+    }
 }
 

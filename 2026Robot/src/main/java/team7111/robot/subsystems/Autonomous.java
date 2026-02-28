@@ -58,9 +58,9 @@ public class Autonomous extends SubsystemBase {
      
     public enum Autos {
         forwardTest,
-        leftNeutral,
         Rhub2IN,
         Lhub2IN,
+        RhubINIA,
     }
 
     public enum Paths {
@@ -102,17 +102,11 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.forward)));
                 break;
 
-            case leftNeutral:
-                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
+            case RhubINIA:
                 auto.add(new AutoAction(SuperState.prepareHubShot));
-                auto.add(new AutoAction(SuperState.score));
-                //auto.add(new AutoAction(SuperState.intake));
-                auto.add(new AutoAction(getPath(Paths.trenchLNeutral)));
-                auto.add(new AutoAction(getPath(Paths.trenchLAlliance)));
-                auto.add(new AutoAction(SuperState.prepareHubShot).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(null)));
                 break;
 
             case Rhub2IN:
