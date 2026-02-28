@@ -163,6 +163,8 @@ public class SuperStructure extends SubsystemBase {
         }*/
 
         // Driver controller commands
+        stow = driverController.getBButton();
+
         if(driverController.getLeftBumperButtonPressed()) {
             intaking = true;
             useObjectDetection = true;
@@ -238,27 +240,6 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();
         }
-
-        //Operator state commands
-        if(operatorController.getLeftBumperButton()) {
-            passing = true;
-        } else {
-            passing = false;
-        }
-
-        if(operatorController.getRightTriggerAxis() > 0.15) {
-            intaking = true;
-        } else {
-            intaking = false;
-        }
-
-        if(operatorController.getLeftTriggerAxis() > 0.15) {
-            scoring = true;
-        } else {
-            scoring = false;
-        }
-
-        stow = operatorController.getBButton();
 
         hasAcheivedState = manageSuperState(superState);
 
