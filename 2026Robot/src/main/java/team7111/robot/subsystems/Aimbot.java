@@ -23,7 +23,7 @@ public class Aimbot extends SubsystemBase{
     /** Multiplied against the angle stick (left). Called 50x per second, so max rate is this number x50 */
     private double angleSensitivity = 0.005;
     /** Multiplied against the speed stick (Right). Called 50x per second, so max rate is this number x50 */
-    private double speedSensitivity = 0.001;
+    private double speedSensitivity = 0.000001;
 
     /** On scale of 0 - 1, if the controller is less than this, ignores the value */
     private double controllerDeadzone = 0.1;
@@ -429,7 +429,9 @@ public class Aimbot extends SubsystemBase{
             calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleSensitivity;
         }
         if(Math.abs(operatorController.getRightY()) > controllerDeadzone) {
-            calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedSensitivity;
+            calculatedSpeed = operatorController.getRightY() * maxShooterSpeed;
+        } else {
+            calculatedSpeed = 0;
         }
     }
 
@@ -441,15 +443,16 @@ public class Aimbot extends SubsystemBase{
         calculatedAngle = calculatedAngle + shooterAngleOffset;
         
         calculatedSpeed = calculatedSpeed *RPMMult;
-
-        //Deadzone application
-        if(Math.abs(operatorController.getLeftY()) > controllerDeadzone) {
-            calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
+        if(currentShotType != shotType.Manual)
+        {
+            //Deadzone application
+            if(Math.abs(operatorController.getLeftY()) > controllerDeadzone) {
+                calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
+            }
+            if(Math.abs(operatorController.getRightY()) > controllerDeadzone) {
+                calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;
+            }
         }
-        if(Math.abs(operatorController.getRightY()) > controllerDeadzone) {
-            calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;
-        }
-        SmartDashboard.putNumber("calculated angle untampered", calculatedAngle);
     }
 
     //Shoots towards apriltag, or last variables if apriltags are null/disabled

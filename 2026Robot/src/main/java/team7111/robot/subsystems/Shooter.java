@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, true, false, new PIDController(0.00202, 0.0000, 0.0), 
+        1, 20, false, false, new PIDController(0.00202, 0.0000, 0.0), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
@@ -75,7 +75,7 @@ public class Shooter extends SubsystemBase {
     private final double maxHoodTraj = 90 - minHoodPos; // 83
     private final double minHoodTraj = 90 - maxHoodPos; // 59.038
 
-    private ShooterState currentState = ShooterState.stopped;
+    private ShooterState currentState = ShooterState.manual;
 
     public Shooter(Aimbot aimbot) {
         this.aimbot = aimbot;
@@ -83,19 +83,19 @@ public class Shooter extends SubsystemBase {
         double hoodMOI = 0.06244;
 
         hood = RobotBase.isReal()
-            ? new REVMotor(15, new RelativeThroughBore(1, 2, false, 17.5, minHoodPos), hoodConfig)
+            ? new CTREMotor(18, new RelativeThroughBore(0, 1, true, 17.5, minHoodPos), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(
-                    DCMotor.getNEO(1), hoodConfig.gearRatio, hoodMOI, 0.2, 
+                    DCMotor.getKrakenX60(1), hoodConfig.gearRatio, hoodMOI, 0.2, 
                     Degrees.of(minHoodPos).in(Radians), Degrees.of(maxHoodPos).in(Radians), true, Degrees.of(minHoodPos).in(Radians)), 
                 hoodConfig.pid, 
                 hoodConfig.armFF);
         
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
-                new CTREMotor(12, null, flywheelConfig), 
-                new CTREMotor(10, null, flywheelConfig),
+                new CTREMotor(16, null, flywheelConfig), 
+                new CTREMotor(17, null, flywheelConfig),
                 12, true)
             : new FlywheelSimMotor(
                 null, 

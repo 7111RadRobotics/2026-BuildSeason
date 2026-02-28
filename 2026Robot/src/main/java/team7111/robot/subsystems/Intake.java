@@ -56,11 +56,11 @@ public class Intake extends SubsystemBase {
     private final double minPivotPos = 0;
 
     private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
-    private int pivotID = 10;
+    private int pivotID = 12;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
-    private int flywheelLeadID = 11;
-    private int flywheelFollowID = 12;
+    private int flywheelLeadID = 10;
+    private int flywheelFollowID = 11;
 
     private Motor pivot;
 
@@ -103,12 +103,12 @@ public class Intake extends SubsystemBase {
         if(pivotPos <= minPivotPos) {
             pivotPos = minPivotPos;
         }
-        pivot.setSetpoint(pivotPos, false);
+        //pivot.setSetpoint(pivotPos, false);
         //flyWheel.setDutyCycle(flyWheelSpeed);
         //flyWheel.periodic();
 
         
-        pivot.periodic();
+        //pivot.periodic();
         intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
     }
 

@@ -166,6 +166,8 @@ public class SuperStructure extends SubsystemBase {
         }*/
 
         // Driver controller commands
+        stow = driverController.getBButton();
+
         if(driverController.getLeftBumperButtonPressed()) {
             intaking = true;
             useObjectDetection = true;
@@ -251,27 +253,6 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggleVision();
         }
 
-        //Operator state commands
-        if(operatorController.getLeftBumperButton()) {
-            passing = true;
-        } else {
-            passing = false;
-        }
-
-        if(operatorController.getRightTriggerAxis() > 0.15) {
-            intaking = true;
-        } else {
-            intaking = false;
-        }
-
-        if(operatorController.getLeftTriggerAxis() > 0.15) {
-            scoring = true;
-        } else {
-            scoring = false;
-        }
-
-        stow = operatorController.getBButton();
-
         hasAcheivedState = manageSuperState(superState);
 
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
@@ -281,6 +262,7 @@ public class SuperStructure extends SubsystemBase {
 
         //Timing measurement, in milliseconds
         SmartDashboard.putNumber("Time for superstructure periodic", (double) ((endTime - startTime) / 1000000.0));
+        SmartDashboard.putBoolean("manual mode", superState == SuperState.manual);
     }
 
     /**
@@ -525,12 +507,15 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         intake.setState(IntakeState.manual);
         targeting.setShotType(shotType.Manual);
-        hopper.setState(HopperState.manual);  
+        hopper.setState(HopperState.manual);
+        shooter.setState(ShooterState.followAimbot);
         
-        if(!operatorController.getAButton()){
+        /*if(!operatorController.getAButton()){
             intake.setPosition(Math.abs(operatorController.getRightY() * 128));
         }else
             intake.setPosition(128);
+        */
+        hopper.setSpeed(operatorController.getLeftTriggerAxis());
 
         return true;
     }
