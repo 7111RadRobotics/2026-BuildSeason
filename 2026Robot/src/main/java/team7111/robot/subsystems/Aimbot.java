@@ -102,8 +102,6 @@ public class Aimbot extends SubsystemBase{
     public enum shotType {
         Direct,
         Parabolic,
-        RegHubShot,
-        Pass,
         Transport,
         Manual,
         Apriltag,
@@ -113,6 +111,8 @@ public class Aimbot extends SubsystemBase{
 
     public enum presetShotType {
         Trench,
+        RegHubShot,
+        Pass,
         Default,
     }
 
@@ -265,22 +265,6 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
                 break;
-            case RegHubShot:
-                RegHubShot();
-                SmartDashboard.putBoolean("ShootDirect", false);
-                SmartDashboard.putBoolean("ShootPara", false);
-                SmartDashboard.putBoolean("Transport", false);
-                SmartDashboard.putBoolean("Manual", false);
-                SmartDashboard.putBoolean("ShootApril", false);
-                break;
-            case Pass:
-                pass();
-                SmartDashboard.putBoolean("ShootDirect", false);
-                SmartDashboard.putBoolean("ShootPara", false);
-                SmartDashboard.putBoolean("Transport", false);
-                SmartDashboard.putBoolean("Manual", false);
-                SmartDashboard.putBoolean("ShootApril", false);
-                break;
             case Transport:
                 transport();
                 SmartDashboard.putBoolean("ShootDirect", false);
@@ -324,6 +308,14 @@ public class Aimbot extends SubsystemBase{
             case Trench:
                 calculatedSpeed = 0;
                 calculatedAngle = 0;
+                break;
+            case RegHubShot:
+                calculatedAngle = 70;
+                calculatedSpeed = 2000;
+                break;
+            case Pass:
+                calculatedAngle = maxShooterAngle;
+                calculatedSpeed = shooterOptimalSpeed;
                 break;
             case Default:
                 calculatedSpeed = 0;
@@ -424,17 +416,6 @@ public class Aimbot extends SubsystemBase{
         calculatedSpeed = velocityReq;
     }
 
-    /** A RegHubShot angle and speed. will need to be tuned */
-    private void RegHubShot(){
-        calculatedAngle = 70;
-        calculatedSpeed = 2000;
-    }
-
-    private void pass(){
-        calculatedAngle = maxShooterAngle;
-        calculatedSpeed = 2000; //TODO tune this
-    }
-    
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;

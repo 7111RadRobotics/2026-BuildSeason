@@ -83,7 +83,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean stow = false;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.RegHubShot;
+    private shotType scoringState = shotType.Direct;
+
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -402,7 +403,8 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setShotType(shotType.Pass);
+            targeting.setPreset(presetShotType.RegHubShot);
+            targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
@@ -422,7 +424,8 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean pass(){
         targeting.setToggle(true);
-        targeting.setShotType(shotType.RegHubShot);
+        targeting.setPreset(presetShotType.RegHubShot);
+        targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
@@ -440,7 +443,8 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setShotType(shotType.Pass);
+            targeting.setPreset(presetShotType.Pass);
+            targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);
