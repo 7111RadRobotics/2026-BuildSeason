@@ -184,7 +184,7 @@ public class Swerve extends SubsystemBase {
                 manual(0, 0, 0, false, false);
                 break;
             case snapAngle:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), -snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
                 break;
             case followGamePiece:
                 manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false);

@@ -69,21 +69,19 @@ public class SuperStructure extends SubsystemBase {
     private int autoIndex = 0;
     private List<AutoAction> autoActions;
 
-    private boolean aimAtHub = false;
     private boolean alignToHub = false;
     private boolean moveThroughTrench = false;
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
     private boolean defaultDrive = true;
-    private boolean trenchShot = false;
-
+    
     private boolean intaking = false;
     private boolean scoring = false;
     private boolean passing = false;
     private boolean stow = false;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.Direct;
+    private shotType scoringState = shotType.Parabolic;
 
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
@@ -141,28 +139,14 @@ public class SuperStructure extends SubsystemBase {
             swerve.zeroGyro();
             swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
         }
-        if(operatorController.getStartButtonPressed()){
-            if(superState != SuperState.manual)
-                setSuperState(SuperState.manual);
-            else 
-                setSuperState(SuperState.deployed);
-        }
 
-
+        // move through trench button commented due to drivers request
         /*if(driverController.getLeftTriggerAxis() > 0.15 && !moveThroughTrench){
             moveThroughTrench = true;
             swerve.setPath(auto.getNearestTrenchPath(swerve.getPose()));
             swerve.setSwerveState(SwerveState.initializePath);
         }else if(driverController.getLeftTriggerAxis() <= 0.15 && moveThroughTrench){
             moveThroughTrench = false;
-        }
-
-        if(driverController.getLeftBumperButtonPressed()){
-            orientWithBump = true;
-            swerve.setSnapAngle(45);
-            swerve.setSwerveState(SwerveState.snapAngle);
-        }else if(driverController.getLeftBumperButtonReleased()){
-            orientWithBump = false;
         }*/
 
         // Driver controller commands
@@ -175,45 +159,41 @@ public class SuperStructure extends SubsystemBase {
             intaking = false;
             useObjectDetection = false;
         }
+
         if(driverController.getLeftTriggerAxis() > 0.1 && !intaking) {
             intaking = true;
-        }else if(driverController.getLeftTriggerAxis() <= 0.1 && intaking){
+        }else if(driverController.getLeftTriggerAxis() <= 0.1 && intaking && !useObjectDetection){
             intaking = false;
         }
+
         if(driverController.getLeftStickButton()){
             intaking = false;
         }
+
         if(driverController.getRightBumperButtonPressed()) {
             passing = true;
-            scoring = false;
+            targeting.setPreset(presetShotType.RegHubShot);
         } else if(driverController.getRightBumperButtonReleased()) {
             passing = false;
         }
-        if(driverController.getRightTriggerAxis() > 0.1 && !aimAtHub) {
-            aimAtHub = true;
+
+        if(driverController.getRightTriggerAxis() > 0.1 && !scoring) {
             scoring = true;
-            passing = false;
-
-            swerve.setSnapAngle(targeting.getCalculatedDirection());
-            swerve.setSwerveState(SwerveState.snapAngle);
-            scoringState = shotType.Parabolic;
-
-        }else if(driverController.getRightTriggerAxis() <= 0.1 && aimAtHub){
-            aimAtHub = false;
+        }else if(driverController.getRightTriggerAxis() <= 0.1 && scoring){
             scoring = false;
         }
+
         if(driverController.getRightStickButtonPressed()) {
             targeting.setPreset(presetShotType.Trench);
-            targeting.setShotType(shotType.Preset);
-            scoring = true;
+            passing = true;
         } else if(driverController.getRightStickButtonReleased()) {
-            targeting.setShotType(shotType.Manual);
-            scoring = false;
+            passing = false;
         }
-
 
         if(driverController.getAButtonPressed()) {
             orientWithBump = true;
+            swerve.setSnapAngle(45);
+            swerve.setSwerveState(SwerveState.snapAngle);
         } else if(driverController.getAButtonReleased()) {
             orientWithBump = false;
         }
@@ -229,7 +209,7 @@ public class SuperStructure extends SubsystemBase {
             swerve.setGamepieceYaw(vision.getGamepieceYaw());
         }
 
-        defaultDrive = !aimAtHub && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
+        defaultDrive = !scoring && !alignToHub && !moveThroughTrench && !orientWithBump && !useObjectDetection;
 
         if(defaultDrive && !inAuto){
             swerve.setSwerveState(SwerveState.manual);
@@ -364,7 +344,7 @@ public class SuperStructure extends SubsystemBase {
         hopper.setState(HopperState.intake);
         
         if(useObjectDetection){
-            
+            swerve.setSwerveState(SwerveState.followGamePiece);
         }
 
         if(!intaking) {
@@ -406,7 +386,6 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean pass(){
         targeting.setToggle(true);
-        targeting.setPreset(presetShotType.RegHubShot);
         targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.deploy);
@@ -425,7 +404,6 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setPreset(presetShotType.Pass);
             targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.intake);
@@ -443,6 +421,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean prepareHubShot(){
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.followAimbot;
+        swerve.setSnapAngle(targeting.getCalculatedDirection());
+        swerve.setSwerveState(SwerveState.snapAngle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
@@ -465,12 +445,14 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean score(){
         targeting.setToggle(true);
+        
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
             targeting.setShotType(scoringState);
         }
         shooter.setState(ShooterState.followAimbot);
+        swerve.setSnapAngle(targeting.getCalculatedDirection());
         
         if(intaking) {
             setSuperState(SuperState.snowBlowerScore);
@@ -490,6 +472,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(scoringState);
         }
+        swerve.setSnapAngle(targeting.getCalculatedDirection());
         shooter.setState(ShooterState.followAimbot);
         hopper.setState(HopperState.shoot);
         if(!scoring) {
