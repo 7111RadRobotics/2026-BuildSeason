@@ -20,7 +20,7 @@ import team7111.robot.subsystems.Shooter;
 import team7111.robot.subsystems.SuperStructure;
 import team7111.robot.subsystems.Swerve;
 import team7111.robot.subsystems.Vision;
-import team7111.robot.subsystems.Zones;
+import team7111.robot.subsystems.Field;
 import team7111.robot.subsystems.SuperStructure.SuperState;
 
 /**
@@ -30,7 +30,7 @@ import team7111.robot.subsystems.SuperStructure.SuperState;
  */
 public class Robot extends TimedRobot {
 
-    private Zones zone;
+    private Field field;
     private Autonomous auto;
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
@@ -45,15 +45,15 @@ public class Robot extends TimedRobot {
      * initialization code.
      */
     public Robot() {
-        zone = new Zones(() -> {
+        field = new Field(() -> {
             var alliance = DriverStation.getAlliance();
             if(alliance.isPresent()){
                 return alliance.get() == Alliance.Red;
             }
             return false;
         });
-        auto = new Autonomous(zone);
-        superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, zone);
+        auto = new Autonomous(field);
+        superStructure = new SuperStructure(auto, swerve, vision, aimbot, intake, hopper, shooter, field);
     }
 
     /**

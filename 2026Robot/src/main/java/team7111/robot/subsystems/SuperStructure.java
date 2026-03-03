@@ -59,6 +59,7 @@ public class SuperStructure extends SubsystemBase {
     private final Intake intake;
     private final Hopper hopper;
     private final Shooter shooter;
+    private final Field field;
 
     // Buttons of controllers can be assigned to booleans which are checked in various super states. 
     private final XboxController driverController = new XboxController(0);
@@ -96,7 +97,7 @@ public class SuperStructure extends SubsystemBase {
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
      */
-    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Aimbot aimbot, Intake intake, Hopper hopper, Shooter shooter, Zones zone){
+    public SuperStructure(Autonomous auto, Swerve swerve, Vision vision, Aimbot aimbot, Intake intake, Hopper hopper, Shooter shooter, Field field){
         this.auto = auto;
         this.swerve = swerve;
         this.vision = vision;
@@ -104,6 +105,7 @@ public class SuperStructure extends SubsystemBase {
         this.intake = intake;
         this.hopper = hopper;
         this.shooter = shooter;
+        this.field = field;
 
         DriverStation.silenceJoystickConnectionWarning(true);
         this.swerve.setJoysickInputs(() -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX());

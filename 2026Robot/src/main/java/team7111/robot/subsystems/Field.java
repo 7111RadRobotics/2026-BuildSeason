@@ -5,11 +5,11 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Zones extends SubsystemBase {
+public class Field extends SubsystemBase {
     
     private BooleanSupplier isRedAlliance;
 
-    public Zones(BooleanSupplier isRedAlliance){
+    public Field(BooleanSupplier isRedAlliance){
         this.isRedAlliance = isRedAlliance;
     }
 

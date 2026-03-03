@@ -22,7 +22,7 @@ public class Autonomous extends SubsystemBase {
 
     Timer timer = new Timer();
 
-    Zones zone;
+    Field zone;
 
 
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
@@ -80,7 +80,7 @@ public class Autonomous extends SubsystemBase {
         LNsweep,
     }
 
-    public Autonomous(Zones zone){
+    public Autonomous(Field zone){
         for (Autos auto : Autos.values()) {
             autoChooser.addOption(auto.name(), auto);
         }
