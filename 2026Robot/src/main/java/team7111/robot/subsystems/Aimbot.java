@@ -2,7 +2,6 @@ package team7111.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,6 +16,10 @@ public class Aimbot extends SubsystemBase{
     /** Given as backup for if camera detects no valid apriltag */
     private Supplier<Pose2d> robotPose;
     
+
+    private final Pose3d blueHub = new Pose3d(4.635, 4.039, Units.inchesToMeters(72), null); 
+    private final Pose3d redHub = new Pose3d(11.946, 4.039, Units.inchesToMeters(72), null); 
+        
     //CONTROLLER
     /** Controls the manual firing, and adds angle if the stick is moved */
     private XboxController operatorController = null;
@@ -172,15 +175,23 @@ public class Aimbot extends SubsystemBase{
     /** The direction in degrees to the target */
     private double degreeToTarget = 0.0;
 
-    public Aimbot(Vision vision, Supplier<Pose2d> robotPose, Pose3d targetPose) {
+    public Aimbot(Vision vision, Supplier<Pose2d> robotPose) {
         this.vision = vision;
         this.robotPose = robotPose;
-        this.targetPose = targetPose;
+        
+        //Defaults to shooting at the blue hub
+        this.targetPose = blueHub;
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
-    public void giveResources(XboxController operatorController) {
+    public void giveResources(XboxController operatorController, boolean isBlueAlliance) {
         this.operatorController = operatorController;
+
+        if(isBlueAlliance) {
+            this.targetPose = blueHub;
+        } else {
+            this.targetPose = redHub;
+        }
     }
 
     /** Sets the angle offsets for the camera and the shooter, measured from horizontal */
