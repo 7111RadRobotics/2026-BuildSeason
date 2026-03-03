@@ -580,6 +580,11 @@ public class Aimbot extends SubsystemBase{
 
         rotation = 90 - rotation;
 
+        if(rotation < -180) {
+            rotation += 360;
+        } else if(rotation > 180) {
+            rotation -= 360;
+        }
 
         double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
         Transform3d returnedTrans = new Transform3d(
