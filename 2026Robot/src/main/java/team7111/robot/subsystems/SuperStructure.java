@@ -2,13 +2,16 @@ package team7111.robot.subsystems;
 
 import java.util.List;
 
+import javax.lang.model.element.ModuleElement.DirectiveKind;
 import javax.print.attribute.standard.RequestingUserName;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
@@ -83,6 +86,12 @@ public class SuperStructure extends SubsystemBase {
     private shotType currentShot = shotType.Transport;
     private shotType scoringState = shotType.Parabolic;
 
+    private String gameData;
+    private boolean bHub = false;
+    private boolean hasData = false;
+
+    private Timer phaseTimer = new Timer();
+
     /**
      * The constructor will take each subsystem as an argument and save them as objects in the class. 
      * @param subsystem represents a subsystem. 
@@ -102,6 +111,7 @@ public class SuperStructure extends SubsystemBase {
         this.swerve.setSwerveState(SwerveState.manual);
 
         targeting.giveResources(operatorController);
+
     }
 
     /**
@@ -113,10 +123,49 @@ public class SuperStructure extends SubsystemBase {
          * score left trigger
          * pass left bumper
          */
+        gameData = DriverStation.getGameSpecificMessage();
+        if(!hasData && !gameData.isEmpty()) {
+            if(gameData.charAt(0) == 'B') {
+                    bHub = false;
+                    hasData = true;
+                } else if(gameData.charAt(0) == 'R') {
+                    bHub = true;
+                    hasData = true;
+                } else {
+                    hasData = false;
+                }
+        }
+
+        if (DriverStation.isTeleopEnabled() && hasData) {
+            phaseTimer.start();
+        } else if (DriverStation.isDisabled()) {
+            phaseTimer.stop();
+            phaseTimer.reset();
+        }
+        
+        if(phaseTimer.get() >= 20 && phaseTimer.get() <= 21) {
+           
+            driverController.setRumble(RumbleType.kBothRumble, 1);            
+        } else {
+            driverController.setRumble(RumbleType.kBothRumble, 0);
+        }
+        
+
+        if (phaseTimer.hasElapsed(25)) {
+             bHub = !bHub;
+             
+             phaseTimer.restart();
+        }
+
+
         
         //Timer for the periodic
         long startTime = System.nanoTime();
         SmartDashboard.putString("SuperState", superState.name());
+
+        SmartDashboard.putBoolean("bHub", bHub);
+        SmartDashboard.putString("gameData", gameData);
+        SmartDashboard.putNumber("phaseTime", phaseTimer.get());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
         Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
@@ -214,7 +263,7 @@ public class SuperStructure extends SubsystemBase {
         if(defaultDrive && !inAuto){
             swerve.setSwerveState(SwerveState.manual);
         }
-
+        
 
         // Operator controller commands
         if(operatorController.getStartButtonPressed()) {
@@ -623,4 +672,6 @@ public class SuperStructure extends SubsystemBase {
     public void disableAuto(){
         superState = SuperState.autonomousExit;
     }
+
+    
 }
