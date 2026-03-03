@@ -210,7 +210,16 @@ public class Aimbot extends SubsystemBase{
     }
 
     public double getCalculatedDirection() {
-        return this.degreeToTarget  + rioToShooterOffset;
+
+        // Checks and ensures between -180 and 180
+        double returnAngle = degreeToTarget + rioToShooterOffset;
+        if(returnAngle < -180) {
+            returnAngle += 360;
+        } else if(returnAngle > 180) {
+            returnAngle -= 360;
+        }
+
+        return returnAngle;
     }
 
     public boolean getToggle(){
@@ -579,12 +588,6 @@ public class Aimbot extends SubsystemBase{
         }
 
         rotation = 90 - rotation;
-
-        if(rotation < -180) {
-            rotation += 360;
-        } else if(rotation > 180) {
-            rotation -= 360;
-        }
 
         double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
         Transform3d returnedTrans = new Transform3d(
