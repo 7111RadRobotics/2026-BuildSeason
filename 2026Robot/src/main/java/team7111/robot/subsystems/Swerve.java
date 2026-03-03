@@ -184,6 +184,13 @@ public class Swerve extends SubsystemBase {
                 manual(0, 0, 0, false, false);
                 break;
             case snapAngle:
+                // Optimize code
+                double difference = snapAngleSetpoint - getYaw().getDegrees();
+
+                if(difference > 180) {
+                    snapAngleSetpoint += 360;
+                }
+
                 manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), -snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
                 break;
             case followGamePiece:
