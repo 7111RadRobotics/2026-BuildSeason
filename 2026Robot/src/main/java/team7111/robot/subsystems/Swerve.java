@@ -188,6 +188,8 @@ public class Swerve extends SubsystemBase {
                 double difference = snapAngleSetpoint - getYaw().getDegrees();
 
                 if(difference > 180) {
+                    snapAngleSetpoint -= 360;
+                } else if(difference < -180) {
                     snapAngleSetpoint += 360;
                 }
 
