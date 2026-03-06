@@ -6,8 +6,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Aimbot extends SubsystemBase{
     /** Given as backup for if camera detects no valid apriltag */
     private Supplier<Pose2d> robotPose;
+    private Supplier<Transform2d> robotVelocity;
     
-
     private final Pose3d blueHub = new Pose3d(4.635, 4.039, Units.inchesToMeters(72), null); 
     private final Pose3d redHub = new Pose3d(11.946, 4.039, Units.inchesToMeters(72), null); 
         
@@ -158,9 +160,19 @@ public class Aimbot extends SubsystemBase{
         };
 
     /** max distance for the shot table in feet */
-    private int maxDist = 15; 
+    private final int maxDist = 15; 
     /** min distance for the shot table in feet */
-    private int minDist = 1;
+    private final int minDist = 1;
+
+    // On the move code
+    /** Time per iteration in moving shot code, in seconds */
+    private final double timeStep = 0.05;
+    /** Max time in seconds the robot will calculate, in seconds */
+    private final double maxFltTime = 6;
+    /** Starting calculation step for the shooter, in seconds */
+    private final double startingTimeStep = 2.0;
+    /** Minimum angle the ball is allowed to fall into the target while using on the move shooting, in degrees from horizontal (positive is downwards) */
+    private final double minImpactAngle = 65;
 
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
@@ -175,9 +187,10 @@ public class Aimbot extends SubsystemBase{
     /** The direction in degrees to the target */
     private double degreeToTarget = 0.0;
 
-    public Aimbot(Vision vision, Supplier<Pose2d> robotPose) {
+    public Aimbot(Vision vision, Supplier<Pose2d> robotPose, Supplier<Transform2d> robotVelocity) {
         this.vision = vision;
         this.robotPose = robotPose;
+        this.robotVelocity = robotVelocity;
         
         //Defaults to shooting at the blue hub
         this.targetPose = blueHub;
@@ -436,6 +449,47 @@ public class Aimbot extends SubsystemBase{
         calculatedSpeed = velocityReq;
     }
 
+    /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
+    public void shootOnTheMove() {
+
+        //Difference in poses to the target
+        Transform3d difference = getTransToTarget();
+
+        Transform2d robotVel;
+
+        
+        //T is in a scale of timeStep
+        for(double t = startingTimeStep; t < maxFltTime; t += timeStep) {
+
+            //X is forward/back, Y is left/right, Z is height
+            Transform3d outputVel = new Transform3d((difference.getX()/t) - robotVelocity.get().getX(), 
+                                                    (difference.getY()/t) - robotVelocity.get().getY(), 
+                                                    (difference.getZ()/t) - ((0.5)*-9.81*t),
+                                                     null);
+
+            double targetingAngleOffset = Math.atan2(outputVel.getY(), outputVel.getX());
+            
+            double shootingAngle = Math.atan2(outputVel.getZ(), outputVel.getX());
+            double shootingSpeed = Math.hypot(Math.hypot(outputVel.getZ(), outputVel.getY()), outputVel.getX());
+
+            //Constraints
+            if(shootingSpeed <= maxShooterSpeed && shootingAngle >= minShooterAngle) {
+                if(shootingAngle <= maxShooterAngle) {
+                    double impactXVel = outputVel.getX();
+                    double impactZVel = outputVel.getZ() - (9.81*difference.getX()) / outputVel.getX();
+
+                    double impactAngle = Math.atan2(-impactZVel, impactXVel);
+
+                    if(impactAngle > minImpactAngle) {
+                        calculatedAngle = shootingAngle;
+                        calculatedSpeed = shootingSpeed;
+                        degreeToTarget += targetingAngleOffset;
+                    }
+                }
+            }
+        }
+    }
+
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;
@@ -519,7 +573,8 @@ public class Aimbot extends SubsystemBase{
                 return null;
             }
             //Robot relative
-            Transform3d calculatedPos = new Transform3d(visionResults.getX() + camToTargetXOffset, //Distance to the target from center of robot
+            Transform3d calculatedPos = new Transform3d(
+                visionResults.getX() + camToTargetXOffset, //Distance to the target from center of robot
                 visionResults.getY(), //Left/Right offset of the robot to the target
                 visionResults.getZ() + camToTargetHeightOffset, //Height of the target (from 0)
                 null);

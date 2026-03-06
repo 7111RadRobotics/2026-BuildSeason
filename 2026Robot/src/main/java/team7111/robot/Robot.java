@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
     private Autonomous auto;
     private Swerve swerve = new Swerve();
     private Vision vision = new Vision();
-    private Aimbot aimbot = new Aimbot(vision, swerve::getPose);
+    private Aimbot aimbot = new Aimbot(vision, swerve::getPose, swerve::getVelocity());
     private Intake intake = new Intake();
     private Hopper hopper = new Hopper();
     private Shooter shooter = new Shooter(aimbot);

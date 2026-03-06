@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -63,6 +64,13 @@ public class Swerve extends SubsystemBase {
 
     private PIDController gamepieceAnglePID;
     private double gamepieceYaw = 0;
+
+    /** X velocity of the robot relative to itself */
+    private double robotXVelocity;
+    /** Y velocity of the robot relative to itself */
+    private double robotYVelocity;
+    /** Rotation velocity of the robot, CW positive */
+    private double rotationVelocity;
 
     private final double controllerDeadzone = 0.0;
 
@@ -237,6 +245,10 @@ public class Swerve extends SubsystemBase {
         leftRight *= SwerveConstants.maxDriveVelocity;
         rotation *= SwerveConstants.maxAngularVelocity;
 
+        robotXVelocity = forwardBack;
+        robotYVelocity = leftRight;
+        rotationVelocity = rotation;
+
         // Get desired module states.
         ChassisSpeeds chassisSpeeds = isFieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw())
@@ -304,6 +316,11 @@ public class Swerve extends SubsystemBase {
 
     public Pose2d getPose() {
         return swerveOdometry.getEstimatedPosition();
+    }
+
+    /** Robot relative, X is forward/back, Y is left/Right, rotation is the robot rotation value */
+    public Transform2d getVelocity() {
+        return new Transform2d(robotXVelocity, robotYVelocity, new Rotation2d(rotationVelocity));
     }
 
     public void resetOdometry(Pose2d pose) {
