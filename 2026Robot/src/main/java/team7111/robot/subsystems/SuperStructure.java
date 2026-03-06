@@ -417,7 +417,6 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
-            targeting.setPreset(presetShotType.RegHubShot);
             targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.deploy);
@@ -550,7 +549,7 @@ public class SuperStructure extends SubsystemBase {
         }else
             intake.setPosition(128);
         */
-        hopper.setSpeed(operatorController.getLeftTriggerAxis());
+        //hopper.setSpeed(operatorController.getLeftTriggerAxis());
 
         return true;
     }

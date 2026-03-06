@@ -57,11 +57,11 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        105.6, 20, false, false, new PIDController(2, 0.052, 0.015), 
+        105.6, 20, false, false, new PIDController(0.65, 0.003, 0.00035), 
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.00202, 0.0000, 0.0), 
+        1, 20, false, false, new PIDController(0.00225, 0.0000, 0.03), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
@@ -70,10 +70,10 @@ public class Shooter extends SubsystemBase {
     private double hoodTrajSetpoint = 60;
     private double flywheelSpeed = 0;
 
-    private final double maxHoodPos = 30.962;
-    private final double minHoodPos = 7;
-    private final double maxHoodTraj = 90 - minHoodPos; // 83
-    private final double minHoodTraj = 90 - maxHoodPos; // 59.038
+    private final double maxHoodPos = 30;//30.962;
+    private final double minHoodPos = 8;//7
+    private final double maxHoodTraj = 90 - minHoodPos; // 82 //83
+    private final double minHoodTraj = 90 - maxHoodPos; // 60 //59.038
 
     private ShooterState currentState = ShooterState.manual;
 
@@ -115,9 +115,9 @@ public class Shooter extends SubsystemBase {
         flywheels.periodic();
 
         if(hoodTrajSetpoint > maxHoodTraj){
-            hood.setSetpoint(maxHoodPos, false);
-        }else if(hoodTrajSetpoint < minHoodTraj){
             hood.setSetpoint(minHoodPos, false);
+        }else if(hoodTrajSetpoint < minHoodTraj){
+            hood.setSetpoint(maxHoodPos, false);
         }else{
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
         }
@@ -142,12 +142,12 @@ public class Shooter extends SubsystemBase {
     // These can be checked in SuperStructure to determine a SuperState
     // or change a state/value in another subsystem.
     public boolean isAtSetpoint(){
-        boolean isAtSetpoint = hood.isAtSetpoint(2); 
+        boolean isAtSetpoint = hood.isAtSetpoint(1); 
         return isAtSetpoint;
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(250);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(500);
         return isAtSetpoint;
     }
 
@@ -204,7 +204,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void stopped(){
-        hoodTrajSetpoint = 50;
+        hoodTrajSetpoint = 75;
         flywheelSpeed = 0;
     }
 

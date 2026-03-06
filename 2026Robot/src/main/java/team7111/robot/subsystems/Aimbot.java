@@ -326,12 +326,12 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 0;
-                calculatedAngle = 0;
+                calculatedSpeed = 2500;
+                calculatedAngle = 60;
                 break;
             case RegHubShot:
-                calculatedAngle = 70;
-                calculatedSpeed = 2000;
+                calculatedAngle = 75;
+                calculatedSpeed = 2500;
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;

@@ -103,10 +103,10 @@ public class Intake extends SubsystemBase {
         if(pivotPos <= minPivotPos) {
             pivotPos = minPivotPos;
         }
-        pivot.setSetpoint(pivotPos, false);
-        flyWheel.setDutyCycle(flyWheelSpeed);
+        //pivot.setSetpoint(pivotPos, false);
+        //flyWheel.setDutyCycle(flyWheelSpeed);
         
-        flyWheel.periodic();        
+        flyWheel.periodic();
         pivot.periodic();
         intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
     }
