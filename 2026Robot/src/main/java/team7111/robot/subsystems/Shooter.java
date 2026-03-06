@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase {
     public Shooter(Aimbot aimbot) {
         this.aimbot = aimbot;
 
-        double hoodMOI = 0.06244;
+        double hoodMOI = 0.0708190376784300761;
 
         hood = RobotBase.isReal()
             ? new CTREMotor(18, new RelativeThroughBore(0, 1, true, 17.5, minHoodPos), hoodConfig)
