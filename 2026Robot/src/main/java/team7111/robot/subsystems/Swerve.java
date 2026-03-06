@@ -318,7 +318,7 @@ public class Swerve extends SubsystemBase {
         return swerveOdometry.getEstimatedPosition();
     }
 
-    /** Robot relative, X is forward/back, Y is left/Right, rotation is the robot rotation value */
+    /** Field relative, X is forward/back, Y is left/Right, rotation is the robot rotation value */
     public Transform2d getVelocity() {
         return new Transform2d(robotXVelocity, robotYVelocity, new Rotation2d(rotationVelocity));
     }

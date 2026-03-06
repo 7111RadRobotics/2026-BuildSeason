@@ -454,29 +454,43 @@ public class Aimbot extends SubsystemBase{
 
         //Difference in poses to the target
         Transform3d difference = getTransToTarget();
+        
+        double rotToTarget = degreeToTarget;
+        //Field relative, robotPose.get().getRotation() gets robot rotation.
+        //X is forward/backward along the field (towards other alliance)
+        //Y is left/right
+        Transform2d robotVel = robotVelocity.get();
 
-        Transform2d robotVel;
+        double theta = Math.toRadians(degreeToTarget);
 
+        double robotXVelocity =
+            robotVel.getX() * Math.cos(theta) +
+            robotVel.getY() * Math.sin(theta);
+
+        double robotYVelocity =
+            -robotVel.getX() * Math.sin(theta) +
+            robotVel.getY() * Math.cos(theta);
         
         //T is in a scale of timeStep
         for(double t = startingTimeStep; t < maxFltTime; t += timeStep) {
 
             //X is forward/back, Y is left/right, Z is height
-            Transform3d outputVel = new Transform3d((difference.getX()/t) - robotVelocity.get().getX(), 
-                                                    (difference.getY()/t) - robotVelocity.get().getY(), 
+            Transform3d outputVel = new Transform3d((difference.getX()/t) - robotXVelocity, 
+                                                    (difference.getY()/t) - robotYVelocity, 
                                                     (difference.getZ()/t) - ((0.5)*-9.81*t),
                                                      null);
 
             double targetingAngleOffset = Math.atan2(outputVel.getY(), outputVel.getX());
             
-            double shootingAngle = Math.atan2(outputVel.getZ(), outputVel.getX());
+            double shootingAngle = Math.atan2(outputVel.getZ(),
+                                   Math.hypot(outputVel.getX(), outputVel.getY()));
             double shootingSpeed = Math.hypot(Math.hypot(outputVel.getZ(), outputVel.getY()), outputVel.getX());
 
             //Constraints
             if(shootingSpeed <= maxShooterSpeed && shootingAngle >= minShooterAngle) {
                 if(shootingAngle <= maxShooterAngle) {
                     double impactXVel = outputVel.getX();
-                    double impactZVel = outputVel.getZ() - (9.81*difference.getX()) / outputVel.getX();
+                    double impactZVel = outputVel.getZ() - 9.81 * t;
 
                     double impactAngle = Math.atan2(-impactZVel, impactXVel);
 
@@ -484,6 +498,7 @@ public class Aimbot extends SubsystemBase{
                         calculatedAngle = shootingAngle;
                         calculatedSpeed = shootingSpeed;
                         degreeToTarget += targetingAngleOffset;
+                        return;
                     }
                 }
             }
@@ -631,10 +646,6 @@ public class Aimbot extends SubsystemBase{
                 rotation = Math.atan(-ydif/xdif) * 180/Math.PI + 90;
             }
         } else {
-            //ISSUE:
-            //Vision uses local x and y difference
-            //This is using field relative x and y difference
-            //Same reason angle is hard to calculate
             if(ydif > 0) {
                 rotation = Math.atan(ydif/-xdif) * 180/Math.PI + 270;
             } else {
