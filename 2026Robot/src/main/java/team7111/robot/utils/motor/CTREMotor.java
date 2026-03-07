@@ -38,6 +38,7 @@ public class CTREMotor implements Motor {
     private double negativeVoltageLimit = -100;
     private double positiveVelocityLimit = 5000;
     private double negativeVelocityLimit = -5000;
+    private Follower follower;
     private SimpleMotorFeedforward feedforward;
     private ArmFeedforward armFF;
     private ElevatorFeedforward elevatorFF;
@@ -221,6 +222,10 @@ public class CTREMotor implements Motor {
         this.isFollower = isFollower;
         this.leaderID = id;
         this.isFollowerInverted = isInverted;
+        MotorAlignmentValue motorAlignmentValue = isFollowerInverted
+            ? MotorAlignmentValue.Opposed
+            : MotorAlignmentValue.Aligned;
+        follower = new Follower(id, motorAlignmentValue);
     }
 
     public void periodic(){
@@ -235,7 +240,7 @@ public class CTREMotor implements Motor {
             : MotorAlignmentValue.Aligned;
 
         if (isFollower) {
-            motor.setControl(new Follower(leaderID, motorAlignmentValue));
+            motor.setControl(follower.withLeaderID(leaderID).withMotorAlignment(motorAlignmentValue));
         }
         /*pid = new PIDController(
             motorPEntry.getDouble(0), 

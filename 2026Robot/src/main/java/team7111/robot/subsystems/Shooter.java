@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(1.2, 0.0000, 0.0), 
+        1, 20, false, false, new PIDController(1.5, 0.0000, 0.1), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
@@ -96,7 +96,7 @@ public class Shooter extends SubsystemBase {
             ? new TwoMotors(
                 new CTREMotor(16, null, flywheelConfig), 
                 new CTREMotor(17, null, flywheelConfig),
-                12, true)
+                16, true)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60(2), 0.01, 1), DCMotor.getKrakenX60(2), 0.1),
