@@ -1,5 +1,6 @@
 package team7111.robot.subsystems;
 
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,7 +11,9 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -19,9 +22,17 @@ public class Aimbot extends SubsystemBase{
     private Supplier<Pose2d> robotPose;
     private Supplier<Transform2d> robotVelocity;
     
-    private final Pose3d blueHub = new Pose3d(4.635, 4.039, Units.inchesToMeters(72), null); 
-    private final Pose3d redHub = new Pose3d(11.946, 4.039, Units.inchesToMeters(72), null); 
-        
+    private final Pose3d blueHub = new Pose3d(4.635, 4.034536, Units.inchesToMeters(72), null); 
+    private final Pose3d redHub = new Pose3d(11.946, 4.034536, Units.inchesToMeters(72), null); 
+    
+    /** Distance from the wall on each alliance to shoot at when passing */
+    private final double edgeOffset = 1.0;
+    /** Y offset of targets for each corner when passing, from the center of the field's Y pos */
+    private final double yOffset = 4.034536 / 2.0;
+    /** Blue alliance middle, red alliance middle */
+    private final Pose3d[] corners = {new Pose3d(edgeOffset, 4.034536, 0, null), 
+                                      new Pose3d(16.540988-edgeOffset, 4.034536, 0, null)};
+
     //CONTROLLER
     /** Controls the manual firing, and adds angle if the stick is moved */
     private XboxController operatorController = null;
@@ -64,7 +75,7 @@ public class Aimbot extends SubsystemBase{
     /** Maximum shooter angle in degrees, from horizontal */
     private final double maxShooterAngle = 83;
     
-    private final double lowestShooterAngle = maxShooterAngle;
+    private final double lowestShooterAngle = minShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
     private final double maxShooterSpeed = 3000;
@@ -103,6 +114,7 @@ public class Aimbot extends SubsystemBase{
      * Apriltag - Targets directly to the most well seen apriltag, or continues current values if vision is disabled <p>
      * Preset - aims at the current preset shot type <p>
      * ShotTable - uses a shot table and interpolates where it should aim <p>
+     * ShootOnTheMove - Uses leading to fire a ball rather than directly at the target. Also will shoot at corners if the robot is not in its alliance <p>
     */
     public enum shotType {
         Direct,
@@ -112,6 +124,7 @@ public class Aimbot extends SubsystemBase{
         Apriltag,
         Preset,
         ShotTable,
+        ShootOnTheMove,
     }
 
     public enum presetShotType {
@@ -173,6 +186,15 @@ public class Aimbot extends SubsystemBase{
     private final double startingTimeStep = 2.0;
     /** Minimum angle the ball is allowed to fall into the target while using on the move shooting, in degrees from horizontal (positive is downwards) */
     private final double minImpactAngle = 65;
+    /** If no valid shooting solution is found, sets this to false. */
+    private boolean possibleToFire = false;
+
+    /** Used to see if the target has changed at all, set each time it goes through the loop */
+    private Pose3d prevTarget = null;
+    /** If the firing stays on on the move shooting, turns to true. */
+    private boolean uninterruptedFiring = false;
+    /** If has calculated the time to fire a ball already, and still using the same target and firing method (most likely havent moved much) */
+    private double timeOffset = 0;
 
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
@@ -211,6 +233,11 @@ public class Aimbot extends SubsystemBase{
     public void setOffsets(double cameraOffset, double shooterOffset) {
         this.cameraAngleOffset = cameraOffset;
         this.shooterAngleOffset = shooterOffset;
+    }
+
+    /** Returns if a shooting solution has been found. Only used with on the move shooting. */
+    public boolean shotPossibleOnTheMove() {
+        return possibleToFire;
     }
 
     /** Returns calculated angle the shooter needs to fire at */
@@ -268,6 +295,20 @@ public class Aimbot extends SubsystemBase{
         presetShot = shotType;
     }
 
+    /** Allows custom targeting to a target position. Does not affect anything if shooting with vision. */
+    public void setCustomTarget(Pose3d customTarget) {
+        targetPose = customTarget;
+    }
+    
+    /** Resets the target to default (the current alliance hub for most shooting modes, unless otherwise specified) */
+    public void resetTarget() {
+        if(DriverStation.getAlliance().get() == Alliance.Blue) {
+            targetPose = blueHub;
+        } else {
+            targetPose = redHub;
+        }
+    }
+
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
     public void periodic() {
         SmartDashboard.putBoolean("Is enabled", isEnabled);
@@ -289,6 +330,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
+                SmartDashboard.putBoolean("On the move", false);
                 break;
             case Parabolic:
                 parabolicShot();
@@ -297,6 +339,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
+                SmartDashboard.putBoolean("On the move", false);
                 break;
             case Transport:
                 transport();
@@ -305,6 +348,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", true);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", false);
+                SmartDashboard.putBoolean("On the move", false);
                 break;
             case Manual:
                 manual();
@@ -313,6 +357,7 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", true);
                 SmartDashboard.putBoolean("ShootApril", false);
+                SmartDashboard.putBoolean("On the move", false);
                 break;
             case Apriltag:
                 apriltag();
@@ -321,6 +366,16 @@ public class Aimbot extends SubsystemBase{
                 SmartDashboard.putBoolean("Transport", false);
                 SmartDashboard.putBoolean("Manual", false);
                 SmartDashboard.putBoolean("ShootApril", true);
+                SmartDashboard.putBoolean("On the move", false);
+                break;
+            case ShootOnTheMove:
+                shootOnTheMove();
+                SmartDashboard.putBoolean("On the move", true);
+                SmartDashboard.putBoolean("ShootDirect", false);
+                SmartDashboard.putBoolean("ShootPara", false);
+                SmartDashboard.putBoolean("Transport", false);
+                SmartDashboard.putBoolean("Manual", false);
+                SmartDashboard.putBoolean("ShootApril", false);
                 break;
             case Preset:
                 presetShot();
@@ -329,6 +384,11 @@ public class Aimbot extends SubsystemBase{
                 shotTable();
                 break;
         }
+
+        if(currentShotType != shotType.ShootOnTheMove) {
+            uninterruptedFiring = false;
+        }
+        prevTarget = targetPose;
 
         useOffsets();
         useRestraints();
@@ -452,10 +512,16 @@ public class Aimbot extends SubsystemBase{
     /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
     public void shootOnTheMove() {
 
+        /** If continuously firing, this is the time discrepancy it will give as padding to the previous time calculation.
+         *  paddingTime/timeStep is a rough estemate of the time it will take per shot to calculate. Lower this value if too processor heavy
+         */
+        final double paddingTime = 0.25;
+
+        possibleToFire = false;
+
         //Difference in poses to the target
         Transform3d difference = getTransToTarget();
-        
-        double rotToTarget = degreeToTarget;
+    
         //Field relative, robotPose.get().getRotation() gets robot rotation.
         //X is forward/backward along the field (towards other alliance)
         //Y is left/right
@@ -471,8 +537,14 @@ public class Aimbot extends SubsystemBase{
             -robotVel.getX() * Math.sin(theta) +
             robotVel.getY() * Math.cos(theta);
         
+        //Allows to skip
+        if(!(uninterruptedFiring && prevTarget == targetPose)) {
+            timeOffset = 0;
+        }
+
+        boolean wasWithinConstraints = false;
         //T is in a scale of timeStep
-        for(double t = startingTimeStep; t < maxFltTime; t += timeStep) {
+        for(double t = startingTimeStep + timeOffset; t < maxFltTime; t += timeStep) {
 
             //X is forward/back, Y is left/right, Z is height
             Transform3d outputVel = new Transform3d((difference.getX()/t) - robotXVelocity, 
@@ -484,7 +556,11 @@ public class Aimbot extends SubsystemBase{
             
             double shootingAngle = Math.atan2(outputVel.getZ(),
                                    Math.hypot(outputVel.getX(), outputVel.getY()));
+            shootingAngle = Units.radiansToDegrees(shootingAngle);
             double shootingSpeed = Math.hypot(Math.hypot(outputVel.getZ(), outputVel.getY()), outputVel.getX());
+
+            // m/s to rpm
+            shootingSpeed = (shootingSpeed / wheelCircumference) * 60;
 
             //Constraints
             if(shootingSpeed <= maxShooterSpeed && shootingAngle >= minShooterAngle) {
@@ -492,16 +568,27 @@ public class Aimbot extends SubsystemBase{
                     double impactXVel = outputVel.getX();
                     double impactZVel = outputVel.getZ() - 9.81 * t;
 
-                    double impactAngle = Math.atan2(-impactZVel, impactXVel);
+                    double impactAngle = Units.radiansToDegrees(Math.atan2(-impactZVel, impactXVel));
+
+                    wasWithinConstraints = true;
 
                     if(impactAngle > minImpactAngle) {
                         calculatedAngle = shootingAngle;
                         calculatedSpeed = shootingSpeed;
-                        degreeToTarget += targetingAngleOffset;
+                        degreeToTarget += Units.radiansToDegrees(targetingAngleOffset);
+                        timeOffset = t - startingTimeStep - paddingTime; //Optimization for firing continuously
+                        uninterruptedFiring = true;
+                        possibleToFire = true;
                         return;
                     }
                 }
+            } else if(wasWithinConstraints) {
+                uninterruptedFiring = false;
+                possibleToFire = false;
+                break; //Quits the loop if we were in the constraints before, but went outside of one of them.
             }
+            //If all 3 are true at once, will set calculated speed and angles.
+            //If one boolean was true, but turns false (went out of bounds for angle or speed), then breaks early because no valid firing angle
         }
     }
 
@@ -601,19 +688,10 @@ public class Aimbot extends SubsystemBase{
             double ydif = targetPose.getY() - robotPose.get().getY();
 
             double rotation = 0;
-            if(xdif > 0) {
-                if(ydif > 0) {
-                    rotation = Math.atan(xdif/ydif) * 180/Math.PI;
-                } else {
-                    rotation = Math.atan(-ydif/xdif) * 180/Math.PI + 90;
-                }
-            } else {
-                if(ydif > 0) {
-                    rotation = Math.atan(ydif/-xdif) * 180/Math.PI + 270;
-                } else {
-                    rotation = Math.atan(-xdif/-ydif) * 180/Math.PI + 180;
-                }
-            }
+            
+            rotation = Math.toDegrees(Math.atan2(ydif, xdif));
+
+            degreeToTarget = rotation;
 
             rotation = 90 - rotation;
 
@@ -622,7 +700,7 @@ public class Aimbot extends SubsystemBase{
             double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
             Transform3d returnedTrans = new Transform3d(distance,
                 0.0,
-                visionResults.getZ(),
+                calculatedPos.getZ(),
                 new Rotation3d(new Rotation2d(rotation)));
             degreeToTarget = rotation;
 
@@ -639,19 +717,10 @@ public class Aimbot extends SubsystemBase{
         double ydif = targetPose.getY() - robotPose.get().getY();
 
         double rotation = 0;
-        if(xdif > 0) {
-            if(ydif > 0) {
-                rotation = Math.atan(xdif/ydif) * 180/Math.PI;
-            } else {
-                rotation = Math.atan(-ydif/xdif) * 180/Math.PI + 90;
-            }
-        } else {
-            if(ydif > 0) {
-                rotation = Math.atan(ydif/-xdif) * 180/Math.PI + 270;
-            } else {
-                rotation = Math.atan(-xdif/-ydif) * 180/Math.PI + 180;
-            }
-        }
+        
+        rotation = Math.toDegrees(Math.atan2(ydif, xdif));
+
+        degreeToTarget = rotation;
 
         rotation = 90 - rotation;
 
