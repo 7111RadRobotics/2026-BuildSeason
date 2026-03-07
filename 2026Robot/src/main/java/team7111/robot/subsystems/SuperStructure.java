@@ -301,7 +301,7 @@ public class SuperStructure extends SubsystemBase {
         hasAcheivedState = manageSuperState(superState);
 
         //If autotargeting, will check if the robot is in the nuteral zone and set to shoot towards the corners
-        if(autoTargeting) {
+        //if(autoTargeting) {
             if(field.inAllianceZone(swerve.getPose())) {
                 targeting.resetTarget();
             } else {
@@ -320,7 +320,7 @@ public class SuperStructure extends SubsystemBase {
                     targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
                 }
             }
-        }
+        //}
 
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
