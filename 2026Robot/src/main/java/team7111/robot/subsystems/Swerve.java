@@ -249,6 +249,8 @@ public class Swerve extends SubsystemBase {
         robotYVelocity = leftRight;
         rotationVelocity = rotation;
 
+        SmartDashboard.putNumber("X speed", robotXVelocity);
+        SmartDashboard.putNumber("Y speed", robotYVelocity);
         // Get desired module states.
         ChassisSpeeds chassisSpeeds = isFieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw())

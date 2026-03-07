@@ -26,11 +26,10 @@ public class Aimbot extends SubsystemBase{
 
     private StructPublisher<Pose2d> aimingPoint = 
                                     NetworkTableInstance.getDefault().getStructTopic("Aiming target", Pose2d.struct).publish();
+    private StructPublisher<Pose2d> targetPoint = 
+                                    NetworkTableInstance.getDefault().getStructTopic("Target", Pose2d.struct).publish();
 
     private Pose2d aimPoint = null;
-    
-    /** The current alliance of the robot */
-    private BooleanSupplier currentAlliance = null;
 
     private final Pose3d blueHub = new Pose3d(4.635, 4.034536, Units.inchesToMeters(72), null); 
     private final Pose3d redHub = new Pose3d(11.946, 4.034536, Units.inchesToMeters(72), null); 
@@ -88,7 +87,7 @@ public class Aimbot extends SubsystemBase{
     private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
-    private final double maxShooterSpeed = 3000;
+    private final double maxShooterSpeed = 6000;
     /** Minimum rotations per minute allowable on the shooter (Overrided in off state, in RPM) */
     private final double minShooterSpeed = 0;
 
@@ -413,13 +412,14 @@ public class Aimbot extends SubsystemBase{
 
         double theta = Units.degreesToRadians(calculatedAngle);
 
-        double mps = calculatedSpeed * wheelCircumference / 60.0;
+        double mps = calculatedSpeed * wheelCircumference / 60.0 / RPMMult;
         double vy = mps * Math.sin(theta);
         double vx = mps * Math.cos(theta);
 
         double launchHeight = shooterHeightOffset;
-        double targetHeight = targetPose.getY();
+        double targetHeight = targetPose.getZ();
 
+        // becomes nan
         double discriminant = vy * vy - 2.0 * 9.81 * (targetHeight - launchHeight);
 
         double sqrtD = Math.sqrt(discriminant);
@@ -434,11 +434,12 @@ public class Aimbot extends SubsystemBase{
         double dist = vx * t;
 
         double xdif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
-        double ydif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
+        double ydif = Math.sin(Units.degreesToRadians(degreeToTarget)) * dist;
 
         aimPoint = new Pose2d(robotPose.get().getX() + xdif, robotPose.get().getY() + ydif, new Rotation2d(0));
         
         aimingPoint.set(aimPoint);
+        targetPoint.set(new Pose2d(targetPose.getX(), targetPose.getY(), new Rotation2d(0)));
     }
 
     /** Aims using presets */
@@ -546,7 +547,7 @@ public class Aimbot extends SubsystemBase{
         //Converts from meters per second to rotations per minute
         double velocityReq = Math.sqrt((9.81/(2*velocityCalculation)));
 
-        velocityReq = velocityReq / wheelCircumference;
+        velocityReq = velocityReq / wheelCircumference * 60;
 
         calculatedSpeed = velocityReq;
     }
@@ -630,7 +631,7 @@ public class Aimbot extends SubsystemBase{
 
                     wasWithinConstraints = true;
 
-                    if(impactAngle > minImpactAngle) {
+                    //if(impactAngle > minImpactAngle) {
                         calculatedAngle = shootingAngle;
                         calculatedSpeed = shootingSpeed;
                         degreeToTarget += Units.radiansToDegrees(targetingAngleOffset);
@@ -638,7 +639,7 @@ public class Aimbot extends SubsystemBase{
                         uninterruptedFiring = true;
                         possibleToFire = true;
                         return;
-                    }
+                    //}
                 }
             } else if(wasWithinConstraints) {
                 uninterruptedFiring = false;
@@ -776,7 +777,7 @@ public class Aimbot extends SubsystemBase{
 
         double rotation = 0;
         
-        rotation = Math.toDegrees(Math.atan2(ydif, xdif));
+        rotation = Math.toDegrees(Math.atan2(xdif, ydif));
 
         degreeToTarget = rotation;
 
