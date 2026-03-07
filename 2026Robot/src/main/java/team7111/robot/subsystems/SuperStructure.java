@@ -277,15 +277,15 @@ public class SuperStructure extends SubsystemBase {
         }
         if(operatorController.getAButtonPressed()) {
             autoTargeting = false;
-            currentShot = shotType.Direct;
+            scoringState = shotType.Direct;
         }
         if(operatorController.getBButtonPressed()) {
             autoTargeting = false;
-            currentShot = shotType.ShootOnTheMove;
+            scoringState = shotType.ShootOnTheMove;
         }
         if(operatorController.getXButtonPressed()) {
             autoTargeting = false;
-            currentShot = shotType.Apriltag;
+            scoringState = shotType.Parabolic;
         }
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();

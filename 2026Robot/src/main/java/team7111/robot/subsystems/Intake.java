@@ -103,8 +103,8 @@ public class Intake extends SubsystemBase {
         if(pivotPos <= minPivotPos) {
             pivotPos = minPivotPos;
         }
-        //pivot.setSetpoint(pivotPos, false);
-        //flyWheel.setDutyCycle(flyWheelSpeed);
+        pivot.setSetpoint(pivotPos, false);
+        flyWheel.setDutyCycle(flyWheelSpeed);
         
         flyWheel.periodic();
         pivot.periodic();

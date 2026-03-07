@@ -25,7 +25,9 @@ public class Aimbot extends SubsystemBase{
     private Supplier<Transform2d> robotVelocity;
 
     private StructPublisher<Pose2d> aimingPoint = 
-                                    NetworkTableInstance.getDefault().getStructTopic("Robot Pose", Pose2d.struct).publish();
+                                    NetworkTableInstance.getDefault().getStructTopic("Aiming target", Pose2d.struct).publish();
+
+    private Pose2d aimPoint = null;
     
     /** The current alliance of the robot */
     private BooleanSupplier currentAlliance = null;
@@ -401,6 +403,15 @@ public class Aimbot extends SubsystemBase{
                 break;
         }
 
+        double verticalSpeed = calculatedSpeed * Math.sin(Units.degreesToRadians(calculatedAngle));
+        double horizontalSpeed = calculatedSpeed * Math.cos(Units.degreesToRadians(calculatedAngle));
+
+        double timeToTarget = verticalSpeed;
+
+
+
+        aimingPoint.set(aimPoint);
+        
         if(currentShotType != shotType.ShootOnTheMove) {
             uninterruptedFiring = false;
         }
@@ -584,7 +595,6 @@ public class Aimbot extends SubsystemBase{
                                                     (difference.getZ()/t) - ((0.5)*-9.81*t),
                                                      null);
 
-            
             double targetingAngleOffset = Math.atan2(outputVel.getY(), outputVel.getX());
             
             double shootingAngle = Math.atan2(outputVel.getZ(),
@@ -613,7 +623,7 @@ public class Aimbot extends SubsystemBase{
                         uninterruptedFiring = true;
                         possibleToFire = true;
 
-                        aimingPoint.set(new Pose2d(robotPose.get().getX() + outputVel.getX(), robotPose.get().getY() + outputVel.getY(), new Rotation2d(0)));
+                        aimPoint = new Pose2d(robotPose.get().getX() + outputVel.getX() * t, robotPose.get().getY() + outputVel.getY() * t, new Rotation2d(0));
                         return;
                     }
                 }
