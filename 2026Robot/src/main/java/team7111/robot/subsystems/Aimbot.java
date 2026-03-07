@@ -23,13 +23,16 @@ public class Aimbot extends SubsystemBase{
     private Supplier<Pose2d> robotPose;
     private Supplier<Transform2d> robotVelocity;
     
+    /** The current alliance of the robot */
+    private BooleanSupplier currentAlliance = null;
+
     private final Pose3d blueHub = new Pose3d(4.635, 4.034536, Units.inchesToMeters(72), null); 
     private final Pose3d redHub = new Pose3d(11.946, 4.034536, Units.inchesToMeters(72), null); 
     
     /** Distance from the wall on each alliance to shoot at when passing */
     private final double edgeOffset = 1.0;
     /** Y offset of targets for each corner when passing, from the center of the field's Y pos */
-    private final double yOffset = 4.034536 / 2.0;
+    private final double yOffset = 4.034536 / 2.0; //Currently 1/4 or 3/4 of the y on the field
     /** Blue alliance middle, red alliance middle */
     private final Pose3d[] corners = {new Pose3d(edgeOffset, 4.034536, 0, null), 
                                       new Pose3d(16.540988-edgeOffset, 4.034536, 0, null)};
@@ -93,7 +96,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 1.72;
+    private final double RPMMult = 2.0;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -522,6 +525,21 @@ public class Aimbot extends SubsystemBase{
     /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
     public void shootOnTheMove() {
 
+        if(!inALlianceSide()) {
+            if(robotPose.get().getY() > corners[0].getY()) {
+                if(currentAlliance.getAsBoolean()) {
+                    targetPose = new Pose3d(corners[0].getX(), corners[0].getY() + yOffset, corners[0].getZ(), null);
+                } else {
+                    targetPose = new Pose3d(corners[1].getX(), corners[1].getY() + yOffset, corners[1].getZ(), null);
+                }
+            } else {
+                if(currentAlliance.getAsBoolean()) {
+                    targetPose = new Pose3d(corners[0].getX(), corners[0].getY() - yOffset, corners[0].getZ(), null);
+                } else {
+                    targetPose = new Pose3d(corners[1].getX(), corners[1].getY() - yOffset, corners[1].getZ(), null);
+                }
+            }
+        }
         /** If continuously firing, this is the time discrepancy it will give as padding to the previous time calculation.
          *  paddingTime/timeStep is a rough estemate of the time it will take per shot to calculate. Lower this value if too processor heavy
          */
@@ -744,6 +762,25 @@ public class Aimbot extends SubsystemBase{
 
         return returnedTrans;
     }
+
+
+    private boolean inALlianceSide() {
+        double blueSideEdge = Units.inchesToMeters(182.11); // Trench of the blue side
+        double redSideEdge = Units.inchesToMeters(651.22-182.11); // Trench of the red side
+        
+        if(currentAlliance.getAsBoolean()) {
+            if(robotPose.get().getX() < blueSideEdge) {
+                return true;
+            }  
+        } else {
+            if(robotPose.get().getX() > redSideEdge) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }
 //floccinaucinihilipilification
 //hehe >:3
