@@ -427,8 +427,8 @@ public class Aimbot extends SubsystemBase{
                 return;
             }
 
-            double angleDifference = shotTableAngles[(int) Math.ceil(distance)] - shotTableAngles[(int) distance];
-            double speedDifference = shotTableSpeeds[(int) Math.ceil(distance)] - shotTableSpeeds[(int) distance];
+            double angleDifference = shotTableAngles[(int) Math.ceil(distance) -1] - shotTableAngles[(int) distance -1];
+            double speedDifference = shotTableSpeeds[(int) Math.ceil(distance) -1] - shotTableSpeeds[(int) distance -1];
 
             double interpMult = distance % 1;
 
