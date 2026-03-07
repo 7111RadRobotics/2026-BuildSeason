@@ -28,6 +28,7 @@ public class Hopper extends SubsystemBase {
         intake,
         shoot,
         idle,
+        stopped,
         manual,
     }
 
@@ -68,8 +69,8 @@ public class Hopper extends SubsystemBase {
     public void periodic(){
         manageState();
 
-        spindexer.setDutyCycle(spindexerSpeed);
-        shooterIndexer.setDutyCycle(shooterIndexerSpeed);
+        //spindexer.setDutyCycle(spindexerSpeed);
+        //shooterIndexer.setDutyCycle(shooterIndexerSpeed);
     }
 
     public void simulationPeriodic(){
@@ -96,6 +97,9 @@ public class Hopper extends SubsystemBase {
             case shoot:
                 shoot();
                 break;
+            case stopped:
+                stopped();
+                break;
             case manual:
                 manual();
                 break;
@@ -106,18 +110,23 @@ public class Hopper extends SubsystemBase {
 
     // named differently to not overide a different method
     private void idleMode(){
-        shooterIndexerSpeed = 0;
-        spindexerSpeed = 0;
+        shooterIndexerSpeed = -0.25;
+        spindexerSpeed = 0.3;
     }
 
     private void intake(){
-        shooterIndexerSpeed = 0;
-        spindexerSpeed = 0.0;
+        shooterIndexerSpeed = -0.25;
+        spindexerSpeed = 0.3;
     }
 
     private void shoot(){
-        //shooterIndexerSpeed = 0.8;
-       // spindexerSpeed = 0.8;
+        shooterIndexerSpeed = 0.8;
+        spindexerSpeed = 0.8;
+    }
+
+    private void stopped(){
+        shooterIndexerSpeed = 0;
+        spindexerSpeed = 0;
     }
 
     private void manual(){

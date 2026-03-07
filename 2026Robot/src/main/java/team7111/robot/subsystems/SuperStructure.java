@@ -116,7 +116,11 @@ public class SuperStructure extends SubsystemBase {
         this.swerve.setDriveFieldRelative(true);
         this.swerve.setSwerveState(SwerveState.manual);
 
-        targeting.giveResources(operatorController, () -> DriverStation.getAlliance().get() == Alliance.Blue);
+        targeting.giveResources(operatorController, () -> {
+            if(DriverStation.getAlliance().isPresent())
+                return DriverStation.getAlliance().get() == Alliance.Blue;
+            return true;
+        });
 
     }
 
@@ -490,7 +494,7 @@ public class SuperStructure extends SubsystemBase {
             targeting.setShotType(shotType.Preset);
         }
         intake.setState(IntakeState.intake);
-        hopper.setState(HopperState.intake);
+        hopper.setState(HopperState.shoot);
         if(!intaking){
             setSuperState(SuperState.pass);
         }

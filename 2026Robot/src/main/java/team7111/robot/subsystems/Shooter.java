@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(1, 0.0000, 0.0), 
+        1, 20, false, false, new PIDController(1.2, 0.0000, 0.0), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
@@ -149,7 +149,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(1500);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(3000);
         return isAtSetpoint;
     }
 

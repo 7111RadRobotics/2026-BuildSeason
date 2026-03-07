@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -103,12 +104,14 @@ public class Intake extends SubsystemBase {
         if(pivotPos <= minPivotPos) {
             pivotPos = minPivotPos;
         }
-        pivot.setSetpoint(pivotPos, false);
-        flyWheel.setDutyCycle(flyWheelSpeed);
+        //pivot.setSetpoint(pivotPos, false);
+        //flyWheel.setDutyCycle(flyWheelSpeed);
         
         flyWheel.periodic();
         pivot.periodic();
         intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
+
+        SmartDashboard.putNumber("intake pivot position", pivot.getPosition());
     }
 
     public void simulationPeriodic(){}
@@ -147,15 +150,17 @@ public class Intake extends SubsystemBase {
     private void stow(){
         //System.out.println("Runs code for the stow state");
         pivotPos = minPivotPos;
-        
+        flyWheelSpeed = 0;
     }
 
     private void deploy(){
         pivotPos = maxPivotPos;
+        flyWheelSpeed = 0;
     }
 
     private void intake(){
         pivotPos = maxPivotPos;
+        flyWheelSpeed = -0.65;
     }
 
     private void manual(){
