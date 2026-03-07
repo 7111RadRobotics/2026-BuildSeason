@@ -403,15 +403,6 @@ public class Aimbot extends SubsystemBase{
                 break;
         }
 
-        double verticalSpeed = calculatedSpeed * Math.sin(Units.degreesToRadians(calculatedAngle));
-        double horizontalSpeed = calculatedSpeed * Math.cos(Units.degreesToRadians(calculatedAngle));
-
-        double timeToTarget = verticalSpeed;
-
-
-
-        aimingPoint.set(aimPoint);
-        
         if(currentShotType != shotType.ShootOnTheMove) {
             uninterruptedFiring = false;
         }
@@ -419,6 +410,35 @@ public class Aimbot extends SubsystemBase{
 
         useOffsets();
         useRestraints();
+
+        double theta = Units.degreesToRadians(calculatedAngle);
+
+        double mps = calculatedSpeed * wheelCircumference / 60.0;
+        double vy = mps * Math.sin(theta);
+        double vx = mps * Math.cos(theta);
+
+        double launchHeight = shooterHeightOffset;
+        double targetHeight = targetPose.getY();
+
+        double discriminant = vy * vy - 2.0 * 9.81 * (targetHeight - launchHeight);
+
+        double sqrtD = Math.sqrt(discriminant);
+
+        // two times: up-pass and down-pass
+        double t1 = (vy - sqrtD) / 9.81;
+        double t2 = (vy + sqrtD) / 9.81;
+
+        // usually use larger positive time for descending hit
+        double t = Math.max(t1, t2);
+
+        double dist = vx * t;
+
+        double xdif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
+        double ydif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
+
+        aimPoint = new Pose2d(robotPose.get().getX() + xdif, robotPose.get().getY() + ydif, new Rotation2d(0));
+        
+        aimingPoint.set(aimPoint);
     }
 
     /** Aims using presets */
@@ -518,20 +538,15 @@ public class Aimbot extends SubsystemBase{
         } else {
             calculatedAngle = Math.atan(calculatedRatio) * 180/Math.PI;
         }
-        
-        SmartDashboard.putNumber("Nan?", calculatedRatio);
 
         double velocityCalculation = 
             (distanceToHubEdge * calculatedRatio - targetHeightAboveHubEdge) /
             ((1+calculatedRatio * calculatedRatio) * distanceToHubEdge * distanceToHubEdge);
-        SmartDashboard.putNumber("Velocity calculation", velocityCalculation);
         
         //Converts from meters per second to rotations per minute
         double velocityReq = Math.sqrt((9.81/(2*velocityCalculation)));
-        SmartDashboard.putNumber("VelocityRequired", velocityReq);
 
         velocityReq = velocityReq / wheelCircumference;
-        SmartDashboard.putNumber("VelocityToRotationsPerMinute", velocityReq);
 
         calculatedSpeed = velocityReq;
     }
@@ -622,8 +637,6 @@ public class Aimbot extends SubsystemBase{
                         timeOffset = t - startingTimeStep - paddingTime; //Optimization for firing continuously
                         uninterruptedFiring = true;
                         possibleToFire = true;
-
-                        aimPoint = new Pose2d(robotPose.get().getX() + outputVel.getX() * t, robotPose.get().getY() + outputVel.getY() * t, new Rotation2d(0));
                         return;
                     }
                 }
