@@ -276,7 +276,7 @@ public class SuperStructure extends SubsystemBase {
             currentShot = shotType.Direct;
         }
         if(operatorController.getBButtonPressed()) {
-            currentShot = shotType.Parabolic;
+            currentShot = shotType.ShootOnTheMove;
         }
         if(operatorController.getXButtonPressed()) {
             currentShot = shotType.Apriltag;
