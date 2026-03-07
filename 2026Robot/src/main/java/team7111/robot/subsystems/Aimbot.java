@@ -319,7 +319,6 @@ public class Aimbot extends SubsystemBase{
         } else {
             targetPose = blueHub;
         }
-        
     }
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
@@ -524,8 +523,8 @@ public class Aimbot extends SubsystemBase{
 
     /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
     public void shootOnTheMove() {
-
-        if(!inALlianceSide()) {
+        
+        /*if(!inALlianceSide()) {
             if(robotPose.get().getY() > corners[0].getY()) {
                 if(currentAlliance.getAsBoolean()) {
                     targetPose = new Pose3d(corners[0].getX(), corners[0].getY() + yOffset, corners[0].getZ(), null);
@@ -539,7 +538,8 @@ public class Aimbot extends SubsystemBase{
                     targetPose = new Pose3d(corners[1].getX(), corners[1].getY() - yOffset, corners[1].getZ(), null);
                 }
             }
-        }
+        }*/
+
         /** If continuously firing, this is the time discrepancy it will give as padding to the previous time calculation.
          *  paddingTime/timeStep is a rough estemate of the time it will take per shot to calculate. Lower this value if too processor heavy
          */
@@ -764,7 +764,7 @@ public class Aimbot extends SubsystemBase{
     }
 
 
-    private boolean inALlianceSide() {
+    /*private boolean inALlianceSide() {
         double blueSideEdge = Units.inchesToMeters(182.11); // Trench of the blue side
         double redSideEdge = Units.inchesToMeters(651.22-182.11); // Trench of the red side
         
@@ -778,7 +778,7 @@ public class Aimbot extends SubsystemBase{
             }
         }
         return false;
-    }
+    }*/
 
 
 }

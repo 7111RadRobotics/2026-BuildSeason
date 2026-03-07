@@ -7,6 +7,7 @@ import javax.print.attribute.standard.RequestingUserName;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -84,6 +85,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean scoring = false;
     private boolean passing = false;
     private boolean stow = false;
+
+    private boolean autoTargeting = true;
 
     private shotType currentShot = shotType.Transport;
     private shotType scoringState = shotType.Parabolic;
@@ -273,19 +276,47 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggle();
         }
         if(operatorController.getAButtonPressed()) {
+            autoTargeting = false;
             currentShot = shotType.Direct;
         }
         if(operatorController.getBButtonPressed()) {
+            autoTargeting = false;
             currentShot = shotType.ShootOnTheMove;
         }
         if(operatorController.getXButtonPressed()) {
+            autoTargeting = false;
             currentShot = shotType.Apriltag;
         }
         if(operatorController.getBackButtonPressed()) {
             targeting.toggleVision();
         }
+        if(operatorController.getYButtonPressed()) {
+            autoTargeting = true;
+        }
 
         hasAcheivedState = manageSuperState(superState);
+
+        //If autotargeting, will check if the robot is in the nuteral zone and set to shoot towards the corners
+        if(autoTargeting) {
+            if(field.inAllianceZone(swerve.getPose())) {
+                targeting.resetTarget();
+            } else {
+                Pose3d corner = null;
+
+                if(DriverStation.getAlliance().isPresent()) {
+                    if(DriverStation.getAlliance().get() == Alliance.Blue) {
+                        corner = new Pose3d(1.0, 4.034536, 0, null);
+                    } else {
+                        corner = new Pose3d(16.540988-1.0, 4.034536, 0, null);
+                    }
+                }
+                if(swerve.getPose().getY() >= Units.inchesToMeters(317.69)) {
+                    targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                } else {
+                    targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                }
+            }
+        }
 
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
