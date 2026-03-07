@@ -233,16 +233,16 @@ public class DrivebaseConfig {
 
         double canCoder1Offset = isSim
             ? 0
-            : -137.197;
+            : -49.92;
         double canCoder2Offset = isSim
             ? 0
-            : 13.36;
+            : 101.9;
         double canCoder3Offset = isSim
             ? 0
-            : -50.98;
+            : 35.06;
         double canCoder4Offset = isSim
             ? 0
-            : 174.81;
+            : -96.15;
 
         SwerveModuleConfig[] moduleConstants = new SwerveModuleConfig[]{
 

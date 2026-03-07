@@ -81,7 +81,7 @@ public class TwoMotors implements Motor {
     }
 
     public boolean isAtVelocitySetpoint(double deadzone){
-        return motor1.isAtSetpoint(deadzone);
+        return motor1.isAtVelocitySetpoint(deadzone);
     }
 
     public SimpleMotorFeedforward getFeedForward(){

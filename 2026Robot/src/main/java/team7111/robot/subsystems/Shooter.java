@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.00225, 0.0000, 0.03), 
+        1, 20, false, false, new PIDController(0.5, 0.0000, 0.0), 
         MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
@@ -134,6 +134,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("hood trajectory", -hood.getPosition() + 90);
         SmartDashboard.putNumber("Flywheel Velocity", flywheels.getVelocity());
         SmartDashboard.putNumber("FlywheelSetpoint", flywheelSpeed);
+        SmartDashboard.putBoolean("isAtSetpoint", isAtSetpoint());
+        SmartDashboard.putBoolean("isAtVelocitySetpoint", isAtSpeedSetpoint());
     }
 
     public void simulationPeriodic(){}
@@ -147,7 +149,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(500);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(1500);
         return isAtSetpoint;
     }
 

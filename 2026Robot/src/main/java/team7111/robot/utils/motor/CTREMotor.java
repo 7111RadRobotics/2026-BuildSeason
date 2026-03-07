@@ -107,12 +107,14 @@ public class CTREMotor implements Motor {
     }
 
     public void setVelocity(double rpm){
+        
         if(rpm > positiveVelocityLimit){
             rpm = positiveVelocityLimit;
         }
         if(rpm < negativeVelocityLimit){
             rpm = negativeVelocityLimit;
         }
+        rpm /= 60;
         motor.setControl(velocityVoltage.withVelocity(rpm * gearRatio));
     }
 
@@ -200,7 +202,7 @@ public class CTREMotor implements Motor {
     }
 
     public boolean isAtVelocitySetpoint(double deadzone){
-        return getPosition() >= velocitySetpoint - deadzone && getPosition() <= velocitySetpoint + deadzone;
+        return getVelocity() >= velocitySetpoint - deadzone && getVelocity() <= velocitySetpoint + deadzone;
     }
         
     public SimpleMotorFeedforward getFeedForward(){

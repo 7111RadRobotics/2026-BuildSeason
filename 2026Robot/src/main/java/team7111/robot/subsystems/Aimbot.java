@@ -2,6 +2,7 @@ package team7111.robot.subsystems;
 
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -75,7 +76,7 @@ public class Aimbot extends SubsystemBase{
     /** Maximum shooter angle in degrees, from horizontal */
     private final double maxShooterAngle = 83;
     
-    private final double lowestShooterAngle = minShooterAngle;
+    private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
     private final double maxShooterSpeed = 3000;
@@ -219,14 +220,17 @@ public class Aimbot extends SubsystemBase{
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
-    public void giveResources(XboxController operatorController, boolean isBlueAlliance) {
+    public void giveResources(XboxController operatorController, BooleanSupplier isBlueAlliance) {
         this.operatorController = operatorController;
-
-        if(isBlueAlliance) {
+        if (isBlueAlliance != null) {
+            if(isBlueAlliance.getAsBoolean()) {
             this.targetPose = blueHub;
         } else {
             this.targetPose = redHub;
         }
+
+        }
+        
     }
 
     /** Sets the angle offsets for the camera and the shooter, measured from horizontal */
@@ -302,11 +306,17 @@ public class Aimbot extends SubsystemBase{
     
     /** Resets the target to default (the current alliance hub for most shooting modes, unless otherwise specified) */
     public void resetTarget() {
-        if(DriverStation.getAlliance().get() == Alliance.Blue) {
-            targetPose = blueHub;
+        if (DriverStation.getAlliance().isPresent()) {
+                
+                if(DriverStation.getAlliance().get() == Alliance.Blue) {
+                targetPose = blueHub;
+            } else {
+                targetPose = redHub;
+            }
         } else {
-            targetPose = redHub;
+            targetPose = blueHub;
         }
+        
     }
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
@@ -399,12 +409,12 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 2500;
+                calculatedSpeed = 2000;
                 calculatedAngle = 60;
                 break;
             case RegHubShot:
                 calculatedAngle = 75;
-                calculatedSpeed = 2500;
+                calculatedSpeed = 2000;
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;

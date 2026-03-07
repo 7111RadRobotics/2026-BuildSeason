@@ -109,11 +109,11 @@ public class SuperStructure extends SubsystemBase {
         this.field = field;
 
         DriverStation.silenceJoystickConnectionWarning(true);
-        this.swerve.setJoysickInputs(() -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX());
+        this.swerve.setJoysickInputs(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
         this.swerve.setSwerveState(SwerveState.manual);
 
-        targeting.giveResources(operatorController, DriverStation.getAlliance().get() == Alliance.Blue);
+        targeting.giveResources(operatorController, () -> DriverStation.getAlliance().get() == Alliance.Blue);
 
     }
 
@@ -424,6 +424,7 @@ public class SuperStructure extends SubsystemBase {
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
             if(intaking) {
                 setSuperState(SuperState.snowBlowerPass);
+                return true;
             }
             setSuperState(SuperState.pass);
             return true;
