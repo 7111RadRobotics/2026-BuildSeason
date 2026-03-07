@@ -11,7 +11,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -22,6 +23,9 @@ public class Aimbot extends SubsystemBase{
     /** Given as backup for if camera detects no valid apriltag */
     private Supplier<Pose2d> robotPose;
     private Supplier<Transform2d> robotVelocity;
+
+    private StructPublisher<Pose2d> aimingPoint = 
+                                    NetworkTableInstance.getDefault().getStructTopic("Robot Pose", Pose2d.struct).publish();
     
     /** The current alliance of the robot */
     private BooleanSupplier currentAlliance = null;
@@ -416,7 +420,7 @@ public class Aimbot extends SubsystemBase{
                 break;
             case RegHubShot:
                 calculatedAngle = 75;
-                calculatedSpeed = 2000;
+                calculatedSpeed = 1000;
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;
@@ -580,6 +584,7 @@ public class Aimbot extends SubsystemBase{
                                                     (difference.getZ()/t) - ((0.5)*-9.81*t),
                                                      null);
 
+            
             double targetingAngleOffset = Math.atan2(outputVel.getY(), outputVel.getX());
             
             double shootingAngle = Math.atan2(outputVel.getZ(),
@@ -607,6 +612,8 @@ public class Aimbot extends SubsystemBase{
                         timeOffset = t - startingTimeStep - paddingTime; //Optimization for firing continuously
                         uninterruptedFiring = true;
                         possibleToFire = true;
+
+                        aimingPoint.set(new Pose2d(robotPose.get().getX() + outputVel.getX(), robotPose.get().getY() + outputVel.getY(), new Rotation2d(0)));
                         return;
                     }
                 }

@@ -116,8 +116,8 @@ public class Hopper extends SubsystemBase {
     }
 
     private void shoot(){
-        shooterIndexerSpeed = 0.8;
-        spindexerSpeed = 0.8;
+        //shooterIndexerSpeed = 0.8;
+       // spindexerSpeed = 0.8;
     }
 
     private void manual(){
