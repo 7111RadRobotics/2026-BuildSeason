@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -72,6 +73,8 @@ public class Swerve extends SubsystemBase {
     /** Rotation velocity of the robot, CW positive */
     private double rotationVelocity;
 
+    private SwerveDriveKinematics kinematics;
+
     private final double controllerDeadzone = 0.0;
 
     public enum SwerveState{
@@ -113,6 +116,12 @@ public class Swerve extends SubsystemBase {
         
         snapAnglePID = new PIDController(0.04, 0.0, 0.001);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
+
+        //Velocity kinematics object
+        kinematics = new SwerveDriveKinematics(modules[0].getOffset(),
+                                               modules[0].getOffset(),
+                                               modules[0].getOffset(),
+                                               modules[0].getOffset());
     }
 
     @Override 
@@ -148,6 +157,9 @@ public class Swerve extends SubsystemBase {
         if(DriverStation.getAlliance().isPresent()){
             pathMaster.useAllianceFlipping(DriverStation.getAlliance().get() == Alliance.Red, false);
         }
+
+        SmartDashboard.putNumber("X speed", robotXVelocity);
+        SmartDashboard.putNumber("Y speed", robotYVelocity);
     }
 
     public void simulationPeriodic(){
@@ -245,12 +257,6 @@ public class Swerve extends SubsystemBase {
         leftRight *= SwerveConstants.maxDriveVelocity;
         rotation *= SwerveConstants.maxAngularVelocity;
 
-        robotXVelocity = forwardBack;
-        robotYVelocity = leftRight;
-        rotationVelocity = rotation;
-
-        SmartDashboard.putNumber("X speed", robotXVelocity);
-        SmartDashboard.putNumber("Y speed", robotYVelocity);
         // Get desired module states.
         ChassisSpeeds chassisSpeeds = isFieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw())
@@ -259,6 +265,14 @@ public class Swerve extends SubsystemBase {
         SwerveModuleState[] states = SwerveConstants.kinematics.toSwerveModuleStates(chassisSpeeds);
 
         setModuleStates(states, isOpenLoop);
+
+        // Converts module states to chassis speeds
+        ChassisSpeeds chassisSpeedVelocities = kinematics.toChassisSpeeds(
+        modules[0].getState(), modules[1].getState(), modules[2].getState(), modules[3].getState());
+
+        robotXVelocity = chassisSpeedVelocities.vxMetersPerSecond; 
+        robotYVelocity = chassisSpeedVelocities.vyMetersPerSecond;
+        rotationVelocity = Units.radiansToDegrees(chassisSpeedVelocities.omegaRadiansPerSecond);
     }
 
     public void setSwerveState(SwerveState swerveState){

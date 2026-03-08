@@ -1,6 +1,7 @@
 package team7111.robot.utils.swervemodules;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import team7111.robot.utils.config.SwerveModuleConfig;
 import team7111.robot.utils.encoder.GenericEncoder;
@@ -10,10 +11,14 @@ public class CombinedSwerveModule implements GenericSwerveModule {
 
     private GenericSwerveModule driveMotor;
     private GenericSwerveModule angleMotor;
+    
+    private SwerveModuleConfig config;
 
     public CombinedSwerveModule(GenericSwerveModule driveMotor, GenericSwerveModule angleMotor, SwerveModuleConfig config) {
         this.driveMotor = driveMotor;
         this.angleMotor = angleMotor;
+
+        this.config = config;
     }
 
     @Override
@@ -34,6 +39,11 @@ public class CombinedSwerveModule implements GenericSwerveModule {
     @Override
     public double getDrivePosition() {
         return driveMotor.getDrivePosition();
+    }
+
+    @Override
+    public Translation2d getOffset() {
+        return config.fromCenter;
     }
 
     /** Gets the angle of the swerve drive */

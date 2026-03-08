@@ -4,6 +4,7 @@ package team7111.robot.utils.swervemodules;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -29,6 +30,8 @@ public class SimSwerveModule implements GenericSwerveModule{
 
     private double driveGearRatio;
 
+    private Translation2d fromCenter;
+
     public SimSwerveModule(SwerveModuleConfig config){
         driveMotorOutput = config.driveMotor.dcMotor;
         angleMotorOutput = config.angleMotor.dcMotor;
@@ -53,6 +56,8 @@ public class SimSwerveModule implements GenericSwerveModule{
         drivePID = new PIDController(drivePID.getP(), drivePID.getI(), drivePID.getD());
 
         anglePID.enableContinuousInput(-0.5, 0.5);
+
+        this.fromCenter = config.fromCenter;
     }
 
     @Override
@@ -88,6 +93,11 @@ public class SimSwerveModule implements GenericSwerveModule{
         double rotations = angleMotorSim.getAngularPositionRotations();
         SmartDashboard.putNumber("rotations", rotations);
         return Rotation2d.fromRotations(rotations);
+    }
+
+    @Override
+    public Translation2d getOffset() {
+        return fromCenter;
     }
 
     @Override

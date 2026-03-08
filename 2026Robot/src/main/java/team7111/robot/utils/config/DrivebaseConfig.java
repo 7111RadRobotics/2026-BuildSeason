@@ -6,6 +6,8 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import team7111.robot.utils.encoder.CTREEncoder;
@@ -24,6 +26,9 @@ public class DrivebaseConfig {
     public double wheelDiameter;
     public SwerveMotorConfig swerveMotorConfig;
     public double gyroOffsetDegrees;
+
+    public static double swervemoduleDistXOffset = Units.inchesToMeters(3); //X distance from the edge of the swerve base to where the swerve module wheel is
+    public static double swervemoduleDistYOffset = Units.inchesToMeters(3); //Y distance from the edge of the swerve base to where the swerve module wheel is
 
     public DrivebaseConfig(
         GenericSwerveModule[] moduleTypes, SwerveModuleConfig[] moduleConstants, 
@@ -80,25 +85,33 @@ public class DrivebaseConfig {
 
         SwerveModuleConfig[] moduleConstants = new SwerveModuleConfig[]{
 
+            //Front left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(5, driveMotorConfig), 
                 new SwerveMotorConfig(6, angleMotorConfig), 
-                new CTREEncoder(1, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(1, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            //Front right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(7, driveMotorConfig), 
                 new SwerveMotorConfig(8, angleMotorConfig), 
-                new CTREEncoder(3, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(3, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
 
+            //Back left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(3, driveMotorConfig), 
                 new SwerveMotorConfig(4, angleMotorConfig), 
-                new CTREEncoder(0, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(0, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            //Back right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(1, driveMotorConfig), 
                 new SwerveMotorConfig(2, angleMotorConfig), 
-                new CTREEncoder(2, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(2, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
         };
 
         GenericSwerveModule[] moduleTypes;
@@ -162,25 +175,33 @@ public class DrivebaseConfig {
 
         SwerveModuleConfig[] moduleConstants = new SwerveModuleConfig[]{
 
+            //Front left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(11, driveMotorConfig), 
                 new SwerveMotorConfig(4, angleMotorConfig), 
-                new CTREEncoder(1, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(1, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            //Front right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(7, driveMotorConfig), 
                 new SwerveMotorConfig(6, angleMotorConfig), 
-                new CTREEncoder(2, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(2, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
             
+            //Back left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(9, driveMotorConfig), 
                 new SwerveMotorConfig(10, angleMotorConfig), 
-                new CTREEncoder(3, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(3, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            //Back right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(12, driveMotorConfig),
                 new SwerveMotorConfig(3, angleMotorConfig),
-                new CTREEncoder(0, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(0, encoderConfig), canCoder0Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
         };
 
 
@@ -246,25 +267,33 @@ public class DrivebaseConfig {
 
         SwerveModuleConfig[] moduleConstants = new SwerveModuleConfig[]{
 
+            //Front left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(2, driveMotorConfig), 
                 new SwerveMotorConfig(2, angleMotorConfig), 
-                new CTREEncoder(2, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(2, encoderConfig), canCoder2Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            // Front right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(4, driveMotorConfig),
                 new SwerveMotorConfig(4, angleMotorConfig),
-                new CTREEncoder(4, encoderConfig), canCoder4Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(4, encoderConfig), canCoder4Offset, wheelDiameter * Math.PI,
+                new Translation2d(length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
             
+            // Back left
             new SwerveModuleConfig(
                 new SwerveMotorConfig(1, driveMotorConfig), 
                 new SwerveMotorConfig(1, angleMotorConfig), 
-                new CTREEncoder(1, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(1, encoderConfig), canCoder1Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, -width/2 - swervemoduleDistYOffset)),
 
+            //Back right
             new SwerveModuleConfig(
                 new SwerveMotorConfig(3, driveMotorConfig), 
                 new SwerveMotorConfig(3, angleMotorConfig), 
-                new CTREEncoder(3, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI),
+                new CTREEncoder(3, encoderConfig), canCoder3Offset, wheelDiameter * Math.PI,
+                new Translation2d(-length/2 - swervemoduleDistXOffset, width/2 - swervemoduleDistYOffset)),
         };
 
         GenericSwerveModule[] moduleTypes;

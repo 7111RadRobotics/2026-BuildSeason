@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,6 +41,8 @@ public class SparkMaxSwerveModule implements GenericSwerveModule {
     private boolean useDriveMotor = true;
     private boolean useAngleMotor = true;
 
+    private Translation2d fromCenter;
+
     public SparkMaxSwerveModule(SwerveModuleConfig config){
         this.encoder = config.encoder;
         encoderOffsetDegrees = config.canCoderOffsetDegrees;
@@ -58,6 +61,8 @@ public class SparkMaxSwerveModule implements GenericSwerveModule {
         angleEncoder = angleMotor.getEncoder();
         anglePID = angleMotor.getClosedLoopController(); 
         angleGearRatio = config.angleMotor.gearRatio;
+
+        this.fromCenter = config.fromCenter;
     }
 
     public SparkMaxSwerveModule(SwerveModuleConfig config, boolean isDriveMotor){
@@ -122,6 +127,11 @@ public class SparkMaxSwerveModule implements GenericSwerveModule {
     @Override
     public Rotation2d getAngle() {
         return Rotation2d.fromRotations(angleEncoder.getPosition() / angleGearRatio);
+    }
+
+    @Override
+    public Translation2d getOffset() {
+        return fromCenter;
     }
 
     @Override

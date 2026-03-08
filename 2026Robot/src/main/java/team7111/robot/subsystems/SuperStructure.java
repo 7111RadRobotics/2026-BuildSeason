@@ -325,6 +325,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putNumber("ShooterAngle", targeting.getCalculatedAngle());
         SmartDashboard.putNumber("ShooterSpeed", targeting.getCalculatedSpeed());
 
+        SmartDashboard.putString("ShootingType", scoringState.toString());
         long endTime = System.nanoTime();
 
         //Timing measurement, in milliseconds

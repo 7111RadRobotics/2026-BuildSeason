@@ -437,6 +437,8 @@ public class Aimbot extends SubsystemBase{
         double ydif = Math.sin(Units.degreesToRadians(degreeToTarget)) * dist;
 
         aimPoint = new Pose2d(robotPose.get().getX() + xdif, robotPose.get().getY() + ydif, new Rotation2d(0));
+
+        SmartDashboard.putNumber("Time to impact", t);
         
         aimingPoint.set(aimPoint);
         targetPoint.set(new Pose2d(targetPose.getX(), targetPose.getY(), new Rotation2d(0)));
@@ -516,40 +518,102 @@ public class Aimbot extends SubsystemBase{
 
         Transform3d CamToTarget = getTransToTarget();
 
-        if(CamToTarget == null) {
+        if (CamToTarget == null) {
             calculatedAngle = minShooterAngle;
             calculatedSpeed = 0;
             return;
         }
 
+        final double g = 9.81;
+
+        // Horizontal distance from shooter release to target
         double distanceToTarget = CamToTarget.getX() + shooterXOffset;
+
+        // Vertical target height relative to shooter release
         double heightDifference = CamToTarget.getZ() - shooterHeightOffset;
 
         SmartDashboard.putNumber("Distance to target", distanceToTarget);
-        //Subtracts a meter from the distance to get a 2nd target point
-        double distanceToHubEdge = distanceToTarget - 0.5;
-        double targetHeightAboveHubEdge = Units.inchesToMeters(80); //90 inches above the floor, settable to anything desired for angle adjustment
 
-        double calculatedRatio = 
-            ((distanceToTarget*distanceToTarget*heightDifference) - (distanceToHubEdge*distanceToHubEdge*targetHeightAboveHubEdge)) /
-            ((distanceToHubEdge*distanceToTarget*(distanceToHubEdge-distanceToTarget)));
+        //The distance to lip is half a meter from the target
+        double distanceToLip = distanceToTarget - 0.5;
+        //The height of the parabola must pass through 15 inches above the target, at distance to lip back
+        double lipHeight = targetPose.getZ() + Units.inchesToMeters(15);
 
-        if(calculatedRatio < 0) {
+        // Convert lip height to shooter-relative coordinates
+        double lipHeightRelative = lipHeight - shooterHeightOffset;
+
+        // Basic geometry checks
+        if (distanceToTarget <= 0.0 || distanceToLip <= 0.0 || distanceToLip >= distanceToTarget) {
             calculatedAngle = minShooterAngle;
-        } else {
-            calculatedAngle = Math.atan(calculatedRatio) * 180/Math.PI;
+            calculatedSpeed = 0;
+            return;
         }
 
-        double velocityCalculation = 
-            (distanceToHubEdge * calculatedRatio - targetHeightAboveHubEdge) /
-            ((1+calculatedRatio * calculatedRatio) * distanceToHubEdge * distanceToHubEdge);
-        
-        //Converts from meters per second to rotations per minute
-        double velocityReq = Math.sqrt((9.81/(2*velocityCalculation)));
+        // Minimum launch angle required to clear the lip while still hitting the target
+        double denom = distanceToLip - (distanceToLip * distanceToLip / distanceToTarget);
+        if (denom <= 1e-9 || !Double.isFinite(denom)) {
+            calculatedAngle = minShooterAngle;
+            calculatedSpeed = 0;
+            return;
+        }
 
-        velocityReq = velocityReq / wheelCircumference * 60;
+        double tanThetaClear =
+            (lipHeightRelative
+                - heightDifference * (distanceToLip * distanceToLip / (distanceToTarget * distanceToTarget)))
+            / denom;
 
-        calculatedSpeed = velocityReq;
+        if (!Double.isFinite(tanThetaClear)) {
+            calculatedAngle = minShooterAngle;
+            calculatedSpeed = 0;
+            return;
+        }
+
+        double thetaClear = Math.atan(tanThetaClear);
+
+        // Minimum-speed angle to hit the target at all
+        double thetaMinSpeed = Math.atan(
+            (heightDifference + Math.sqrt(distanceToTarget * distanceToTarget
+                                        + heightDifference * heightDifference))
+            / distanceToTarget
+        );
+
+        // Choose the larger of:
+        // - angle needed to clear lip (+ a little margin)
+        // - minimum-speed angle
+        double theta = Math.max(thetaClear + Units.degreesToRadians(3.0), thetaMinSpeed);
+
+        // Clamp to shooter limits
+        theta = Math.max(theta, Units.degreesToRadians(minShooterAngle));
+        theta = Math.min(theta, Units.degreesToRadians(maxShooterAngle));
+
+        double cos = Math.cos(theta);
+        double tan = Math.tan(theta);
+
+        // Solve required launch speed to hit target at chosen angle
+        double denomSpeed = 2.0 * cos * cos * (distanceToTarget * tan - heightDifference);
+
+        if (denomSpeed <= 1e-9 || !Double.isFinite(denomSpeed)) {
+            calculatedAngle = minShooterAngle;
+            calculatedSpeed = 0;
+            return;
+        }
+
+        double speedSq = g * distanceToTarget * distanceToTarget / denomSpeed;
+
+        if (speedSq <= 0.0 || !Double.isFinite(speedSq)) {
+            calculatedAngle = minShooterAngle;
+            calculatedSpeed = 0;
+            return;
+        }
+
+        double mps = Math.sqrt(speedSq);
+
+        // Convert m/s to wheel RPM
+        calculatedAngle = Units.radiansToDegrees(theta);
+        calculatedSpeed = (mps / wheelCircumference) * 60.0;
+
+        // Optional: if you still need your shooter multiplier model elsewhere,
+        // then apply/remove RPMMult here consistently with the rest of your code.
     }
 
     /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
@@ -627,7 +691,7 @@ public class Aimbot extends SubsystemBase{
                     double impactXVel = outputVel.getX();
                     double impactZVel = outputVel.getZ() - 9.81 * t;
 
-                    double impactAngle = Units.radiansToDegrees(Math.atan2(-impactZVel, impactXVel));
+                    //double impactAngle = Units.radiansToDegrees(Math.atan2(-impactZVel, impactXVel));
 
                     wasWithinConstraints = true;
 

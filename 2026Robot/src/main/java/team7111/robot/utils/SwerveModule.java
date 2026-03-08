@@ -1,6 +1,7 @@
 package team7111.robot.utils;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,5 +53,13 @@ public class SwerveModule {
         SwerveModulePosition pos = new SwerveModulePosition(module.getDrivePosition(), getAngle());
 
         return pos;
+    }
+
+    public Translation2d getOffset() {
+        return module.getOffset();
+    }
+    /** Returns in rotations per minute */
+    public double getVelocity() {
+        return module.getDriveVelocity() * 60;
     }
 }

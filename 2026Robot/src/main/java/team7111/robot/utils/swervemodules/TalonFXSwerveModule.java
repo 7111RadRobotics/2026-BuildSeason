@@ -8,6 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,6 +41,8 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
     private boolean useDriveMotor = true;
     private boolean useAngleMotor = true;
 
+    Translation2d fromCenter;
+
     public TalonFXSwerveModule(SwerveModuleConfig config){
         driveMotor = new TalonFX(config.driveMotor.id, Constants.canbus);
         angleMotor = new TalonFX(config.angleMotor.id, Constants.canbus);
@@ -54,6 +57,8 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
         driveRotationsToMeters = wheelCircumference/driveGearRatio;
 
         encoderOffsetDegrees = config.canCoderOffsetDegrees;
+
+        this.fromCenter = config.fromCenter;
     }
 
     public TalonFXSwerveModule(SwerveModuleConfig config, boolean isDriveMotor){
@@ -77,6 +82,8 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
         driveRotationsToMeters = wheelCircumference/driveGearRatio;
 
         encoderOffsetDegrees = config.canCoderOffsetDegrees;
+
+        this.fromCenter = config.fromCenter;
     }
 
     @Override
@@ -115,6 +122,11 @@ public class TalonFXSwerveModule implements GenericSwerveModule{
     public void setAngle(Rotation2d rotation) {
         anglePosition.Position = rotation.getRotations();
         angleMotor.setControl(anglePosition);
+    }
+
+    @Override
+    public Translation2d getOffset() {
+        return fromCenter;
     }
 
     @Override
