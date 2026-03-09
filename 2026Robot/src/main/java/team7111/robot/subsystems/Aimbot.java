@@ -442,6 +442,11 @@ public class Aimbot extends SubsystemBase{
         
         aimingPoint.set(aimPoint);
         targetPoint.set(new Pose2d(targetPose.getX(), targetPose.getY(), new Rotation2d(0)));
+
+        SmartDashboard.putNumber("XVel", robotVelocity.get().getX());
+        SmartDashboard.putNumber("YVel", robotVelocity.get().getY());
+
+
     }
 
     /** Aims using presets */
@@ -618,101 +623,70 @@ public class Aimbot extends SubsystemBase{
 
     /** Most heavy on processing, MONITER SPEED OF PROCESSOR */
     public void shootOnTheMove() {
-        
-        /*if(!inALlianceSide()) {
-            if(robotPose.get().getY() > corners[0].getY()) {
-                if(currentAlliance.getAsBoolean()) {
-                    targetPose = new Pose3d(corners[0].getX(), corners[0].getY() + yOffset, corners[0].getZ(), null);
-                } else {
-                    targetPose = new Pose3d(corners[1].getX(), corners[1].getY() + yOffset, corners[1].getZ(), null);
-                }
-            } else {
-                if(currentAlliance.getAsBoolean()) {
-                    targetPose = new Pose3d(corners[0].getX(), corners[0].getY() - yOffset, corners[0].getZ(), null);
-                } else {
-                    targetPose = new Pose3d(corners[1].getX(), corners[1].getY() - yOffset, corners[1].getZ(), null);
-                }
-            }
-        }*/
-
-        /** If continuously firing, this is the time discrepancy it will give as padding to the previous time calculation.
-         *  paddingTime/timeStep is a rough estemate of the time it will take per shot to calculate. Lower this value if too processor heavy
-         */
+        final double g = 9.81;
         final double paddingTime = 0.25;
 
         possibleToFire = false;
 
-        //Difference in poses to the target
-        Transform3d difference = getTransToTarget();
-    
-        //Field relative, robotPose.get().getRotation() gets robot rotation.
-        //X is forward/backward along the field (towards other alliance)
-        //Y is left/right
-        Transform2d robotVel = robotVelocity.get();
+        Pose2d pose = robotPose.get();
+        Transform2d vel = robotVelocity.get();
 
-        double theta = Math.toRadians(degreeToTarget);
+        double dx = targetPose.getX() - pose.getX();
+        double dy = targetPose.getY() - pose.getY();
+        double dz = targetPose.getZ() - shooterHeightOffset;
 
-        double robotXVelocity =
-            robotVel.getX() * Math.cos(theta) +
-            robotVel.getY() * Math.sin(theta);
+        // Convert robot-relative velocity to field-relative velocity
+        double heading = pose.getRotation().getRadians();
 
-        double robotYVelocity =
-            -robotVel.getX() * Math.sin(theta) +
-            robotVel.getY() * Math.cos(theta);
-        
-        //Allows to skip
-        if(!(uninterruptedFiring && prevTarget == targetPose)) {
+        double robotVX =
+            vel.getX() * Math.cos(heading) - vel.getY() * Math.sin(heading);
+
+        double robotVY =
+            vel.getX() * Math.sin(heading) + vel.getY() * Math.cos(heading);
+
+        if (!(uninterruptedFiring && prevTarget == targetPose)) {
             timeOffset = 0;
         }
 
         boolean wasWithinConstraints = false;
-        //T is in a scale of timeStep
-        for(double t = startingTimeStep + timeOffset; t < maxFltTime; t += timeStep) {
 
-            //X is forward/back, Y is left/right, Z is height
-            Transform3d outputVel = new Transform3d((difference.getX()/t) - robotXVelocity, 
-                                                    (difference.getY()/t) - robotYVelocity, 
-                                                    (difference.getZ()/t) - ((0.5)*-9.81*t),
-                                                     null);
+        for (double t = startingTimeStep + timeOffset; t < maxFltTime; t += timeStep) {
+            // Required launch velocity in FIELD frame
+            double shotVX = dx / t - robotVX;
+            double shotVY = dy / t - robotVY;
+            double shotVZ = dz / t + 0.5 * g * t;
 
-            double targetingAngleOffset = Math.atan2(outputVel.getY(), outputVel.getX());
-            
-            double shootingAngle = Math.atan2(outputVel.getZ(),
-                                   Math.hypot(outputVel.getX(), outputVel.getY()));
-            shootingAngle = Units.radiansToDegrees(shootingAngle);
-            double shootingSpeed = Math.hypot(Math.hypot(outputVel.getZ(), outputVel.getY()), outputVel.getX());
+            double horizontalSpeed = Math.hypot(shotVX, shotVY);
+            double shootingAngle = Units.radiansToDegrees(Math.atan2(shotVZ, horizontalSpeed));
+            double shootingSpeedMps = Math.sqrt(shotVX * shotVX + shotVY * shotVY + shotVZ * shotVZ);
+            double shootingSpeedRpm = (shootingSpeedMps / wheelCircumference) * 60.0;
 
-            // m/s to rpm
-            shootingSpeed = (shootingSpeed / wheelCircumference) * 60;
+            if (shootingSpeedRpm <= maxShooterSpeed &&
+                shootingAngle >= minShooterAngle &&
+                shootingAngle <= maxShooterAngle) {
 
-            //Constraints
-            if(shootingSpeed <= maxShooterSpeed && shootingAngle >= minShooterAngle) {
-                if(shootingAngle <= maxShooterAngle) {
-                    double impactXVel = outputVel.getX();
-                    double impactZVel = outputVel.getZ() - 9.81 * t;
+                wasWithinConstraints = true;
 
-                    //double impactAngle = Units.radiansToDegrees(Math.atan2(-impactZVel, impactXVel));
+                calculatedAngle = shootingAngle;
+                calculatedSpeed = shootingSpeedRpm;
 
-                    wasWithinConstraints = true;
+                // Final field-relative shot direction
+                degreeToTarget = Units.radiansToDegrees(Math.atan2(shotVY, shotVX));
 
-                    //if(impactAngle > minImpactAngle) {
-                        calculatedAngle = shootingAngle;
-                        calculatedSpeed = shootingSpeed;
-                        degreeToTarget += Units.radiansToDegrees(targetingAngleOffset);
-                        timeOffset = t - startingTimeStep - paddingTime; //Optimization for firing continuously
-                        uninterruptedFiring = true;
-                        possibleToFire = true;
-                        return;
-                    //}
-                }
-            } else if(wasWithinConstraints) {
+                timeOffset = t - startingTimeStep - paddingTime;
+                uninterruptedFiring = true;
+                possibleToFire = true;
+                return;
+
+            } else if (wasWithinConstraints) {
                 uninterruptedFiring = false;
                 possibleToFire = false;
-                break; //Quits the loop if we were in the constraints before, but went outside of one of them.
+                break;
             }
-            //If all 3 are true at once, will set calculated speed and angles.
-            //If one boolean was true, but turns false (went out of bounds for angle or speed), then breaks early because no valid firing angle
         }
+
+        uninterruptedFiring = false;
+        possibleToFire = false;
     }
 
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
@@ -841,11 +815,11 @@ public class Aimbot extends SubsystemBase{
 
         double rotation = 0;
         
-        rotation = Math.toDegrees(Math.atan2(xdif, ydif));
+        rotation = Math.toDegrees(Math.atan2(ydif, xdif));
 
-        degreeToTarget = rotation;
+        //degreeToTarget = rotation;
 
-        rotation = 90 - rotation;
+        //rotation = 90 - rotation;
 
         double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
         Transform3d returnedTrans = new Transform3d(
