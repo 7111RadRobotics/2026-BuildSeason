@@ -314,7 +314,7 @@ public class SuperStructure extends SubsystemBase {
                         corner = new Pose3d(16.540988-1.0, 4.034536, 0, null);
                     }
                 }
-                if(swerve.getPose().getY() >= Units.inchesToMeters(317.69)) {
+                if(swerve.getPose().getY() >= Units.inchesToMeters(317.69/2)) {
                     targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
                 } else {
                     targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));

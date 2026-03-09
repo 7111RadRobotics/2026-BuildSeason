@@ -33,14 +33,6 @@ public class Aimbot extends SubsystemBase{
 
     private final Pose3d blueHub = new Pose3d(4.635, 4.034536, Units.inchesToMeters(72), null); 
     private final Pose3d redHub = new Pose3d(11.946, 4.034536, Units.inchesToMeters(72), null); 
-    
-    /** Distance from the wall on each alliance to shoot at when passing */
-    private final double edgeOffset = 1.0;
-    /** Y offset of targets for each corner when passing, from the center of the field's Y pos */
-    private final double yOffset = 4.034536 / 2.0; //Currently 1/4 or 3/4 of the y on the field
-    /** Blue alliance middle, red alliance middle */
-    private final Pose3d[] corners = {new Pose3d(edgeOffset, 4.034536, 0, null), 
-                                      new Pose3d(16.540988-edgeOffset, 4.034536, 0, null)};
 
     //CONTROLLER
     /** Controls the manual firing, and adds angle if the stick is moved */
@@ -441,7 +433,9 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putNumber("Time to impact", t);
         
         aimingPoint.set(aimPoint);
-        targetPoint.set(new Pose2d(targetPose.getX(), targetPose.getY(), new Rotation2d(0)));
+
+        Pose2d targetPose2d = new Pose2d(targetPose.getX(), targetPose.getY(), new Rotation2d(0));
+        targetPoint.set(targetPose2d);
 
         SmartDashboard.putNumber("XVel", robotVelocity.get().getX());
         SmartDashboard.putNumber("YVel", robotVelocity.get().getY());
