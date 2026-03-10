@@ -59,8 +59,8 @@ public class Autonomous extends SubsystemBase {
         new Pose2d(2.996, 5.946, Rotation2d.fromDegrees(-45.65)),
         new Pose2d(2.267, 4.021, Rotation2d.fromDegrees(0)),
         new Pose2d(2.996, 2.096, Rotation2d.fromDegrees(52.65)),
-        new Pose2d(0.42, 7.8, Rotation2d.fromDegrees(-53)),
-        new Pose2d(0.42, 0.66, Rotation2d.fromDegrees(53)),
+        new Pose2d(0.85, 7.5, Rotation2d.fromDegrees(-52.8)),
+        new Pose2d(0.85, 0.66, Rotation2d.fromDegrees(52.8)),
     };
     //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
      
