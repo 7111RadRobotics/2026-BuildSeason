@@ -225,13 +225,11 @@ public class Aimbot extends SubsystemBase{
         this.operatorController = operatorController;
         if (isBlueAlliance != null) {
             if(isBlueAlliance.getAsBoolean()) {
-            this.targetPose = blueHub;
-        } else {
-            this.targetPose = redHub;
+                this.targetPose = blueHub;
+            } else {
+                this.targetPose = redHub;
+            }
         }
-
-        }
-        
     }
 
     /** Sets the angle offsets for the camera and the shooter, measured from horizontal */
@@ -241,7 +239,7 @@ public class Aimbot extends SubsystemBase{
     }
 
     /** Returns if a shooting solution has been found. Only used with on the move shooting. */
-    public boolean shotPossibleOnTheMove() {
+    public boolean shotPossible() {
         return possibleToFire;
     }
 
@@ -308,8 +306,7 @@ public class Aimbot extends SubsystemBase{
     /** Resets the target to default (the current alliance hub for most shooting modes, unless otherwise specified) */
     public void resetTarget() {
         if (DriverStation.getAlliance().isPresent()) {
-                
-                if(DriverStation.getAlliance().get() == Alliance.Blue) {
+            if(DriverStation.getAlliance().get() == Alliance.Blue) {
                 targetPose = blueHub;
             } else {
                 targetPose = redHub;
@@ -519,8 +516,7 @@ public class Aimbot extends SubsystemBase{
         Transform3d CamToTarget = getTransToTarget();
 
         if (CamToTarget == null) {
-            calculatedAngle = minShooterAngle;
-            calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
@@ -537,15 +533,14 @@ public class Aimbot extends SubsystemBase{
         //The distance to lip is half a meter from the target
         double distanceToLip = distanceToTarget - 0.5;
         //The height of the parabola must pass through 15 inches above the target, at distance to lip back
-        double lipHeight = targetPose.getZ() + Units.inchesToMeters(15);
+        double lipHeight = targetPose.getZ() + Units.inchesToMeters(20);
 
         // Convert lip height to shooter-relative coordinates
         double lipHeightRelative = lipHeight - shooterHeightOffset;
 
         // Basic geometry checks
         if (distanceToTarget <= 0.0 || distanceToLip <= 0.0 || distanceToLip >= distanceToTarget) {
-            calculatedAngle = minShooterAngle;
-            calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
@@ -554,6 +549,7 @@ public class Aimbot extends SubsystemBase{
         if (denom <= 1e-9 || !Double.isFinite(denom)) {
             calculatedAngle = minShooterAngle;
             calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
@@ -563,8 +559,7 @@ public class Aimbot extends SubsystemBase{
             / denom;
 
         if (!Double.isFinite(tanThetaClear)) {
-            calculatedAngle = minShooterAngle;
-            calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
@@ -593,16 +588,14 @@ public class Aimbot extends SubsystemBase{
         double denomSpeed = 2.0 * cos * cos * (distanceToTarget * tan - heightDifference);
 
         if (denomSpeed <= 1e-9 || !Double.isFinite(denomSpeed)) {
-            calculatedAngle = minShooterAngle;
-            calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
         double speedSq = g * distanceToTarget * distanceToTarget / denomSpeed;
 
         if (speedSq <= 0.0 || !Double.isFinite(speedSq)) {
-            calculatedAngle = minShooterAngle;
-            calculatedSpeed = 0;
+            possibleToFire = false;
             return;
         }
 
@@ -692,6 +685,7 @@ public class Aimbot extends SubsystemBase{
 
     /** Sets to fire as flat of a line as possible. Operator controls do NOT determine raw angle, but distance they want to fire */
     private void manual() {
+        possibleToFire = true;
         //Deadzone application
         if(Math.abs(operatorController.getLeftY()) > controllerDeadzone) {
             calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleSensitivity;
@@ -812,10 +806,6 @@ public class Aimbot extends SubsystemBase{
         
         rotation = Math.toDegrees(Math.atan2(ydif, xdif));
 
-        //degreeToTarget = rotation;
-
-        //rotation = 90 - rotation;
-
         double distance = Math.sqrt(Math.pow(calculatedPos.getX(), 2) + Math.pow(calculatedPos.getY(), 2));
         Transform3d returnedTrans = new Transform3d(
             distance, 
@@ -826,25 +816,6 @@ public class Aimbot extends SubsystemBase{
 
         return returnedTrans;
     }
-
-
-    /*private boolean inALlianceSide() {
-        double blueSideEdge = Units.inchesToMeters(182.11); // Trench of the blue side
-        double redSideEdge = Units.inchesToMeters(651.22-182.11); // Trench of the red side
-        
-        if(currentAlliance.getAsBoolean()) {
-            if(robotPose.get().getX() < blueSideEdge) {
-                return true;
-            }  
-        } else {
-            if(robotPose.get().getX() > redSideEdge) {
-                return true;
-            }
-        }
-        return false;
-    }*/
-
-
 }
 //floccinaucinihilipilification
 //hehe >:3

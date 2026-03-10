@@ -539,7 +539,11 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(scoringState);
         }
-        shooter.setState(ShooterState.followAimbot);
+        if(targeting.shotPossible()) {
+            shooter.setState(ShooterState.followAimbot);
+        } else {
+            shooter.setState(ShooterState.idle);
+        }
         swerve.setSnapAngle(targeting.getCalculatedDirection());
         
         if(intaking) {
