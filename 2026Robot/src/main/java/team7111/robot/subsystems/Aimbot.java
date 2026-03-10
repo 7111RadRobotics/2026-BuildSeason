@@ -185,7 +185,7 @@ public class Aimbot extends SubsystemBase{
     /** Max time in seconds the robot will calculate, in seconds */
     private final double maxFltTime = 6;
     /** Starting calculation step for the shooter, in seconds */
-    private final double startingTimeStep = 2.0;
+    private final double startingTimeStep = 1.0;
     /** Minimum angle the ball is allowed to fall into the target while using on the move shooting, in degrees from horizontal (positive is downwards) */
     private final double minImpactAngle = 65;
     /** If no valid shooting solution is found, sets this to false. */
@@ -197,6 +197,8 @@ public class Aimbot extends SubsystemBase{
     private boolean uninterruptedFiring = false;
     /** If has calculated the time to fire a ball already, and still using the same target and firing method (most likely havent moved much) */
     private double timeOffset = 0;
+    /** Boolean to track if we are firing at the hub. when false, disables the on the move minimum impact angle check */
+    private boolean hubShot = true;
 
     /** Current type of shot to calculate */
     private shotType currentShotType = shotType.Parabolic;
@@ -218,6 +220,8 @@ public class Aimbot extends SubsystemBase{
         
         //Defaults to shooting at the blue hub
         this.targetPose = blueHub;
+
+        resetTarget();
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
@@ -301,6 +305,7 @@ public class Aimbot extends SubsystemBase{
     /** Allows custom targeting to a target position. Does not affect anything if shooting with vision. */
     public void setCustomTarget(Pose3d customTarget) {
         targetPose = customTarget;
+        hubShot = false;
     }
     
     /** Resets the target to default (the current alliance hub for most shooting modes, unless otherwise specified) */
@@ -314,6 +319,8 @@ public class Aimbot extends SubsystemBase{
         } else {
             targetPose = blueHub;
         }
+
+        hubShot = true;
     }
 
     /** Calculates angle and speed for the shooter. If calculations are disabled, acts as a transport mode.*/
@@ -655,16 +662,32 @@ public class Aimbot extends SubsystemBase{
 
                 wasWithinConstraints = true;
 
-                calculatedAngle = shootingAngle;
-                calculatedSpeed = shootingSpeedRpm;
+                // Impact vertical velocity at target
+                double impactVZ = shotVZ - g * t;
 
-                // Final field-relative shot direction
-                degreeToTarget = Units.radiansToDegrees(Math.atan2(shotVY, shotVX));
+                // Negative means descending
+                double impactAngleDeg = Units.radiansToDegrees(
+                    Math.atan2(impactVZ, horizontalSpeed)
+                );
 
-                timeOffset = t - startingTimeStep - paddingTime;
-                uninterruptedFiring = true;
-                possibleToFire = true;
-                return;
+                boolean impactOk = true;
+
+                if (hubShot) {
+                    impactOk = impactAngleDeg <= -minImpactAngle;
+                }
+
+                if (impactOk) {
+                    calculatedAngle = shootingAngle;
+                    calculatedSpeed = shootingSpeedRpm;
+
+                    // Final field-relative shot direction
+                    degreeToTarget = Units.radiansToDegrees(Math.atan2(shotVY, shotVX));
+
+                    timeOffset = t - startingTimeStep - paddingTime;
+                    uninterruptedFiring = true;
+                    possibleToFire = true;
+                    return;
+                }
 
             } else if (wasWithinConstraints) {
                 uninterruptedFiring = false;
@@ -672,7 +695,6 @@ public class Aimbot extends SubsystemBase{
                 break;
             }
         }
-
         uninterruptedFiring = false;
         possibleToFire = false;
     }
