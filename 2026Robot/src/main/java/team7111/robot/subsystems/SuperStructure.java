@@ -249,6 +249,13 @@ public class SuperStructure extends SubsystemBase {
             passing = false;
         }
 
+        if(driverController.getLeftStickButtonPressed()) {
+            targeting.setPreset(presetShotType.Outpost);
+            passing = true;
+        } else if(driverController.getLeftStickButtonReleased()) {
+            passing = false;
+        }
+
         if(driverController.getAButtonPressed()) {
             orientWithBump = true;
             swerve.setSnapAngle(45);

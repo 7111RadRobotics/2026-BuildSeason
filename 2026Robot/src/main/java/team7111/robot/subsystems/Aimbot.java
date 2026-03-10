@@ -471,7 +471,7 @@ public class Aimbot extends SubsystemBase{
                 break;
             case Outpost:
                 calculatedSpeed = 1000;
-                calculatedAngle = 60;
+                calculatedAngle = 75;
                 break;
         }
     }
