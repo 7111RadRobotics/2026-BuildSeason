@@ -62,8 +62,8 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.51, 0.0, 0.0), 
-        MechanismType.flywheel, 0.18325, 0.0943, 0, 0);//0.21, 0.19, 1.66, 0);
+        1, 20, false, false, new PIDController(0.51, 0.001, 0.0), 
+        MechanismType.flywheel, 0.18325, 0.095, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
     private Motor flywheels;
