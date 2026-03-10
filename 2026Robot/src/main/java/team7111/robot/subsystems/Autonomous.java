@@ -6,10 +6,14 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.lib.pathfinding.Path;
@@ -20,10 +24,12 @@ import team7111.robot.utils.AutoAction;
 
 public class Autonomous extends SubsystemBase {
 
-    Timer timer = new Timer();
+    private Timer timer = new Timer();
 
-    Field zone;
+    private Field zone;
 
+    private StructArrayPublisher<Pose2d> hubPublisher = 
+            NetworkTableInstance.getDefault().getStructArrayTopic("Hub Presets", Pose2d.struct).publish();
 
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
     private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
@@ -48,11 +54,11 @@ public class Autonomous extends SubsystemBase {
 
     public final Pose2d[] hubPresetPoses = new Pose2d[]{
         // TODO get coordinates for poses near trench
-        new Pose2d(4.25, 0.625, Rotation2d.fromDegrees(90)),
-        new Pose2d(4.25, 7.45, Rotation2d.fromDegrees(-90)),
-        new Pose2d(2.266, 5.946, Rotation2d.fromDegrees(-30.65)),
+        new Pose2d(4.15, 0.625, Rotation2d.fromDegrees(90)),
+        new Pose2d(4.5, 7.45, Rotation2d.fromDegrees(-90)),
+        new Pose2d(2.996, 5.946, Rotation2d.fromDegrees(-45.65)),
         new Pose2d(2.267, 4.021, Rotation2d.fromDegrees(0)),
-        new Pose2d(1.975, 1.986, Rotation2d.fromDegrees(38.21)),
+        new Pose2d(2.996, 2.096, Rotation2d.fromDegrees(52.65)),
     };
     //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
      
@@ -87,9 +93,13 @@ public class Autonomous extends SubsystemBase {
         this.zone = zone;
         
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
+
+        hubPublisher.accept(hubPresetPoses);
     }
 
-    public void periodic(){}
+    public void periodic(){
+        
+    }
 
     public void simulationPeriodic(){}
 
