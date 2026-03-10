@@ -56,7 +56,7 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(20, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(0.05, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
     private int pivotID = 12;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
@@ -92,6 +92,9 @@ public class Intake extends SubsystemBase {
         
         mechanism2d.getRoot("Intake", 0.7, 0.3).append(intakeLigament);
         Shuffleboard.getTab("Mechanisms").add("intake", mechanism2d);
+
+        pivot.setPositionReadout(0);
+
     }
 
     public void periodic(){
