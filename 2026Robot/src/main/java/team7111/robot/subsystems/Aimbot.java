@@ -134,6 +134,7 @@ public class Aimbot extends SubsystemBase{
         RegHubShot,
         Pass,
         Default,
+        Outpost,
     }
 
     /** each double is the angle per foot */
@@ -467,6 +468,10 @@ public class Aimbot extends SubsystemBase{
             case Default:
                 calculatedSpeed = 0;
                 calculatedAngle = 0;
+                break;
+            case Outpost:
+                calculatedSpeed = 1000;
+                calculatedAngle = 60;
                 break;
         }
     }
