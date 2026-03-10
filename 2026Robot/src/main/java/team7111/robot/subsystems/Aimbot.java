@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import team7111.robot.Constants.MechanismConstants;
 
 public class Aimbot extends SubsystemBase{
     /** Given as backup for if camera detects no valid apriltag */
@@ -72,9 +73,9 @@ public class Aimbot extends SubsystemBase{
 
     //ANGLE CONSTRAINTS
     /** Minimum shooter angle in degrees, from horizontal */
-    private final double minShooterAngle = 59.038;
+    private final double minShooterAngle = MechanismConstants.minHoodTraj;
     /** Maximum shooter angle in degrees, from horizontal */
-    private final double maxShooterAngle = 83;
+    private final double maxShooterAngle = MechanismConstants.maxHoodTraj;
     
     private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
@@ -448,7 +449,7 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 2000;
+                calculatedSpeed = 1000;
                 calculatedAngle = 60;
                 break;
             case RegHubShot:

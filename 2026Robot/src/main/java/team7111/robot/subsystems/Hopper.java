@@ -13,6 +13,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This class is an example to how a subsystem looks and functions.
@@ -69,8 +70,10 @@ public class Hopper extends SubsystemBase {
     public void periodic(){
         manageState();
 
-        //spindexer.setDutyCycle(spindexerSpeed);
-        //shooterIndexer.setDutyCycle(shooterIndexerSpeed);
+        spindexer.setDutyCycle(spindexerSpeed);
+        shooterIndexer.setDutyCycle(shooterIndexerSpeed);
+
+        SmartDashboard.putNumber("Spindexer RPM", spindexer.getVelocity());
     }
 
     public void simulationPeriodic(){
@@ -110,8 +113,8 @@ public class Hopper extends SubsystemBase {
 
     // named differently to not overide a different method
     private void idleMode(){
-        shooterIndexerSpeed = -0.25;
-        spindexerSpeed = 0.3;
+        shooterIndexerSpeed = -0.2;
+        spindexerSpeed = 0.26;
     }
 
     private void intake(){
@@ -120,8 +123,8 @@ public class Hopper extends SubsystemBase {
     }
 
     private void shoot(){
-        shooterIndexerSpeed = 0.8;
-        spindexerSpeed = 0.8;
+        shooterIndexerSpeed = 0.4;
+        spindexerSpeed = 0.26;
     }
 
     private void stopped(){

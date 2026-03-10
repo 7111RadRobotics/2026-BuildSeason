@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import team7111.robot.Constants.MechanismConstants;
 import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.utils.encoder.RelativeThroughBore;
 import team7111.robot.utils.motor.ArmSimMotor;
@@ -61,21 +62,21 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(1.5, 0.0000, 0.1), 
-        MechanismType.flywheel, 0.0, 0.0, 0, 0);//0.21, 0.19, 1.66, 0);
+        1, 20, false, false, new PIDController(0.51, 0.0, 0.0), 
+        MechanismType.flywheel, 0.18325, 0.0943, 0, 0);//0.21, 0.19, 1.66, 0);
 
     private Motor hood;
     private Motor flywheels;
 
-    private double hoodTrajSetpoint = 60;
+    private double hoodTrajSetpoint = 82;
     private double flywheelSpeed = 0;
 
-    private final double maxHoodPos = 30;//30.962;
-    private final double minHoodPos = 8;//7
-    private final double maxHoodTraj = 90 - minHoodPos; // 82 //83
-    private final double minHoodTraj = 90 - maxHoodPos; // 60 //59.038
+    private final double maxHoodPos = MechanismConstants.maxHoodPos;//30.962;
+    private final double minHoodPos = MechanismConstants.minHoodPos;//7
+    private final double maxHoodTraj = MechanismConstants.maxHoodTraj; // 82 //83
+    private final double minHoodTraj = MechanismConstants.minHoodTraj; // 60 //59.038
 
-    private ShooterState currentState = ShooterState.manual;
+    private ShooterState currentState = ShooterState.stopped;
 
     public Shooter(Aimbot aimbot) {
         this.aimbot = aimbot;
@@ -125,6 +126,7 @@ public class Shooter extends SubsystemBase {
             flywheels.setVoltage(0);
         }else 
             flywheels.setVelocity(flywheelSpeed);
+            
         
 
         hoodTrajectoryLigament.setAngle(90 - hood.getPosition());
@@ -134,6 +136,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("hood trajectory", -hood.getPosition() + 90);
         SmartDashboard.putNumber("Flywheel Velocity", flywheels.getVelocity());
         SmartDashboard.putNumber("FlywheelSetpoint", flywheelSpeed);
+        SmartDashboard.putNumber("Flywheel Voltage", flywheels.getVoltage());
         SmartDashboard.putBoolean("isAtSetpoint", isAtSetpoint());
         SmartDashboard.putBoolean("isAtVelocitySetpoint", isAtSpeedSetpoint());
     }
@@ -206,7 +209,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void stopped(){
-        hoodTrajSetpoint = 75;
+        hoodTrajSetpoint = 81;
         flywheelSpeed = 0;
     }
 

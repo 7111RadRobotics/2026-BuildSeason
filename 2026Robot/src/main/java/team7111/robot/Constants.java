@@ -27,6 +27,16 @@ public class Constants {
         public static final SlewRateLimiter rotationLimiter = new SlewRateLimiter(4);
     }
 
+    /** Contains all constants relate to mechanisms */
+
+    public static class MechanismConstants {
+        
+        public static final double maxHoodPos = 30;
+        public static final double minHoodPos = 8;
+        public static final double maxHoodTraj = 90 - minHoodPos; // 82 //83
+        public static final double minHoodTraj = 90 - maxHoodPos; // 60 //59.038
+    }
+
     /** All swerve constants. */
     public static class SwerveConstants {
         /** Contains robot-specific drivebase constants */
