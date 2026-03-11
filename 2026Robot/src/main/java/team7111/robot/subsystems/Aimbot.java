@@ -88,13 +88,14 @@ public class Aimbot extends SubsystemBase{
     /** Offset from ground the ball leaves the shooter, in meters */
     private final double shooterHeightOffset = Units.inchesToMeters(20);
     /** Offset from the center of the robot to the shooter, in meters */
-    private final double shooterXOffset = 0.25;
-    
+    private final double shooterXOffset = -0.25;
+    /** Offset from the center of the robot to the shooter in meters */
+    private final double shooterYOffset = -0.1;
     /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 2.0;
+    private final double RPMMult = 1.72;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -539,10 +540,10 @@ public class Aimbot extends SubsystemBase{
         final double g = 9.81;
 
         // Horizontal distance from shooter release to target
-        double distanceToTarget = CamToTarget.getX() + shooterXOffset;
+        double distanceToTarget = CamToTarget.getX();
 
         // Vertical target height relative to shooter release
-        double heightDifference = CamToTarget.getZ() - shooterHeightOffset;
+        double heightDifference = CamToTarget.getZ();
 
         //The distance to lip is half a meter from the target
         double distanceToLip = distanceToTarget - 0.5;
@@ -789,16 +790,16 @@ public class Aimbot extends SubsystemBase{
             }
             //Robot relative
             Transform3d calculatedPos = new Transform3d(
-                visionResults.getX() + camToTargetXOffset, //Distance to the target from center of robot
-                visionResults.getY(), //Left/Right offset of the robot to the target
+                visionResults.getX() - camToTargetXOffset - shooterXOffset, //Distance to the target from center of robot
+                visionResults.getY() - shooterYOffset, //Left/Right offset of the robot to the target
                 visionResults.getZ() + camToTargetHeightOffset, //Height of the target (from 0)
                 null);
 
 
             //FOR ROTATION CALUCLATION
             //X difference and y difference
-            double xdif = targetPose.getX() - robotPose.get().getX();
-            double ydif = targetPose.getY() - robotPose.get().getY();
+            double xdif = targetPose.getX() - robotPose.get().getX() - shooterXOffset;
+            double ydif = targetPose.getY() - robotPose.get().getY() - shooterYOffset;
 
             double rotation = 0;
             
@@ -826,8 +827,8 @@ public class Aimbot extends SubsystemBase{
             null);
             
         //X difference and y difference
-        double xdif = targetPose.getX() - robotPose.get().getX();
-        double ydif = targetPose.getY() - robotPose.get().getY();
+        double xdif = targetPose.getX() - robotPose.get().getX() - shooterXOffset;
+        double ydif = targetPose.getY() - robotPose.get().getY() - shooterYOffset;
 
         double rotation = 0;
         

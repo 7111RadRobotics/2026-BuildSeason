@@ -70,8 +70,8 @@ public class Hopper extends SubsystemBase {
     public void periodic(){
         manageState();
 
-        //spindexer.setDutyCycle(spindexerSpeed);
-        //shooterIndexer.setDutyCycle(shooterIndexerSpeed);
+        spindexer.setDutyCycle(spindexerSpeed);
+        shooterIndexer.setDutyCycle(shooterIndexerSpeed);
 
         SmartDashboard.putNumber("Spindexer RPM", spindexer.getVelocity());
     }
@@ -113,7 +113,7 @@ public class Hopper extends SubsystemBase {
 
     // named differently to not overide a different method
     private void idleMode(){
-        shooterIndexerSpeed = -0.2;
+        shooterIndexerSpeed = -0.0;
         spindexerSpeed = 0.26;
     }
 

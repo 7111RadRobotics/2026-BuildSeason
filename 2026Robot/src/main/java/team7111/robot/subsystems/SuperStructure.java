@@ -89,7 +89,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autoTargeting = true;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.Parabolic;
+    private shotType scoringState = shotType.ShootOnTheMove;
 
     private String gameData;
     private boolean bHub = false;
@@ -396,12 +396,11 @@ public class SuperStructure extends SubsystemBase {
      * @return true if the state is complete. The condition could represent mechanisms at a setpoint, a beambreak trigger, a timer, etc.
      * Mainly used for autonomous routines.
      */
-
     private boolean stowed(){
         targeting.setToggle(true);
         targeting.setShotType(shotType.Transport);
         shooter.setState(ShooterState.followAimbot);
-        intake.setState(IntakeState.stow);
+        //intake.setState(IntakeState.stow);
         hopper.setState(HopperState.idle);
 
         if(intaking) {
@@ -425,7 +424,7 @@ public class SuperStructure extends SubsystemBase {
         }
         targeting.setShotType(shotType.Transport);
         
-        intake.setState(IntakeState.deploy);
+        //intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
 
         if(passing) {
@@ -440,7 +439,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean intake(){
         targeting.setToggle(true);
-        intake.setState(IntakeState.intake);
+        //intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);
         
         if(useObjectDetection){
@@ -467,7 +466,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(shotType.Preset);
         }
-        intake.setState(IntakeState.deploy);
+        //intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
             if(intaking) {
@@ -488,7 +487,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
-        intake.setState(IntakeState.deploy);
+        //intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
         if(intaking){
             setSuperState(SuperState.snowBlowerPass);
@@ -506,7 +505,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(shotType.Preset);
         }
-        intake.setState(IntakeState.intake);
+        //intake.setState(IntakeState.intake);
         hopper.setState(HopperState.shoot);
         if(!intaking){
             setSuperState(SuperState.pass);
@@ -522,7 +521,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.followAimbot;
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        swerve.setSwerveState(SwerveState.snapAngle);
+        //swerve.setSwerveState(SwerveState.snapAngle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
@@ -545,7 +544,6 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean score(){
         targeting.setToggle(true);
-        
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
@@ -558,6 +556,8 @@ public class SuperStructure extends SubsystemBase {
         }
         swerve.setSnapAngle(targeting.getCalculatedDirection());
         
+        hopper.setState(HopperState.shoot);
+
         if(intaking) {
             setSuperState(SuperState.snowBlowerScore);
         }
@@ -570,7 +570,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean snowBlowerScore(){
         targeting.setToggle(true);
-        intake.setState(IntakeState.intake);
+        //intake.setState(IntakeState.intake);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
@@ -592,7 +592,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean manual(){
         // code for direct control of mechanisms goes here
         targeting.setToggle(true);
-        intake.setState(IntakeState.manual);
+        //intake.setState(IntakeState.manual);
         targeting.setShotType(shotType.Manual);
         hopper.setState(HopperState.manual);
         shooter.setState(ShooterState.followAimbot);

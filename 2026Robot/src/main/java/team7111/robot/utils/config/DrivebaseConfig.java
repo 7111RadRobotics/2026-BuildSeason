@@ -228,8 +228,8 @@ public class DrivebaseConfig {
     }
     
     public static DrivebaseConfig getHybrid(boolean isSim) {
-        double width = Units.inchesToMeters(21.25);
-        double length = Units.inchesToMeters(23.25);
+        double width = Units.inchesToMeters(20);
+        double length = Units.inchesToMeters(20);
         double wheelDiameter = Units.inchesToMeters(4);
 
         double driveGearing = 6.72 / 1.0;

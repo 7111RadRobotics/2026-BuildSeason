@@ -56,7 +56,7 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(0.05, 20, false, false, new PIDController(0.07, 0.0, 0.001), MechanismType.arm, 0, 0, 0, 0);
+    private MotorConfig pivotConfig = new MotorConfig(0.05, 20, false, false, new PIDController(1, 0.0, 0.01), MechanismType.arm, 0, 2.44, 0.08, 0.52);
     private int pivotID = 12;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
@@ -107,14 +107,23 @@ public class Intake extends SubsystemBase {
         if(pivotPos <= minPivotPos) {
             pivotPos = minPivotPos;
         }
-        //pivot.setSetpoint(pivotPos, false);
+        
+
+        pivot.setSetpoint(pivotPos, false);
+  
         //flyWheel.setDutyCycle(flyWheelSpeed);
+
+        /*if (pivot.isAtSetpoint(5)) {
+            pivot.setVoltage(0);
+        }*/
         
         flyWheel.periodic();
         pivot.periodic();
         intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
 
         SmartDashboard.putNumber("intake pivot position", pivot.getPosition());
+        SmartDashboard.putNumber("Intake Setpoint", pivotPos);
+        SmartDashboard.putBoolean("Intake is at Setpoint", pivot.isAtSetpoint(20));
     }
 
     public void simulationPeriodic(){}
