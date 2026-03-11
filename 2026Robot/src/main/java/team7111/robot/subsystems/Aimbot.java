@@ -86,7 +86,7 @@ public class Aimbot extends SubsystemBase{
 
     //POSITION OFFSETS
     /** Offset from ground the ball leaves the shooter, in meters */
-    private final double shooterHeightOffset = 0.75;
+    private final double shooterHeightOffset = Units.inchesToMeters(20);
     /** Offset from the center of the robot to the shooter, in meters */
     private final double shooterXOffset = 0.25;
     
@@ -414,6 +414,8 @@ public class Aimbot extends SubsystemBase{
         double vy = mps * Math.sin(theta);
         double vx = mps * Math.cos(theta);
 
+        SmartDashboard.putNumber("mps", mps);
+
         double launchHeight = shooterHeightOffset;
         double targetHeight = targetPose.getZ();
 
@@ -430,6 +432,8 @@ public class Aimbot extends SubsystemBase{
         double t = Math.max(t1, t2);
 
         double dist = vx * t;
+
+        SmartDashboard.putNumber("Distance to calculated lead", dist);
 
         double xdif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
         double ydif = Math.sin(Units.degreesToRadians(degreeToTarget)) * dist;
@@ -540,8 +544,6 @@ public class Aimbot extends SubsystemBase{
         // Vertical target height relative to shooter release
         double heightDifference = CamToTarget.getZ() - shooterHeightOffset;
 
-        SmartDashboard.putNumber("Distance to target", distanceToTarget);
-
         //The distance to lip is half a meter from the target
         double distanceToLip = distanceToTarget - 0.5;
         //The height of the parabola must pass through 15 inches above the target, at distance to lip back
@@ -566,9 +568,7 @@ public class Aimbot extends SubsystemBase{
         }
 
         double tanThetaClear =
-            (lipHeightRelative
-                - heightDifference * (distanceToLip * distanceToLip / (distanceToTarget * distanceToTarget)))
-            / denom;
+            (lipHeightRelative - heightDifference * (distanceToLip * distanceToLip / (distanceToTarget * distanceToTarget))) / denom;
 
         if (!Double.isFinite(tanThetaClear)) {
             possibleToFire = false;
@@ -697,7 +697,7 @@ public class Aimbot extends SubsystemBase{
             } else if (wasWithinConstraints) {
                 uninterruptedFiring = false;
                 possibleToFire = false;
-                break;
+                return;
             }
         }
         uninterruptedFiring = false;
