@@ -57,6 +57,7 @@ public class REVMotor implements Motor {
         this.elevatorFeedforward = config.elevatorFF;
         this.simpleMotorFeedforward = config.simpleFF;
         this.sparkConfig = config.sparkConfig;
+        this.mechanismType = config.mechanism;
     
         motor = new SparkMax(id, MotorType.kBrushless);
 

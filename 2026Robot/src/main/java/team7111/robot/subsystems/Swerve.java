@@ -112,7 +112,7 @@ public class Swerve extends SubsystemBase {
 
         
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
-            getPositions(), new Pose2d(4.635 - (0.25 + 1), 4.039 + 0.1, Rotation2d.fromDegrees(0)));
+            getPositions(), new Pose2d(0, 0 + 0.1, Rotation2d.fromDegrees(0)));
         
         snapAnglePID = new PIDController(0.04, 0.0, 0.001);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
@@ -291,8 +291,11 @@ public class Swerve extends SubsystemBase {
         gamepieceYaw = yaw;
     }
 
-    public void addVisionMeasurement(Pose2d pose){
-        swerveOdometry.addVisionMeasurement(new Pose2d(pose.getX(), pose.getY(), getYaw()), Timer.getFPGATimestamp());
+    public void addVisionMeasurement(Pose2d pose, boolean useGyroYaw){
+        Rotation2d rotation = useGyroYaw
+            ? getYaw()
+            : pose.getRotation();
+        swerveOdometry.addVisionMeasurement(new Pose2d(pose.getX(), pose.getY(), rotation), Timer.getFPGATimestamp());
     }
 
     /** To be used by auto. Use the drive method during teleop. */

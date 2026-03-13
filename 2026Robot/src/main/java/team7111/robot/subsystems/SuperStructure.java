@@ -180,7 +180,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
         Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
-            swerve.addVisionMeasurement(visionRobotPose.toPose2d());
+            swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
         }
 
         // Driver controller commands
@@ -400,7 +400,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         targeting.setShotType(shotType.Transport);
         shooter.setState(ShooterState.followAimbot);
-        //intake.setState(IntakeState.stow);
+        intake.setState(IntakeState.stow);
         hopper.setState(HopperState.idle);
 
         if(intaking) {
@@ -424,7 +424,7 @@ public class SuperStructure extends SubsystemBase {
         }
         targeting.setShotType(shotType.Transport);
         
-        //intake.setState(IntakeState.deploy);
+        intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
 
         if(passing) {
@@ -439,7 +439,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean intake(){
         targeting.setToggle(true);
-        //intake.setState(IntakeState.intake);
+        intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);
         
         if(useObjectDetection){
@@ -466,7 +466,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(shotType.Preset);
         }
-        //intake.setState(IntakeState.deploy);
+        intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.idle);
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
             if(intaking) {
@@ -487,7 +487,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
-        //intake.setState(IntakeState.deploy);
+        intake.setState(IntakeState.deploy);
         hopper.setState(HopperState.shoot);
         if(intaking){
             setSuperState(SuperState.snowBlowerPass);
@@ -505,7 +505,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(shotType.Preset);
         }
-        //intake.setState(IntakeState.intake);
+        intake.setState(IntakeState.intake);
         hopper.setState(HopperState.shoot);
         if(!intaking){
             setSuperState(SuperState.pass);
@@ -570,7 +570,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean snowBlowerScore(){
         targeting.setToggle(true);
-        //intake.setState(IntakeState.intake);
+        intake.setState(IntakeState.intake);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
@@ -592,7 +592,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean manual(){
         // code for direct control of mechanisms goes here
         targeting.setToggle(true);
-        //intake.setState(IntakeState.manual);
+        intake.setState(IntakeState.manual);
         targeting.setShotType(shotType.Manual);
         hopper.setState(HopperState.manual);
         shooter.setState(ShooterState.followAimbot);

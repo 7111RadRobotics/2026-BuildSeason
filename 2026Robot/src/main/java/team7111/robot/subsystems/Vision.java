@@ -35,7 +35,7 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(Inches.of(14).in(Meters), Inches.of(8).in(Meters), 0, new Rotation3d(0, Degrees.of(15).in(Radians), 0)),
+        new Transform3d(Inches.of(14).in(Meters), Inches.of(8).in(Meters), Inches.of(20).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
     };
 
     //private final AHRS gyro;
