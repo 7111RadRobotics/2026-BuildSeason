@@ -311,11 +311,6 @@ public class SuperStructure extends SubsystemBase {
         //if(autoTargeting) {
             if(field.inAllianceZone(swerve.getPose())) {
                 targeting.resetTarget();
-                if (swerve.getPose().getX() == (16.54 +- 0.4) && swerve.getPose().getY() == (0.64 +- 0.4) && DriverStation.getAlliance().get() == Alliance.Red) {
-                    targeting.setPreset(presetShotType.Outpost);
-                } else if (swerve.getPose().getX() == (0.39 +- 0.4) && swerve.getPose().getY() == (8 +- 0.4) && DriverStation.getAlliance().get() == Alliance.Blue) {
-                    targeting.setPreset(presetShotType.Outpost);
-                }
             } else {
                 Pose3d corner = null;
 
