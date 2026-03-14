@@ -198,10 +198,10 @@ public class Swerve extends SubsystemBase {
                 break;
 
             case manual:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), joystickYaw.getAsDouble(), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), joystickYaw.getAsDouble(), isDriveFieldRelative, true, false);
                 break;
             case stationary:
-                manual(0, 0, 0, false, false);
+                manual(0, 0, 0, false, false, false);
                 break;
             case snapAngle:
                 // Optimize code
@@ -213,10 +213,10 @@ public class Swerve extends SubsystemBase {
                     snapAngleSetpoint += 360;
                 }
 
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), -snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), -snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false, false);
                 break;
             case followGamePiece:
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false, false);
                 break;
             case bumpAlign:
                 double angle = joystickYaw.getAsDouble();
@@ -230,18 +230,19 @@ public class Swerve extends SubsystemBase {
                     }
                 }
 
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), angle, isDriveFieldRelative, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), angle, isDriveFieldRelative, false, false);
                 break;
             default:
                 break;
         }
     }
 
-    public void manual(double forwardBack, double leftRight, double rotation, boolean isFieldRelative, boolean isOpenLoop){
+    public void manual(double forwardBack, double leftRight, double rotation, boolean isFieldRelative, boolean isAngleJoystick, boolean isOpenLoop){
         // Adding deadzone.
         forwardBack = Math.abs(forwardBack) < controllerDeadzone ? 0 : forwardBack;
         leftRight = Math.abs(leftRight) < controllerDeadzone ? 0 : leftRight;
-        rotation = Math.abs(rotation) < controllerDeadzone ? 0 : rotation;
+        if(isAngleJoystick)
+            rotation = Math.abs(rotation) < controllerDeadzone ? 0 : rotation;
 
         double hypot = Math.hypot(leftRight, forwardBack);
         if(Math.abs(hypot) > 1){
@@ -255,7 +256,8 @@ public class Swerve extends SubsystemBase {
         // Converting to m/s
         forwardBack *= SwerveConstants.maxDriveVelocity;
         leftRight *= SwerveConstants.maxDriveVelocity;
-        rotation *= SwerveConstants.maxAngularVelocity;
+        if(isAngleJoystick)
+            rotation *= SwerveConstants.maxAngularVelocity;
 
         // Get desired module states.
         ChassisSpeeds chassisSpeeds = isFieldRelative
