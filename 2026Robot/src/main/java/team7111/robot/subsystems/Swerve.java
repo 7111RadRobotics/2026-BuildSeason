@@ -112,7 +112,7 @@ public class Swerve extends SubsystemBase {
 
         
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
-            getPositions(), new Pose2d(0, 0 + 0.1, Rotation2d.fromDegrees(0)));
+            getPositions(), new Pose2d(4.635 - Units.feetToMeters(20), 4.034536, Rotation2d.fromDegrees(0)));
         
         snapAnglePID = new PIDController(0.04, 0.0, 0.001);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);

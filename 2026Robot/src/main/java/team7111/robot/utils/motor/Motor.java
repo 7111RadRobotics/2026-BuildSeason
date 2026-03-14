@@ -62,6 +62,8 @@ public interface Motor {
      * @param d -Type "double" minorly adjusts the end, allowing it to not ocelate.
      */
     public void setPID(double p, double i, double d);
+
+    default public void setVelocityPID(double p, double i, double d){}
     
     /**
      * @return -Type "PIDController", returns the pid controller object, containing all of its parameters as an object.

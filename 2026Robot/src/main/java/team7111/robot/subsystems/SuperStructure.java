@@ -112,7 +112,7 @@ public class SuperStructure extends SubsystemBase {
         this.field = field;
 
         DriverStation.silenceJoystickConnectionWarning(true);
-        this.swerve.setJoysickInputs(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> driverController.getRightX());
+        this.swerve.setJoysickInputs(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> -driverController.getRightX());
         this.swerve.setDriveFieldRelative(true);
         this.swerve.setSwerveState(SwerveState.manual);
 
@@ -180,7 +180,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
         Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
-            swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
+            //swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
         }
 
         // Driver controller commands

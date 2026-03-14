@@ -80,7 +80,7 @@ public class Aimbot extends SubsystemBase{
     private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
-    private final double maxShooterSpeed = 6000;
+    private final double maxShooterSpeed = 5500;
     /** Minimum rotations per minute allowable on the shooter (Overrided in off state, in RPM) */
     private final double minShooterSpeed = 0;
 
@@ -95,7 +95,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 1.72;
+    private final double RPMMult = 2.86;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -434,6 +434,10 @@ public class Aimbot extends SubsystemBase{
 
         double dist = vx * t;
 
+        double wantedTime = (vy / 9.81) * 2;
+
+        SmartDashboard.putNumber("Calculated Time", wantedTime);
+
         SmartDashboard.putNumber("Distance to calculated lead", dist);
 
         double xdif = Math.cos(Units.degreesToRadians(degreeToTarget)) * dist;
@@ -463,8 +467,8 @@ public class Aimbot extends SubsystemBase{
                 calculatedAngle = 60;
                 break;
             case RegHubShot:
-                calculatedAngle = 75;
-                calculatedSpeed = 1000;
+                calculatedAngle = minShooterAngle;
+                calculatedSpeed = maxShooterSpeed;
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;
@@ -708,7 +712,7 @@ public class Aimbot extends SubsystemBase{
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;
-        calculatedSpeed = 0;
+        calculatedSpeed = 250;
     }
 
     /** Sets to fire as flat of a line as possible. Operator controls do NOT determine raw angle, but distance they want to fire */
@@ -842,6 +846,7 @@ public class Aimbot extends SubsystemBase{
             new Rotation3d(new Rotation2d(rotation)));
         degreeToTarget = rotation;
 
+        SmartDashboard.putNumber("Distance", Units.metersToFeet(distance));
         return returnedTrans;
     }
 }

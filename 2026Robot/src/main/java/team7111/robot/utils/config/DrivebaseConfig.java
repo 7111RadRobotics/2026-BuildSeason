@@ -242,7 +242,7 @@ public class DrivebaseConfig {
         boolean angleInversion = true;
         boolean driveBrakeMode = true;
         boolean angleBrakeMode = false;
-        PIDController drivePID = new PIDController(0.35, 0.001, 0.0);
+        PIDController drivePID = new PIDController(0.45, 0.001, 0.0);
         PIDController anglePID = new PIDController(0.5, 0.0, 0.0);
         SimpleMotorFeedforward driveFF = new SimpleMotorFeedforward(0.001, 0.0);
         SimpleMotorFeedforward angleFF = new SimpleMotorFeedforward(0.001, 0.0);

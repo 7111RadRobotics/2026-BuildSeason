@@ -23,6 +23,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import team7111.robot.utils.encoder.GenericEncoder;
 
 
@@ -43,10 +44,11 @@ public class REVMotor implements Motor {
     private double positiveVelocityLimit = 5000;
     private double negativeVelocityLimit = -5000;
     private boolean isFollower = false;
+    private int id;
     
     public REVMotor (int id) {
         motor = new SparkMax(id, MotorType.kBrushless);
-
+        this.id = id;
     }
     
     public REVMotor(int id, GenericEncoder encoder, MotorConfig config){
@@ -58,6 +60,7 @@ public class REVMotor implements Motor {
         this.simpleMotorFeedforward = config.simpleFF;
         this.sparkConfig = config.sparkConfig;
         this.mechanismType = config.mechanism;
+        this.id = id;
     
         motor = new SparkMax(id, MotorType.kBrushless);
 
@@ -93,11 +96,11 @@ public class REVMotor implements Motor {
         if(velocitySetpoint < negativeVelocityLimit){
             velocitySetpoint = negativeVelocityLimit;
         }
-        motor.getClosedLoopController().setSetpoint(rpm * gearRatio, ControlType.kVelocity);
+        motor.getClosedLoopController().setSetpoint(rpm / gearRatio, ControlType.kVelocity);
     }
 
     public double getVelocity(){
-        return motor.getEncoder().getVelocity() / gearRatio;
+        return motor.getEncoder().getVelocity() * gearRatio;
     }
     
     public void setPositionReadout(double position){
@@ -134,7 +137,7 @@ public class REVMotor implements Motor {
             }
         }
         double output = pidOutput + feedforwardOutput;
-
+    
         this.setPoint = setPoint;
         if(output > positiveVoltageLimit){
             output = positiveVoltageLimit;
@@ -142,7 +145,7 @@ public class REVMotor implements Motor {
             output = negativeVoltageLimit;
         }
         motor.setVoltage(output); //Needs velocity for feedforward
-        
+        SmartDashboard.putNumber("Motor " + id + " pid output", output);
     }
 
     public void periodic(){
@@ -166,6 +169,11 @@ public class REVMotor implements Motor {
 
     public void setPID(double p, double i, double d){
         pid.setPID(p, i, d);
+    }
+
+    public void setVelocityPID(double p, double i, double d){
+        sparkConfig.closedLoop.pid(p, i, d);
+        motor.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public PIDController getPID(){
