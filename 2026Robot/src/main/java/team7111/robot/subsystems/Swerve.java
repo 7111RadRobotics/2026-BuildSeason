@@ -106,9 +106,9 @@ public class Swerve extends SubsystemBase {
         /*pathMaster.setTranslationPID(3, 0.015215, 0.1012);
         pathMaster.setRotationPID(0.1425, 0.000, 0.00240225);*/
 
-        pathMaster.setTranslationPID(10, 0.0, 0);
-        pathMaster.setRotationPID(0.5, 0, 0);
-        pathMaster.setInversions(false, false, true, false);
+        pathMaster.setTranslationPID(5, 0.01, 0.001);
+        pathMaster.setRotationPID(0.25, 0, 0.003);
+        pathMaster.setInversions(false, false, false, false);
 
         
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 

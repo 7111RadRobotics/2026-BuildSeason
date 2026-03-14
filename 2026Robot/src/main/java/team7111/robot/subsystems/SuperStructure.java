@@ -57,7 +57,7 @@ public class SuperStructure extends SubsystemBase {
     private final Autonomous auto;
     private final Swerve swerve;
     private final Vision vision;
-    private final Aimbot targeting;
+    public final Aimbot targeting;
     private final Intake intake;
     private final Hopper hopper;
     private final Shooter shooter;
@@ -122,6 +122,8 @@ public class SuperStructure extends SubsystemBase {
             return true;
         });
 
+        auto.giveResources(this);
+
     }
 
     /**
@@ -180,7 +182,7 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
         Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
-            //swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
+            swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
         }
 
         // Driver controller commands
@@ -288,7 +290,7 @@ public class SuperStructure extends SubsystemBase {
         }
         if(operatorController.getAButtonPressed()) {
             autoTargeting = false;
-            scoringState = shotType.Direct;
+            scoringState = shotType.ShotTable;
         }
         if(operatorController.getBButtonPressed()) {
             autoTargeting = false;

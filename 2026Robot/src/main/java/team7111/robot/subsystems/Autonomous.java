@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.lib.pathfinding.Path;
 import team7111.lib.pathfinding.Waypoint;
 import team7111.lib.pathfinding.WaypointConstraints;
+import team7111.robot.subsystems.Aimbot.presetShotType;
 import team7111.robot.subsystems.SuperStructure.SuperState;
 import team7111.robot.utils.AutoAction;
 
@@ -37,7 +38,7 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.1);
     private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
 
-    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.002);
+    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.005);
     private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.3);
 
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
@@ -73,6 +74,8 @@ public class Autonomous extends SubsystemBase {
 
     public enum Paths {
         forward,
+        forwardR,
+        SideSwipe,
 
         hubSetpointL,
         hubSetpointM,
@@ -97,6 +100,7 @@ public class Autonomous extends SubsystemBase {
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
 
         hubPublisher.accept(hubPresetPoses);
+
     }
 
     public void periodic(){
@@ -111,7 +115,17 @@ public class Autonomous extends SubsystemBase {
         // each auto is an array of "AutoAction's"
         switch (autoName) {
             case forwardTest:
+                auto.add(new AutoAction(SuperState.preparePass).withAdditionalCondition(() -> 
+                        {superStructure.targeting.setPreset(presetShotType.Trench);
+                         return true;}));
+                         
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition( () -> timeDelay(4)));
                 auto.add(new AutoAction(getPath(Paths.forward)));
+                auto.add(new AutoAction(getPath(Paths.forwardR)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.SideSwipe)));
+                auto.add(new AutoAction(SuperState.deployed));
+                
                 break;
 
             case RhubINIA:
@@ -154,7 +168,14 @@ public class Autonomous extends SubsystemBase {
         // define Path object for each Paths enum using a switch statement
         switch (path) {
             case forward:
-                waypoints.add(balancedPoint(1, 0, 0));
+                waypoints.add(balancedPoint(5.34, 0.625, 0));
+                
+                break;
+            case forwardR:
+                waypoints.add(balancedPoint(6, 0.625, 180));
+                break;
+            case SideSwipe:
+                waypoints.add(slowPoint(5.985, 3.3, 0));
                 break;
             case hubSetpointRT:
                 waypoints.add(balancedPoint(4.25, 0.625, 90));

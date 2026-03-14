@@ -11,11 +11,17 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
+import edu.wpi.first.wpilibj.shuffleboard.WidgetType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.Constants.MechanismConstants;
@@ -209,7 +215,7 @@ public class Aimbot extends SubsystemBase{
     private presetShotType presetShot = presetShotType.Default;
 
     /** Calculated angle set in periodic method, in degrees (includes shooter and camera offsets in calculation already) */
-    private double calculatedAngle = 0.0;
+    private double calculatedAngle = 82.0;
     /** Calculated speed the wheel needs to spin at, in rotations per minute */
     private double calculatedSpeed = 0.0; 
     /** The direction in degrees to the target */
@@ -224,6 +230,8 @@ public class Aimbot extends SubsystemBase{
         this.targetPose = blueHub;
 
         resetTarget();
+
+
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
@@ -463,12 +471,12 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 1000;
+                calculatedSpeed = 500;
                 calculatedAngle = 60;
                 break;
             case RegHubShot:
-                calculatedAngle = minShooterAngle;
-                calculatedSpeed = maxShooterSpeed;
+                calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 78.25);
+                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2600 / RPMMult);
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;
@@ -712,7 +720,7 @@ public class Aimbot extends SubsystemBase{
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;
-        calculatedSpeed = 250;
+        calculatedSpeed = 1000 / RPMMult;
     }
 
     /** Sets to fire as flat of a line as possible. Operator controls do NOT determine raw angle, but distance they want to fire */

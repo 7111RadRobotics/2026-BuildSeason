@@ -35,7 +35,7 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(Inches.of(14).in(Meters), Inches.of(8).in(Meters), Inches.of(20).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
+        new Transform3d(Inches.of(-3.375).in(Meters), Inches.of(-2.75).in(Meters), Inches.of(20.75).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
     };
 
     //private final AHRS gyro;
@@ -195,7 +195,10 @@ public class Vision extends SubsystemBase{
                 return null;
             }
         }
-        return camera.estRobotPose.estimatedPose;
+        if (camera.getLatestResult().hasTargets()) {
+            return camera.estRobotPose.estimatedPose;
+        }
+        return null;
     }
 
     public double getGamepieceYaw(){

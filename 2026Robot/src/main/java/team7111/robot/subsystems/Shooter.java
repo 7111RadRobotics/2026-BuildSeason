@@ -115,17 +115,17 @@ public class Shooter extends SubsystemBase {
         hood.periodic();
         flywheels.periodic();
 
-        /*if(hoodTrajSetpoint > maxHoodTraj){
+        if(hoodTrajSetpoint > maxHoodTraj){
             hood.setSetpoint(minHoodPos, false);
         }else if(hoodTrajSetpoint < minHoodTraj){
             hood.setSetpoint(maxHoodPos, false);
         }else{
             hood.setSetpoint(90 - hoodTrajSetpoint, false);
         }
-        if(flywheelSpeed == 0 || flywheels.getVelocity() >= 500 + flywheelSpeed){
+        if(flywheelSpeed == 0 || flywheels.getVelocity() >= 75 + flywheelSpeed){
             flywheels.setVoltage(0);
         }else 
-            flywheels.setVelocity(flywheelSpeed);*/
+            flywheels.setVelocity(flywheelSpeed);
             
         
 
