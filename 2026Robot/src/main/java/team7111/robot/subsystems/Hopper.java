@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Hopper extends SubsystemBase {
     
+    private double manSpindexerSpeed = 0.0;
     /**
      * The enum that holds the values of the subsystem's states.
      * It's name should be the subsystem's followed by "State"
@@ -119,17 +120,17 @@ public class Hopper extends SubsystemBase {
     // named differently to not overide a different method
     private void idleMode(){
         shooterIndexerSpeed = -0.1;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.26 * 1.5;
     }
 
     private void intake(){
         shooterIndexerSpeed = -0.25;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.26 * 1.5;
     }
 
     private void shoot(){
         shooterIndexerSpeed = 0.4;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.26 * 1.5;
     }
 
     private void stopped(){
@@ -138,7 +139,12 @@ public class Hopper extends SubsystemBase {
     }
 
     private void manual(){
-        //System.out.println("Runs code for the manual state");
+        spindexerSpeed = manSpindexerSpeed;
+    }
+
+    /** Updates the manual speed setpoint in rpm */
+    public void updateManualSpeed(double speed) {
+        manSpindexerSpeed = speed;
     }
 
     public void setState(HopperState state){

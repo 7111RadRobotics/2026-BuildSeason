@@ -50,6 +50,8 @@ public class Intake extends SubsystemBase {
 
     private double pivotPos = 0;
 
+    private double manualIntakeSpeed = 0;
+
     /** Maximum position in degrees */
     private final double maxPivotPos = 126;
 
@@ -57,8 +59,8 @@ public class Intake extends SubsystemBase {
     private final double minPivotPos = 0;
 
     private MotorConfig pivotConfig = new MotorConfig(0.05, 20, false, true, 
-                                        new PIDController(0.25, 0.0, 0.00), 
-                                        MechanismType.arm, 0.3, 0, 0, 0.52);//2.44, 0.08, 0.52);
+                                        new PIDController(0.4, 0.01, 0.00), 
+                                        MechanismType.arm, 0.3, 0, 0, 0.0);//2.44, 0.08, 0.52);
     private int pivotID = 12;
 
     private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
@@ -96,7 +98,7 @@ public class Intake extends SubsystemBase {
         Shuffleboard.getTab("Mechanisms").add("intake", mechanism2d);
 
         pivot.setPositionReadout(0);
-        pivot.setSpeedLimits(5, -5, true);
+        pivot.setSpeedLimits(5, -100, true);
     }
 
     public void periodic(){
@@ -120,6 +122,9 @@ public class Intake extends SubsystemBase {
             }else if(pivot.getVelocity() < -30){
                 ///pivot.setVelocity(30);
             }else{*/
+            if(currentState.equals(IntakeState.stow)){
+                pivot.setDutyCycle(-1);
+            }else
                 pivot.setSetpoint(pivotPos, true);
             //}
         }
@@ -133,6 +138,7 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putBoolean("Intake is at Setpoint", pivot.isAtSetpoint(20));
         SmartDashboard.putNumber("Intake Velocity", pivot.getVelocity());
         SmartDashboard.putNumber("Intake Voltage", pivot.getVoltage());
+        SmartDashboard.putNumber("Intake Duty Cycle", pivot.getDutyCycle());
     }
 
     public void simulationPeriodic(){}
@@ -186,6 +192,12 @@ public class Intake extends SubsystemBase {
 
     private void manual(){
         //System.out.println("Runs code for the manual state");
+
+        flyWheelSpeed = manualIntakeSpeed;
+    }
+
+    public void updateManualSpeed(double manualSpeed) {
+        manualIntakeSpeed = manualSpeed;
     }
 
     public void setState(IntakeState state){

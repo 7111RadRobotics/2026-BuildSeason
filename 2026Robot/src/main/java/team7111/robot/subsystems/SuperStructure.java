@@ -306,9 +306,37 @@ public class SuperStructure extends SubsystemBase {
         if(operatorController.getYButtonPressed()) {
             autoTargeting = true;
         }
-
+        
         hasAcheivedState = manageSuperState(superState);
 
+        //Overrides any states for hopper and intake manual
+
+        if(operatorController.getPOV() != -1) {
+            hopper.setState(HopperState.manual);
+            
+            switch (operatorController.getPOV()) {
+                case 90:
+                    hopper.updateManualSpeed(-0.1);
+                    break;
+                case 270:
+                    hopper.updateManualSpeed(0.4);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if(operatorController.getRightTriggerAxis() > 0.15) {
+            intake.setState(IntakeState.manual);
+
+            intake.updateManualSpeed(operatorController.getRightTriggerAxis());
+        }
+        if(operatorController.getLeftTriggerAxis() > 0.15) {
+            intake.setState(IntakeState.manual);
+
+            intake.updateManualSpeed(-operatorController.getLeftTriggerAxis());
+        }
+        
         //If autotargeting, will check if the robot is in the nuteral zone and set to shoot towards the corners
         //if(autoTargeting) {
             if(field.inAllianceZone(swerve.getPose())) {
@@ -518,7 +546,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.followAimbot;
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        //swerve.setSwerveState(SwerveState.snapAngle);
+        swerve.setSwerveState(SwerveState.snapAngle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{

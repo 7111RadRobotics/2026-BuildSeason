@@ -101,7 +101,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 2.86;
+    private final double RPMMult = 1.0; //2.86
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;

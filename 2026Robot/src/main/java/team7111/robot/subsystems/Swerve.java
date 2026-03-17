@@ -114,7 +114,7 @@ public class Swerve extends SubsystemBase {
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
             getPositions(), new Pose2d(4.635 - Units.feetToMeters(20), 4.034536, Rotation2d.fromDegrees(0)));
         
-        snapAnglePID = new PIDController(0.04, 0.0, 0.001);
+        snapAnglePID = new PIDController(0.25, 0, 0.003);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
 
         //Velocity kinematics object
@@ -213,7 +213,7 @@ public class Swerve extends SubsystemBase {
                     snapAngleSetpoint += 360;
                 }
 
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), -snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false, false);
                 break;
             case followGamePiece:
                 manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false, false);
