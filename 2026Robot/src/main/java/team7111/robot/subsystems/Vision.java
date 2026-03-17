@@ -36,6 +36,7 @@ public class Vision extends SubsystemBase{
      */
     private final Transform3d cameraPositionsToCenter[] = {
         new Transform3d(Inches.of(-3.375).in(Meters), Inches.of(-2.75).in(Meters), Inches.of(20.75).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
+        //new Transform3d(Inches.of(-12.0), Inches.of(-11), Inches.of(8.0), new Rotation3d(0, Degrees.of(), Degrees.of())),
     };
 
     //private final AHRS gyro;

@@ -75,7 +75,7 @@ public interface Motor {
      * @param positiveSpeed -Type "double", the speed limit in the positive direction
      * @param negativeSpeed -Type "double", the speed limit in the negative direction
      */
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage);
+    default public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage){}
 
     /**
      * Gets the motor encoder.

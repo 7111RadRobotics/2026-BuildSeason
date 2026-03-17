@@ -99,12 +99,6 @@ public class ArmSimMotor implements Motor {
     }
 
     @Override
-    public void setSpeedLimits(double positiveSpeed, double negativeSpeed, boolean isVoltage) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setSpeedLimits'");
-    }
-
-    @Override
     public void setVelocity(double rpm) {
         // does nothing
     }

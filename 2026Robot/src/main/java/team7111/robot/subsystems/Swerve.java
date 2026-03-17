@@ -114,7 +114,7 @@ public class Swerve extends SubsystemBase {
         swerveOdometry = new SwerveDrivePoseEstimator(SwerveConstants.kinematics, getYaw(), 
             getPositions(), new Pose2d(4.635 - Units.feetToMeters(20), 4.034536, Rotation2d.fromDegrees(0)));
         
-        snapAnglePID = new PIDController(0.25, 0, 0.003);
+        snapAnglePID = new PIDController(0.25, 0, 0.002);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
 
         //Velocity kinematics object
@@ -341,6 +341,13 @@ public class Swerve extends SubsystemBase {
 
     /** Robot relative, X is forward/back, Y is left/Right, rotation is the robot rotation value */
     public Transform2d getVelocity() {
+        if(robotXVelocity > 0.2) {
+            robotXVelocity = 0;
+        }
+        if(robotYVelocity > 0.2) {
+            robotYVelocity = 0;
+        }
+
         return new Transform2d(robotXVelocity, robotYVelocity, new Rotation2d(rotationVelocity));
     }
 

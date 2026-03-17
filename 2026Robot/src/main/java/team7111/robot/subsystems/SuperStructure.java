@@ -491,7 +491,7 @@ public class SuperStructure extends SubsystemBase {
         }else{
             targeting.setShotType(shotType.Preset);
         }
-        intake.setState(IntakeState.deploy);
+        
         hopper.setState(HopperState.idle);
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
             if(intaking) {
@@ -512,7 +512,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
-        intake.setState(IntakeState.deploy);
+        intake.setState(IntakeState.shoot);
         hopper.setState(HopperState.shoot);
         if(intaking){
             setSuperState(SuperState.snowBlowerPass);
@@ -580,7 +580,7 @@ public class SuperStructure extends SubsystemBase {
             shooter.setState(ShooterState.idle);
         }
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        
+        intake.setState(IntakeState.shoot);
         hopper.setState(HopperState.shoot);
 
         if(intaking) {

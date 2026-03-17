@@ -471,23 +471,23 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 500;
+                calculatedSpeed = 500 / RPMMult;
                 calculatedAngle = 60;
                 break;
             case RegHubShot:
                 calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 78.25);
-                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2600 / RPMMult);
+                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2800 / RPMMult);
                 break;
             case Pass:
                 calculatedAngle = maxShooterAngle;
                 calculatedSpeed = shooterOptimalSpeed;
                 break;
             case Default:
-                calculatedSpeed = 0;
+                calculatedSpeed = 0 / RPMMult;
                 calculatedAngle = 0;
                 break;
             case Outpost:
-                calculatedSpeed = 1000;
+                calculatedSpeed = 1000 / RPMMult;
                 calculatedAngle = 75;
                 break;
         }

@@ -43,6 +43,7 @@ public class Intake extends SubsystemBase {
         stow,
         deploy,
         intake,
+        shoot,
         manual,
     }
 
@@ -58,8 +59,8 @@ public class Intake extends SubsystemBase {
     /** Minimum position in degrees */
     private final double minPivotPos = 0;
 
-    private MotorConfig pivotConfig = new MotorConfig(0.05, 20, false, true, 
-                                        new PIDController(0.4, 0.01, 0.00), 
+    private MotorConfig pivotConfig = new MotorConfig(0.05, 40, false, true, 
+                                        new PIDController(0.35, 0.01, 0.00), 
                                         MechanismType.arm, 0.3, 0, 0, 0.0);//2.44, 0.08, 0.52);
     private int pivotID = 12;
 
@@ -98,7 +99,7 @@ public class Intake extends SubsystemBase {
         Shuffleboard.getTab("Mechanisms").add("intake", mechanism2d);
 
         pivot.setPositionReadout(0);
-        pivot.setSpeedLimits(5, -100, true);
+        pivot.setSpeedLimits(3, -3, true);
     }
 
     public void periodic(){
@@ -122,9 +123,6 @@ public class Intake extends SubsystemBase {
             }else if(pivot.getVelocity() < -30){
                 ///pivot.setVelocity(30);
             }else{*/
-            if(currentState.equals(IntakeState.stow)){
-                pivot.setDutyCycle(-1);
-            }else
                 pivot.setSetpoint(pivotPos, true);
             //}
         }
@@ -166,6 +164,9 @@ public class Intake extends SubsystemBase {
             case intake:
                 intake();
                 break;
+            case shoot:
+                shoot();
+                break;
             case manual:
                 manual();
                 break;
@@ -188,6 +189,11 @@ public class Intake extends SubsystemBase {
     private void intake(){
         pivotPos = maxPivotPos;
         flyWheelSpeed = -0.65;
+    }
+
+    private void shoot(){
+        pivotPos = 50;
+        flyWheelSpeed = 0;
     }
 
     private void manual(){
