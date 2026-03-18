@@ -70,6 +70,11 @@ public class Autonomous extends SubsystemBase {
         Rhub2IN,
         Lhub2IN,
         RhubINIA,
+        RTrenchBump,
+        LTrenchBump,
+
+        RTrenchTrench,
+        LTrenchTrench,
     }
 
     public enum Paths {
@@ -89,6 +94,12 @@ public class Autonomous extends SubsystemBase {
 
         RNsweep,
         LNsweep,
+
+        RSweepToBump,
+        LSweepToBump,
+        
+        RSweepToTrench,
+        LSweepToTrench,
     }
 
     public Autonomous(Field zone){
@@ -156,7 +167,33 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
-
+            case LTrenchBump:
+                auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.LNsweep)));
+                auto.add(new AutoAction(SuperState.deployed));
+                auto.add(new AutoAction(getPath(Paths.LSweepToBump)));
+                auto.add(new AutoAction(SuperState.score));
+                break;
+            case RTrenchBump:
+                auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.RNsweep)));
+                auto.add(new AutoAction(SuperState.deployed));
+                auto.add(new AutoAction(getPath(Paths.RSweepToBump)));
+                auto.add(new AutoAction(SuperState.score));
+            case LTrenchTrench:
+                auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.LNsweep)));
+                auto.add(new AutoAction(SuperState.deployed));
+                auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
+                auto.add(new AutoAction(SuperState.score));
+                break;
+            case RTrenchTrench:
+                auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.RNsweep)));
+                auto.add(new AutoAction(SuperState.deployed));
+                auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
+                auto.add(new AutoAction(SuperState.score));
+                break;
             default:
                 break;
         }
@@ -209,16 +246,31 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(trenchRWaypoints[1]);
                 break;
             case RNsweep:
-                waypoints.add(balancedPoint(8.182, 0.875, 90));
-                waypoints.add(balancedPoint(8.2, 7.3, 0));
-                //waypoints.add(balancedPoint(4.27, 7.484, -90));
+                waypoints.add(fastPoint(5.7, 0.68, -90));
+                waypoints.add(fastPoint(7.3, 1.26, -20));
+                waypoints.add(balancedPoint(7.45, 3.05, 0));
                 break;
             case LNsweep:
-                waypoints.add(balancedPoint(8.2, 7.3, -90));
-                waypoints.add(balancedPoint(8.2, 0.875, 180));
-                //waypoints.add(balancedPoint(4.217, 0.521, 90));
+                waypoints.add(fastPoint(5.7, 7.389072, 90));
+                waypoints.add(fastPoint(7.3, 6.809072, 160));
+                waypoints.add(balancedPoint(7.45, 4.569072, 180));
                 break;
-            
+            case RSweepToBump:
+                waypoints.add(fastPoint(6.3, 2.5, -45));
+                waypoints.add(balancedPoint(2.26, 2.46, 42));
+                break;
+            case LSweepToBump:
+                waypoints.add(fastPoint(6.3, 5.569072, 135));
+                waypoints.add(balancedPoint(2.26, 5.609072, −138));
+                break;
+            case RSweepToTrench:
+                waypoints.add(balancedPoint(5.86, 0.66, 90));
+                waypoints.add(balancedPoint(3.94, 0.54, 90));
+                break;
+            case LSweepToTrench:
+                waypoints.add(balancedPoint(5.86, 7.409072, -90));
+                waypoints.add(balancedPoint(3.94, 7.529072, -90));
+                break;
             default:
                 break;
         }
