@@ -38,7 +38,7 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.1);
     private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
 
-    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.005);
+    private WaypointConstraints slowTransConstraints = new WaypointConstraints(2, 0, 0.01);
     private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.3);
 
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
@@ -64,23 +64,35 @@ public class Autonomous extends SubsystemBase {
         new Pose2d(0.85, 1.16, Rotation2d.fromDegrees(38.5)),
     };
     //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
-     
+    
+    /**
+     * {@link Autonomous#getAutonomous(Autos)}
+     */
     public enum Autos {
         forwardTest,
         Rhub2IN,
         Lhub2IN,
-        RhubINIA,
-        RTrenchBump,
-        LTrenchBump,
+        rt_TrenchOutpost,
 
-        RTrenchTrench,
-        LTrenchTrench,
+        rt_Bump,
+        lt_Bump,
+        rt_Trench,
+        lt_Trench,
+
+        rt_TrenchTrench, 
+        lt_TrenchTrench,
     }
 
+    /**
+     * {@link Autonomous#getPath(Paths)}
+     */
     public enum Paths {
         forward,
         forwardR,
-        SideSwipe,
+
+        sideSwipeR,
+        sideSwipeL,
+        outpost,
 
         hubSetpointL,
         hubSetpointM,
@@ -120,30 +132,30 @@ public class Autonomous extends SubsystemBase {
 
     public void simulationPeriodic(){}
 
-    public List<AutoAction> getAutonomous(Autos autoName){
+    /**
+     * 
+     * @param autoName
+     * @return
+     * {@link Autos}
+     */
+    public ArrayList<AutoAction> getAutonomous(Autos autoName){
         ArrayList<AutoAction> auto = new ArrayList<>();
         // define each autonomous using a switch statement.
         // each auto is an array of "AutoAction's"
         switch (autoName) {
             case forwardTest:
-                auto.add(new AutoAction(SuperState.preparePass).withAdditionalCondition(() -> 
-                        {superStructure.targeting.setPreset(presetShotType.Trench);
-                         return true;}));
+                auto.add(new AutoAction(SuperState.preparePass).withAdditionalCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.Trench);
+                    return true;
+                }));
                          
                 auto.add(new AutoAction(SuperState.pass).withAlternateCondition( () -> timeDelay(4)));
                 auto.add(new AutoAction(getPath(Paths.forward)));
                 auto.add(new AutoAction(getPath(Paths.forwardR)));
                 auto.add(new AutoAction(SuperState.intake).withNoConditions());
-                auto.add(new AutoAction(getPath(Paths.SideSwipe)));
+                auto.add(new AutoAction(getPath(Paths.sideSwipeR)));
                 auto.add(new AutoAction(SuperState.deployed));
                 
-                break;
-
-            case RhubINIA:
-                auto.add(new AutoAction(SuperState.prepareHubShot));
-                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
-                auto.add(new AutoAction(SuperState.intake).withNoConditions());
-                auto.add(new AutoAction(getPath(null)));
                 break;
 
             case Rhub2IN:
@@ -167,32 +179,74 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
-            case LTrenchBump:
+
+            case rt_TrenchOutpost:
+                auto = getAutonomous(Autos.rt_Trench);
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.outpost)));
+                auto.add(new AutoAction(SuperState.deployed).withNoConditions());
+                auto.add(new AutoAction(getNearestHubScoringPath(hubPresetPoses[0])));
+                break;
+            
+            case lt_Bump:
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToBump)));
-                auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.RegHubShot);
+                    return timeDelay(5);
+                }));
                 break;
-            case RTrenchBump:
+            case rt_Bump:
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToBump)));
-                auto.add(new AutoAction(SuperState.score));
-            case LTrenchTrench:
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.RegHubShot);
+                    return timeDelay(5);
+                }));
+                break;
+            case lt_Trench:
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
-                auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.Trench);
+                    return timeDelay(5);
+                }));
                 break;
-            case RTrenchTrench:
+            case rt_Trench:
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
-                auto.add(new AutoAction(SuperState.score));
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.Trench);
+                    return timeDelay(5);
+                }));
+                break;
+            case lt_TrenchTrench:
+                auto = getAutonomous(Autos.lt_Trench);
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.sideSwipeL)));
+                auto.add(new AutoAction(getPath(Paths.trenchLAlliance).withRotation(0)));
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.Trench);
+                    return timeDelay(5);
+                }));
+                break;
+            case rt_TrenchTrench:
+                auto = getAutonomous(Autos.rt_Trench);
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.sideSwipeR)));
+                auto.add(new AutoAction(getPath(Paths.trenchRAlliance).withRotation(179.5)));
+                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                    superStructure.targeting.setPreset(presetShotType.Trench);
+                    return timeDelay(5);
+                }));
                 break;
             default:
                 break;
@@ -200,6 +254,12 @@ public class Autonomous extends SubsystemBase {
         return auto;
     }
 
+    /**
+     * 
+     * @param path
+     * @return
+     * {@link Paths}
+     */
     public Path getPath(Paths path){
         List<Waypoint> waypoints = new ArrayList<>();
         // define Path object for each Paths enum using a switch statement
@@ -211,7 +271,8 @@ public class Autonomous extends SubsystemBase {
             case forwardR:
                 waypoints.add(balancedPoint(6, 0.625, 180));
                 break;
-            case SideSwipe:
+            case sideSwipeR:
+                waypoints.add(balancedPoint(5.985, 0.625, 90));
                 waypoints.add(slowPoint(5.985, 3.3, 0));
                 break;
             case hubSetpointRT:
@@ -247,13 +308,13 @@ public class Autonomous extends SubsystemBase {
                 break;
             case RNsweep:
                 waypoints.add(fastPoint(5.7, 0.68, -90));
-                waypoints.add(fastPoint(7.3, 1.26, -20));
-                waypoints.add(balancedPoint(7.45, 3.05, 0));
+                waypoints.add(fastPoint(7.7, 1.26, -20));
+                waypoints.add(balancedPoint(7.6, 3.05, 0));
                 break;
             case LNsweep:
-                waypoints.add(fastPoint(5.7, 7.389072, 90));
-                waypoints.add(fastPoint(7.3, 6.809072, 160));
-                waypoints.add(balancedPoint(7.45, 4.569072, 180));
+                waypoints.add(fastPoint(5.7, 7.389072, -90));
+                waypoints.add(fastPoint(7.7, 6.809072, 160));
+                waypoints.add(balancedPoint(7.6, 4.569072, 180));
                 break;
             case RSweepToBump:
                 waypoints.add(fastPoint(6.3, 2.5, -45));
@@ -261,16 +322,21 @@ public class Autonomous extends SubsystemBase {
                 break;
             case LSweepToBump:
                 waypoints.add(fastPoint(6.3, 5.569072, 135));
-                waypoints.add(balancedPoint(2.26, 5.609072, −138));
+                waypoints.add(balancedPoint(2.26, 5.609072, -138));
                 break;
             case RSweepToTrench:
-                waypoints.add(balancedPoint(5.86, 0.66, 90));
+                waypoints.add(fastPoint(6.334, 3.071, 127.5));
+                waypoints.add(balancedPoint(5.86, 0.66, 180));
                 waypoints.add(balancedPoint(3.94, 0.54, 90));
                 break;
             case LSweepToTrench:
-                waypoints.add(balancedPoint(5.86, 7.409072, -90));
+                waypoints.add(fastPoint(6.334, 4.4, 63));
+                waypoints.add(balancedPoint(5.86, 7.409072, 0));
                 waypoints.add(balancedPoint(3.94, 7.529072, -90));
                 break;
+            case outpost:
+                waypoints.add(balancedPoint(1.5, 0.7, 90));
+                waypoints.add(slowPoint(0.76, 0.7, 90));
             default:
                 break;
         }
