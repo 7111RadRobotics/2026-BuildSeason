@@ -63,7 +63,7 @@ public class Autonomous extends SubsystemBase {
         new Pose2d(0.85, 7, Rotation2d.fromDegrees(-38.5)),
         new Pose2d(0.85, 1.16, Rotation2d.fromDegrees(38.5)),
     };
-    //R = Right, L = Left, I = Intake, N = Neutral zone, A = alliance zone
+    //starting position abreviated. separated with "_"
     
     /**
      * {@link Autonomous#getAutonomous(Autos)}
@@ -78,8 +78,8 @@ public class Autonomous extends SubsystemBase {
 
         rt_TrenchTrench, 
         lt_TrenchTrench, 
-        lt_TrenchDepot,
         rt_TrenchOutpost,
+        lt_TrenchDepot,
     }
 
     /**

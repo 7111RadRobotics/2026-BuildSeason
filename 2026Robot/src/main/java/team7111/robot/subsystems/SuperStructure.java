@@ -289,22 +289,17 @@ public class SuperStructure extends SubsystemBase {
             targeting.toggle();
         }
         if(operatorController.getAButtonPressed()) {
-            autoTargeting = false;
             scoringState = shotType.ShotTable;
         }
         if(operatorController.getBButtonPressed()) {
-            autoTargeting = false;
             scoringState = shotType.ShootOnTheMove;
         }
         if(operatorController.getXButtonPressed()) {
-            autoTargeting = false;
             scoringState = shotType.Parabolic;
         }
+        
         if(operatorController.getBackButtonPressed()) {
-            targeting.toggleVision();
-        }
-        if(operatorController.getYButtonPressed()) {
-            autoTargeting = true;
+            autoTargeting = !autoTargeting;
         }
         
         hasAcheivedState = manageSuperState(superState);
@@ -339,7 +334,7 @@ public class SuperStructure extends SubsystemBase {
         
         //If autotargeting, will check if the robot is in the nuteral zone and set to shoot towards the corners
         //if(autoTargeting) {
-            if(field.inAllianceZone(swerve.getPose())) {
+            if((field.inAllianceZone(swerve.getPose()) && autoTargeting) || (!autoTargeting && !operatorController.getLeftBumperButton() && !operatorController.getRightBumperButton())) {
                 targeting.resetTarget();
             } else {
                 Pose3d corner = null;
@@ -351,7 +346,7 @@ public class SuperStructure extends SubsystemBase {
                         corner = new Pose3d(16.540988-1.0, 4.034536, 0, null);
                     }
                 }
-                if(swerve.getPose().getY() >= Units.inchesToMeters(317.69/2)) {
+                if((swerve.getPose().getY() >= Units.inchesToMeters(317.69/2) && autoTargeting) || (!autoTargeting && operatorController.getLeftBumperButton())) {
                     targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
                 } else {
                     targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
