@@ -115,6 +115,8 @@ public class CTREMotor implements Motor {
         if(rpm < negativeVelocityLimit){
             rpm = negativeVelocityLimit;
         }
+        velocitySetpoint = rpm * gearRatio;
+
         rpm /= 60;
         motor.setControl(velocityVoltage.withVelocity(rpm * gearRatio));
     }

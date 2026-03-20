@@ -36,7 +36,7 @@ public class Vision extends SubsystemBase{
      */
     private final Transform3d cameraPositionsToCenter[] = {
         new Transform3d(Inches.of(-3.375).in(Meters), Inches.of(-2.75).in(Meters), Inches.of(20.75).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
-        //new Transform3d(Inches.of(-12.0), Inches.of(-11), Inches.of(8.0), new Rotation3d(0, Degrees.of(), Degrees.of())),
+        new Transform3d(Inches.of(-12.0).in(Meters), Inches.of(-11).in(Meters), Inches.of(8.0).in(Meters), new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(195).in(Radians))),
     };
 
     //private final AHRS gyro;
@@ -117,7 +117,7 @@ public class Vision extends SubsystemBase{
     /**
      * returns the position of the robot averaged between all cameras
      */
-    public Pose3d getRobotPose() {
+    public Pose3d getRobotPose(double ambiguityThreshold) {
         
         boolean hasPose = false;
         double averageX = 0;
@@ -126,13 +126,16 @@ public class Vision extends SubsystemBase{
         double averageRot = 0;
         int numOfCamerasSeen = 0;
         for(int i = 0; i < cameraList.length; i++) {
-            if(cameraList[i].getLatestResult().hasTargets()) {
-                hasPose = true;
-                averageX += cameraList[i].estRobotPose.estimatedPose.getX();
-                averageY += cameraList[i].estRobotPose.estimatedPose.getY();
-                averageZ += cameraList[i].estRobotPose.estimatedPose.getZ();
-                averageRot += cameraList[i].estRobotPose.estimatedPose.getRotation().getAngle();
-                numOfCamerasSeen++;
+            PhotonPipelineResult result = cameraList[i].getLatestResult();
+            if(result.hasTargets()) {
+                if(result.getBestTarget().getPoseAmbiguity() > ambiguityThreshold){
+                    hasPose = true;
+                    averageX += cameraList[i].estRobotPose.estimatedPose.getX();
+                    averageY += cameraList[i].estRobotPose.estimatedPose.getY();
+                    averageZ += cameraList[i].estRobotPose.estimatedPose.getZ();
+                    averageRot += cameraList[i].estRobotPose.estimatedPose.getRotation().getAngle();
+                    numOfCamerasSeen++;
+                }
             }
         }
 

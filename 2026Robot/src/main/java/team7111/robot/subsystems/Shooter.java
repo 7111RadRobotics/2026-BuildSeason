@@ -152,7 +152,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(3000);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(200);
         return isAtSetpoint;
     }
 

@@ -95,6 +95,8 @@ public class SuperStructure extends SubsystemBase {
     private boolean bHub = false;
     private boolean hasData = false;
 
+    private boolean operatorDisabled = false;
+
     private Timer phaseTimer = new Timer();
 
     /**
@@ -149,7 +151,8 @@ public class SuperStructure extends SubsystemBase {
         }
 
         if (DriverStation.isTeleopEnabled() && hasData) {
-            phaseTimer.start();
+            if(DriverStation.getMatchTime() <= 130)
+                phaseTimer.start();
         } else if (DriverStation.isDisabled()) {
             phaseTimer.stop();
             phaseTimer.reset();
@@ -177,10 +180,11 @@ public class SuperStructure extends SubsystemBase {
 
         SmartDashboard.putBoolean("bHub", bHub);
         SmartDashboard.putString("gameData", gameData);
-        SmartDashboard.putNumber("phaseTime", phaseTimer.get());
+        SmartDashboard.putNumber("phaseTime", 25.0 - phaseTimer.get());
 
-        SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose() == null);
-        Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
+        SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose(0.1) == null);
+        //Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
+        Pose3d visionRobotPose = vision.getRobotPose(0.1);
         if(visionRobotPose != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
         }
@@ -198,7 +202,7 @@ public class SuperStructure extends SubsystemBase {
          */
         if(driverController.getStartButton()) {
             swerve.zeroGyro();
-            swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
+            //swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
         }
 
         // move through trench button commented due to drivers request
@@ -285,9 +289,20 @@ public class SuperStructure extends SubsystemBase {
         
 
         // Operator controller commands
-        if(operatorController.getStartButtonPressed()) {
-            targeting.toggle();
-        }
+        /*if(operatorController.getStartButtonPressed()) {
+            if(!operatorDisabled) {
+                operatorDisabled = true;
+                targeting.toggle();
+                setSuperState(SuperState.manual);
+                hopper.setState(HopperState.stopped);
+                intake.setState(IntakeState.stow);
+                shooter.setState(ShooterState.followAimbot);
+            } else {
+                setSuperState(SuperState.deployed);
+                operatorDisabled = false;
+            }
+            
+        }*/
         if(operatorController.getAButtonPressed()) {
             scoringState = shotType.ShotTable;
         }
@@ -338,18 +353,19 @@ public class SuperStructure extends SubsystemBase {
                 targeting.resetTarget();
             } else {
                 Pose3d corner = null;
-
-                if(DriverStation.getAlliance().isPresent()) {
-                    if(DriverStation.getAlliance().get() == Alliance.Blue) {
-                        corner = new Pose3d(1.0, 4.034536, 0, null);
-                    } else {
-                        corner = new Pose3d(16.540988-1.0, 4.034536, 0, null);
+                if(DriverStation.isDSAttached()) {
+                    if(DriverStation.getAlliance().isPresent()) {
+                        if(DriverStation.getAlliance().get() == Alliance.Blue) {
+                            corner = new Pose3d(1.0, 4.034536, 0, null);
+                        } else {
+                            corner = new Pose3d(16.540988-1.0, 4.034536, 0, null);
+                        }
                     }
-                }
-                if((swerve.getPose().getY() >= Units.inchesToMeters(317.69/2) && autoTargeting) || (!autoTargeting && operatorController.getLeftBumperButton())) {
-                    targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
-                } else {
-                    targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                    if((swerve.getPose().getY() >= Units.inchesToMeters(317.69/2) && autoTargeting) || (!autoTargeting && operatorController.getLeftBumperButton())) {
+                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                    } else {
+                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                    }
                 }
             }
         //}
@@ -421,7 +437,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setShotType(shotType.Transport);
         shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.stow);
-        hopper.setState(HopperState.idle);
+        hopper.setState(HopperState.stopped);
 
         if(intaking) {
             setSuperState(SuperState.deployed);
@@ -459,6 +475,8 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean intake(){
         targeting.setToggle(true);
+        targeting.setShotType(shotType.Transport);
+        shooter.setState(ShooterState.followAimbot);
         intake.setState(IntakeState.intake);
         hopper.setState(HopperState.intake);
         
@@ -481,13 +499,18 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean preparePass() {
         targeting.setToggle(true);
+        hopper.setState(HopperState.idle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
+            if(!targeting.getShotType().equals(shotType.Preset)){
+                targeting.setShotType(shotType.Preset);
+                return true;
+            }
             targeting.setShotType(shotType.Preset);
         }
         
-        hopper.setState(HopperState.idle);
+        
         if(shooter.isAtSetpoint() && shooter.isAtSpeedSetpoint()) {
             if(intaking) {
                 setSuperState(SuperState.snowBlowerPass);
@@ -545,6 +568,10 @@ public class SuperStructure extends SubsystemBase {
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{
+            if(!targeting.getShotType().equals(scoringState)){
+                targeting.setShotType(scoringState);
+                return true;
+            }
             targeting.setShotType(scoringState);
         }
         shooter.setState(shooterState);

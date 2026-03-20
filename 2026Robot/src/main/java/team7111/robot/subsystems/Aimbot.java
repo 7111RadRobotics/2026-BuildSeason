@@ -70,7 +70,7 @@ public class Aimbot extends SubsystemBase{
     private final double camToTargetHeightOffset = 2/3;
 
     /** Offset between rio yaw and direction the robot shoots */
-    private final double rioToShooterOffset = 0.0;
+    private final double rioToShooterOffset = 5;
 
     /** shooter wheel diameter, in meters */
     private final double shooterDiameter = Units.inchesToMeters(4);
@@ -101,7 +101,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 1.0; //2.86
+    private final double RPMMult = 2.86;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -263,7 +263,7 @@ public class Aimbot extends SubsystemBase{
     }
 
     public double getCalculatedSpeed() {
-        return this.calculatedSpeed;
+        return this.calculatedSpeed + 100;
     }
 
     public double getCalculatedDirection() {
@@ -308,8 +308,17 @@ public class Aimbot extends SubsystemBase{
         currentShotType = shotType;
     }
 
+    public shotType getShotType(){
+        return currentShotType;
+    }
+
     public void setPreset(presetShotType shotType) {
+        //shotType = presetShot;
         presetShot = shotType;
+    }
+
+    public presetShotType getPresetShotType(){
+        return presetShot;
     }
 
     /** Allows custom targeting to a target position. Does not affect anything if shooting with vision. */
@@ -320,14 +329,16 @@ public class Aimbot extends SubsystemBase{
     
     /** Resets the target to default (the current alliance hub for most shooting modes, unless otherwise specified) */
     public void resetTarget() {
-        if (DriverStation.getAlliance().isPresent()) {
-            if(DriverStation.getAlliance().get() == Alliance.Blue) {
-                targetPose = blueHub;
+        if(DriverStation.isDSAttached()) {
+            if(DriverStation.getAlliance().isPresent()) {
+                if(DriverStation.getAlliance().get() == Alliance.Blue) {
+                    targetPose = blueHub;
+                } else {
+                    targetPose = redHub;
+                }
             } else {
-                targetPose = redHub;
+                targetPose = blueHub;
             }
-        } else {
-            targetPose = blueHub;
         }
 
         hubShot = true;
@@ -696,7 +707,7 @@ public class Aimbot extends SubsystemBase{
 
                 if (impactOk) {
                     calculatedAngle = shootingAngle;
-                    calculatedSpeed = shootingSpeedRpm;
+                    calculatedSpeed = shootingSpeedRpm * 1.05;
 
                     // Final field-relative shot direction
                     degreeToTarget = Units.radiansToDegrees(Math.atan2(shotVY, shotVX));
@@ -752,7 +763,7 @@ public class Aimbot extends SubsystemBase{
                 calculatedAngle = calculatedAngle + operatorController.getLeftY() * angleOverrideRange / 2;
             }
             if(Math.abs(operatorController.getRightY()) > controllerDeadzone) {
-                calculatedSpeed = calculatedSpeed + operatorController.getRightY() * speedOverrideRange / 2;
+                calculatedSpeed = calculatedSpeed - operatorController.getRightY() * speedOverrideRange / 2;
             }
         }
     }

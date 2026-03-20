@@ -20,6 +20,7 @@ import team7111.lib.pathfinding.Path;
 import team7111.lib.pathfinding.Waypoint;
 import team7111.lib.pathfinding.WaypointConstraints;
 import team7111.robot.subsystems.Aimbot.presetShotType;
+import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.subsystems.SuperStructure.SuperState;
 import team7111.robot.utils.AutoAction;
 
@@ -80,6 +81,10 @@ public class Autonomous extends SubsystemBase {
         lt_TrenchTrench, 
         rt_TrenchOutpost,
         lt_TrenchDepot,
+
+        shoot,
+        shootDepot,
+        shootOutpost,
     }
 
     /**
@@ -112,12 +117,15 @@ public class Autonomous extends SubsystemBase {
         
         RSweepToTrench,
         LSweepToTrench, 
+
+        hubMiddle,
     }
 
     public Autonomous(Field zone){
         for (Autos auto : Autos.values()) {
             autoChooser.addOption(auto.name(), auto);
         }
+        autoChooser.setDefaultOption(Autos.shoot.name(), Autos.shoot);
         this.zone = zone;
         
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
@@ -149,7 +157,7 @@ public class Autonomous extends SubsystemBase {
                     return true;
                 }));
                          
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition( () -> timeDelay(4)));
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition( () -> timeDelay(4)));
                 auto.add(new AutoAction(getPath(Paths.forward)));
                 auto.add(new AutoAction(getPath(Paths.forwardR)));
                 auto.add(new AutoAction(SuperState.intake).withNoConditions());
@@ -164,7 +172,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.outpost)));
                 auto.add(new AutoAction(SuperState.deployed).withNoConditions());
                 auto.add(new AutoAction(getNearestHubScoringPath(hubPresetPoses[0])));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
                     superStructure.targeting.setPreset(presetShotType.Trench);
                     return timeDelay(5);
                 }));
@@ -175,7 +183,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.depot)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
                     superStructure.targeting.setPreset(presetShotType.RegHubShot);
                     return timeDelay(5);
                 }));
@@ -187,7 +195,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToBump)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
                     superStructure.targeting.setPreset(presetShotType.RegHubShot);
                     return timeDelay(5);
                 }));
@@ -198,8 +206,8 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToBump)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.RegHubShot);
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);;
                     return timeDelay(5);
                 }));
                 break;
@@ -208,40 +216,76 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.Trench);
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(5);
                 }));
+
                 break;
             case rt_Trench:
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.Trench);
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(5);
                 }));
                 break;
             case lt_TrenchTrench:
                 auto = getAutonomous(Autos.lt_Trench);
-                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(SuperState.intake).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Transport); 
+                    return true;}));
                 auto.add(new AutoAction(getPath(Paths.sideSwipeL)));
-                auto.add(new AutoAction(getPath(Paths.trenchLAlliance).withRotation(0)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.Trench);
+                auto.add(new AutoAction(getPath(Paths.trenchLAlliance).withRotation(-90)));
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(5);
                 }));
                 break;
             case rt_TrenchTrench:
                 auto = getAutonomous(Autos.rt_Trench);
-                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(SuperState.intake).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Transport); 
+                    return true;}));
                 auto.add(new AutoAction(getPath(Paths.sideSwipeR)));
-                auto.add(new AutoAction(getPath(Paths.trenchRAlliance).withRotation(179.5)));
-                auto.add(new AutoAction(SuperState.pass).withAlternateCondition(() -> {
+                auto.add(new AutoAction(getPath(Paths.trenchRAlliance).withRotation(90)));
+                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
                     superStructure.targeting.setPreset(presetShotType.Trench);
                     return timeDelay(5);
                 }));
+                break;
+            case shoot:
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                break;
+            case shootDepot:
+                auto.add(new AutoAction(SuperState.prepareHubShot).withAdditionalCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
+                    return true;
+                }));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.intake));
+                auto.add(new AutoAction(getPath(Paths.depot)));
+                auto.add(new AutoAction(getPath(Paths.hubSetpointM)));
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                break;
+            case shootOutpost:
+                auto.add(new AutoAction(SuperState.prepareHubShot).withAdditionalCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
+                    return true;
+                }));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                auto.add(new AutoAction(SuperState.deployed));
+                auto.add(new AutoAction(getPath(Paths.outpost)));
+                auto.add(new AutoAction(SuperState.deployed).withAlternateCondition(() -> {return timeDelay(5);}));
+                auto.add(new AutoAction(getPath(Paths.hubSetpointM)));
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
             default:
                 break;
@@ -342,6 +386,9 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(balancedPoint(0.83, 7.25, 135));
                 waypoints.add(slowPoint(0.625, 5.77, 165));
                 break;
+            case hubMiddle:
+                waypoints.add(balancedPoint(0, 0, 0));
+
             default:
                 break;
         }

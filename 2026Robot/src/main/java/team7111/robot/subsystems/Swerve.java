@@ -206,14 +206,15 @@ public class Swerve extends SubsystemBase {
             case snapAngle:
                 // Optimize code
                 double difference = snapAngleSetpoint - getYaw().getDegrees();
-
+                double simMult = 1.0;
+                
                 if(difference > 180) {
                     snapAngleSetpoint -= 360;
                 } else if(difference < -180) {
                     snapAngleSetpoint += 360;
                 }
 
-                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees(), snapAngleSetpoint), isDriveFieldRelative, false, false);
+                manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), snapAnglePID.calculate(getYaw().getDegrees() * simMult, snapAngleSetpoint), isDriveFieldRelative, false, false);
                 break;
             case followGamePiece:
                 manual(joystickXTranslation.getAsDouble(), joystickYTranslation.getAsDouble(), gamepieceAnglePID.calculate(gamepieceYaw, snapAngleSetpoint), false, false, false);
@@ -263,6 +264,15 @@ public class Swerve extends SubsystemBase {
         ChassisSpeeds chassisSpeeds = isFieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(forwardBack, leftRight, rotation, getYaw())
             : new ChassisSpeeds(forwardBack, leftRight, rotation);
+        
+        if(DriverStation.isFMSAttached()){
+            if(DriverStation.getAlliance().isPresent()){
+                if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+                    chassisSpeeds.vxMetersPerSecond *= -1.0;
+                    chassisSpeeds.vyMetersPerSecond *= -1.0;
+                }
+            }
+        }
 
         SwerveModuleState[] states = SwerveConstants.kinematics.toSwerveModuleStates(chassisSpeeds);
 
