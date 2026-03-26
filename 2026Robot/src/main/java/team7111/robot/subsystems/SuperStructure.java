@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import team7111.robot.subsystems.Aimbot.shotType;
 import team7111.robot.subsystems.Aimbot.presetShotType;
+import team7111.robot.subsystems.Autonomous.Autos;
 import team7111.robot.subsystems.Autonomous.Paths;
 import team7111.robot.subsystems.Hopper.HopperState;
 import team7111.robot.subsystems.Intake.IntakeState;
@@ -95,6 +96,7 @@ public class SuperStructure extends SubsystemBase {
     private String gameData;
     private boolean bHub = false;
     private boolean hasData = false;
+    private Autos currentAutos;
 
     private boolean operatorDisabled = false;
 
@@ -113,6 +115,7 @@ public class SuperStructure extends SubsystemBase {
         this.hopper = hopper;
         this.shooter = shooter;
         this.field = field;
+        currentAutos = auto.getSelectedAuto();
 
         DriverStation.silenceJoystickConnectionWarning(true);
         this.swerve.setJoysickInputs(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> -driverController.getRightX());
@@ -193,8 +196,11 @@ public class SuperStructure extends SubsystemBase {
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
-            auto.getAutonomous(auto.getSelectedAuto());
-            swerve.resetOdometry(auto.getAssumedPose());
+            Autos selectedAuto = auto.getSelectedAuto();
+            if (!currentAutos.equals(selectedAuto)){
+                swerve.resetOdometry(auto.getAssumedPose());
+                currentAutos = selectedAuto;
+            }
         } 
 
         // Driver controller commands
