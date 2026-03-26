@@ -193,6 +193,7 @@ public class SuperStructure extends SubsystemBase {
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
+            auto.getAutonomous(auto.getSelectedAuto());
             swerve.resetOdometry(auto.getAssumedPose());
         } 
 
