@@ -1,5 +1,7 @@
 package team7111.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +46,8 @@ public class Autonomous extends SubsystemBase {
 
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
     private SuperStructure superStructure;
+
+    private Pose2d assumedPose = new Pose2d(3.5, 4, Rotation2d.kZero);
 
     private final Waypoint[] trenchLWaypoints = new Waypoint[]{
         new Waypoint(new Pose2d(3.8, 7.446, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
@@ -191,6 +195,7 @@ public class Autonomous extends SubsystemBase {
                 break;
             
             case lt_Bump:
+                assumedPose = new Pose2d(3.5, 5.65, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -202,6 +207,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case rt_Bump:
+                assumedPose = new Pose2d(3.5, 2.5, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -213,6 +219,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case lt_Trench:
+                assumedPose = new Pose2d(3.5, 7.5, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -226,6 +233,7 @@ public class Autonomous extends SubsystemBase {
 
                 break;
             case rt_Trench:
+                assumedPose = new Pose2d(3.5, 0.65, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -262,6 +270,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case shoot:
+                assumedPose = new Pose2d(3.5, 4, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
@@ -501,6 +510,10 @@ public class Autonomous extends SubsystemBase {
 
     public void giveResources(SuperStructure superStructure){
         this.superStructure = superStructure;
+    }
+
+    public Pose2d getAssumedPose(){
+        return assumedPose;
     }
 
     private boolean timeDelay(int delay){

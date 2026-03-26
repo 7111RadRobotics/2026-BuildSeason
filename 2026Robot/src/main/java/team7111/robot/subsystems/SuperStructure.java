@@ -74,6 +74,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean inAuto = false;
     private int autoIndex = 0;
     private List<AutoAction> autoActions;
+    private double matchTime;
 
     private boolean alignToHub = false;
     private boolean moveThroughTrench = false;
@@ -149,7 +150,7 @@ public class SuperStructure extends SubsystemBase {
                     hasData = false;
                 }
         }
-
+        
         if (DriverStation.isTeleopEnabled() && hasData) {
             if(DriverStation.getMatchTime() <= 130)
                 phaseTimer.start();
@@ -185,14 +186,15 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose(0.1) == null);
         Pose3d visionRobotPoseShooter = vision.getRobotPose(vision.shooterCam, 0.1);
         Pose3d visionRobotPoseClimb = vision.getRobotPose(vision.climberCam, 0.1);
+        matchTime = DriverStation.getMatchTime();
 
         if(visionRobotPoseClimb != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
-        }
-
-        if(visionRobotPoseShooter != null && RobotBase.isReal()){
+        } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
-        }
+        } else if(matchTime <= 0 && DriverStation.isDisabled()){
+            swerve.resetOdometry(auto.getAssumedPose());
+        } 
 
         // Driver controller commands
         /* Current plan for driver controls:
@@ -351,7 +353,6 @@ public class SuperStructure extends SubsystemBase {
 
             intake.updateManualSpeed(-operatorController.getLeftTriggerAxis());
         }
-        
         //If autotargeting, will check if the robot is in the nuteral zone and set to shoot towards the corners
         //if(autoTargeting) {
             if((field.inAllianceZone(swerve.getPose()) && autoTargeting) || (!autoTargeting && !operatorController.getLeftBumperButton() && !operatorController.getRightBumperButton())) {
