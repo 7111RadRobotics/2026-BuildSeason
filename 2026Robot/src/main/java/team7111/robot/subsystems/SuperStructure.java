@@ -183,10 +183,15 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putNumber("phaseTime", 25.0 - phaseTimer.get());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose(0.1) == null);
-        //Pose3d visionRobotPose = vision.getRobotPose(vision.shooterCam, 0.1);
-        Pose3d visionRobotPose = vision.getRobotPose(0.1);
-        if(visionRobotPose != null && RobotBase.isReal()){
-            swerve.addVisionMeasurement(visionRobotPose.toPose2d(), true);
+        Pose3d visionRobotPoseShooter = vision.getRobotPose(vision.shooterCam, 0.1);
+        Pose3d visionRobotPoseClimb = vision.getRobotPose(vision.climberCam, 0.1);
+
+        if(visionRobotPoseClimb != null && RobotBase.isReal()){
+            swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
+        }
+
+        if(visionRobotPoseShooter != null && RobotBase.isReal()){
+            swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
         }
 
         // Driver controller commands
@@ -329,7 +334,7 @@ public class SuperStructure extends SubsystemBase {
                     hopper.updateManualSpeed(-0.1);
                     break;
                 case 270:
-                    hopper.updateManualSpeed(0.4);
+                    hopper.updateManualSpeed(0.6);
                     break;
                 default:
                     break;
@@ -599,7 +604,7 @@ public class SuperStructure extends SubsystemBase {
         if(targeting.shotPossible()) {
             shooter.setState(ShooterState.followAimbot);
         } else {
-            shooter.setState(ShooterState.idle);
+            shooter.setState(ShooterState.followAimbot);
         }
         swerve.setSnapAngle(targeting.getCalculatedDirection());
         intake.setState(IntakeState.shoot);

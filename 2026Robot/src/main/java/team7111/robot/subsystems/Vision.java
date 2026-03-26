@@ -73,8 +73,8 @@ public class Vision extends SubsystemBase{
         );
 
         climberCam = new Camera(
-            "OV9281_3", 
-            cameraPositionsToCenter[0], 
+            "OV9281_3 (1)", 
+            cameraPositionsToCenter[1], 
             new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
             this
         );

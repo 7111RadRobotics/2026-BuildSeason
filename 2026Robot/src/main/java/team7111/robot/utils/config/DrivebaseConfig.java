@@ -232,7 +232,7 @@ public class DrivebaseConfig {
         double length = Units.inchesToMeters(20);
         double wheelDiameter = Units.inchesToMeters(4);
 
-        double driveGearing = 6.72 / 1.0;
+        double driveGearing = 6.72 / 1.0; 
         double angleGearing = 468.0 / 35.0;
         double driveMOI = 0.25;
         double angleMOI = 0.001;

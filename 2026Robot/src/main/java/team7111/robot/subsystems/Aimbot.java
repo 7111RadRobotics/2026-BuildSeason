@@ -86,7 +86,7 @@ public class Aimbot extends SubsystemBase{
     private final double lowestShooterAngle = maxShooterAngle;
     //SPEED CONSTRAINTS
     /** Maximum rotations per minute allowable on the shooter (in RPM) */
-    private final double maxShooterSpeed = 5500;
+    private final double maxShooterSpeed = 6000;
     /** Minimum rotations per minute allowable on the shooter (Overrided in off state, in RPM) */
     private final double minShooterSpeed = 0;
 
@@ -101,7 +101,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 2.86;
+    private final double RPMMult = 4;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -197,7 +197,7 @@ public class Aimbot extends SubsystemBase{
     /** Minimum angle the ball is allowed to fall into the target while using on the move shooting, in degrees from horizontal (positive is downwards) */
     private final double minImpactAngle = 65;
     /** If no valid shooting solution is found, sets this to false. */
-    private boolean possibleToFire = false;
+    private boolean possibleToFire = true;
 
     /** Used to see if the target has changed at all, set each time it goes through the loop */
     private Pose3d prevTarget = null;
@@ -482,11 +482,11 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 500 / RPMMult;
-                calculatedAngle = 60;
+                calculatedSpeed = 3500 / RPMMult;
+                calculatedAngle = 61;
                 break;
             case RegHubShot:
-                calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 78.25);
+                calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 75);
                 calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2800 / RPMMult);
                 break;
             case Pass:
@@ -555,12 +555,14 @@ public class Aimbot extends SubsystemBase{
 
         Transform3d CamToTarget = getTransToTarget();
 
+        possibleToFire = true;
+        
         if (CamToTarget == null) {
             possibleToFire = false;
             return;
         }
 
-        final double g = 9.81;
+        final double g = 10;//9.81;
 
         // Horizontal distance from shooter release to target
         double distanceToTarget = CamToTarget.getX();
@@ -731,7 +733,7 @@ public class Aimbot extends SubsystemBase{
     /** Sets angle to as close to horizontal as possible, and speed to 0 */
     private void transport() {
         calculatedAngle = lowestShooterAngle;
-        calculatedSpeed = 1000 / RPMMult;
+        calculatedSpeed = 2000 / RPMMult;
     }
 
     /** Sets to fire as flat of a line as possible. Operator controls do NOT determine raw angle, but distance they want to fire */

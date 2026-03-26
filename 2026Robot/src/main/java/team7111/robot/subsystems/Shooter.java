@@ -58,12 +58,12 @@ public class Shooter extends SubsystemBase {
         new MechanismLigament2d("Position", 0.25, 0, 5, new Color8Bit(Color.kCyan));
 
     private MotorConfig hoodConfig = new MotorConfig(
-        105.6, 20, false, false, new PIDController(0.65, 0.003, 0.00035), 
+        105.6, 20, false, false, new PIDController(0.65, 0.003, 0.00035),
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.51, 0.001, 0.0), 
-        MechanismType.flywheel, 0.18325, 0.095, 0, 0);//0.21, 0.19, 1.66, 0);
+        1, 20, false, false, new PIDController(0.51, 0.005, 0.0), // 0.51
+        MechanismType.flywheel, 0.2, 0.095, 0, 0);//0.21, 0.19, 1.66, 0); //0.184
 
     private Motor hood;
     private Motor flywheels;
@@ -126,6 +126,8 @@ public class Shooter extends SubsystemBase {
             flywheels.setVoltage(0);
         }else 
             flywheels.setVelocity(flywheelSpeed);
+
+           // flywheels.setVoltage(0.18325);
             
         
 
@@ -147,12 +149,12 @@ public class Shooter extends SubsystemBase {
     // These can be checked in SuperStructure to determine a SuperState
     // or change a state/value in another subsystem.
     public boolean isAtSetpoint(){
-        boolean isAtSetpoint = hood.isAtSetpoint(1); 
+        boolean isAtSetpoint = hood.isAtSetpoint(2.5); 
         return isAtSetpoint;
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(200);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(150);
         return isAtSetpoint;
     }
 

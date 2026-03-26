@@ -84,7 +84,8 @@ public class Autonomous extends SubsystemBase {
 
         shoot,
         shootDepot,
-        shootOutpost,
+        shootOutpost, 
+        backupShoot,
     }
 
     /**
@@ -216,6 +217,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
+                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -228,6 +230,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
+                auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -286,6 +289,11 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.hubSetpointM)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
+                break;
+            case backupShoot:
+                auto = getAutonomous(Autos.shoot);
+                auto.add(new AutoAction(getPath(Paths.hubSetpointM).withRotation(-90)));
+                auto.add(new AutoAction(SuperState.deployed));
                 break;
             default:
                 break;
@@ -369,22 +377,24 @@ public class Autonomous extends SubsystemBase {
                 break;
             case RSweepToTrench:
                 waypoints.add(fastPoint(6.334, 3.071, 127.5));
-                waypoints.add(balancedPoint(5.86, 0.66, 145));
-                waypoints.add(balancedPoint(3.94, 0.54, 90));
+                waypoints.add(balancedPoint(5.86, 0.66, 90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
+                waypoints.add(slowPoint(3.94, 0.66, 90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
+                waypoints.add(balancedPoint(2.5, 0.66, 90));
                 break;
             case LSweepToTrench:
                 waypoints.add(fastPoint(6.334, 4.4, 63));
-                waypoints.add(balancedPoint(5.86, 7.209072, -30));
-                waypoints.add(balancedPoint(3.94, 7.529072, -90));
+                waypoints.add(balancedPoint(5.86, 7.209072, -90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
+                waypoints.add(slowPoint(3.94, 7.209072, -90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
+                waypoints.add(balancedPoint(2.5, 7.209072, -90));
                 break;
             case outpost:
                 waypoints.add(balancedPoint(1.5, 0.7, 90));
                 waypoints.add(slowPoint(0.76, 0.7, 90));
                 break;
             case depot:
-                waypoints.add(balancedPoint(1.7, 7.4, 90));
-                waypoints.add(balancedPoint(0.83, 7.25, 135));
-                waypoints.add(slowPoint(0.625, 5.77, 165));
+                waypoints.add(balancedPoint(2.376, 4.03, 90));
+                waypoints.add(balancedPoint(1.78, 5.78, 90));
+                waypoints.add(slowPoint(0.7, 5.85, 90));
                 break;
             case hubMiddle:
                 waypoints.add(balancedPoint(0, 0, 0));

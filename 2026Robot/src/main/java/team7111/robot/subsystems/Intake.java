@@ -193,7 +193,7 @@ public class Intake extends SubsystemBase {
 
     private void shoot(){
         pivotPos = 50;
-        flyWheelSpeed = 0;
+        flyWheelSpeed = -0.2;
     }
 
     private void manual(){
