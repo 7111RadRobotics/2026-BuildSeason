@@ -195,14 +195,14 @@ public class SuperStructure extends SubsystemBase {
             swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
-        } else if(matchTime <= 0 && DriverStation.isDisabled()){
-            Autos selectedAuto = auto.getSelectedAuto();
-            if (!currentAutos.equals(selectedAuto)){
-                auto.getAutonomous(selectedAuto);
-                swerve.resetOdometry(auto.getAssumedPose());
-                currentAutos = selectedAuto;
-            }
-        } 
+        } // else if(matchTime <= 0 && DriverStation.isDisabled()){
+        //     Autos selectedAuto = auto.getSelectedAuto();
+        //     if (!currentAutos.equals(selectedAuto)){
+        //         auto.getAutonomous(selectedAuto);
+        //         swerve.resetOdometry(auto.getAssumedPose());
+        //         currentAutos = selectedAuto;
+        //     }
+        // } 
 
         // Driver controller commands
         /* Current plan for driver controls:
