@@ -116,6 +116,7 @@ public class SuperStructure extends SubsystemBase {
         this.shooter = shooter;
         this.field = field;
         currentAutos = auto.getSelectedAuto();
+        autoActions = auto.getAutonomous(auto.getSelectedAuto());
 
         DriverStation.silenceJoystickConnectionWarning(true);
         this.swerve.setJoysickInputs(() -> -driverController.getLeftX(), () -> -driverController.getLeftY(), () -> -driverController.getRightX());
@@ -195,14 +196,14 @@ public class SuperStructure extends SubsystemBase {
             swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
-        } // else if(matchTime <= 0 && DriverStation.isDisabled()){
-        //     Autos selectedAuto = auto.getSelectedAuto();
-        //     if (!currentAutos.equals(selectedAuto)){
-        //         auto.getAutonomous(selectedAuto);
-        //         swerve.resetOdometry(auto.getAssumedPose());
-        //         currentAutos = selectedAuto;
-        //     }
-        // } 
+        } else if(matchTime <= 0 && DriverStation.isDisabled()){
+            Autos selectedAuto = auto.getSelectedAuto();
+            if (!currentAutos.equals(selectedAuto)){
+                autoActions = auto.getAutonomous(selectedAuto);
+                swerve.resetOdometry(auto.getAssumedPose());
+                currentAutos = selectedAuto;
+            }
+         } 
 
         // Driver controller commands
         /* Current plan for driver controls:
@@ -677,7 +678,6 @@ public class SuperStructure extends SubsystemBase {
     private boolean autonomousEnter(){
         setSuperState(SuperState.autonomous);
         autoIndex = 0;
-        autoActions = auto.getAutonomous(auto.getSelectedAuto());
         autonomous();
         return true;
     }
