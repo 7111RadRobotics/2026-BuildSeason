@@ -203,7 +203,7 @@ public class SuperStructure extends SubsystemBase {
                 swerve.resetOdometry(auto.getAssumedPose());
                 currentAutos = selectedAuto;
             }
-         } 
+        }
 
         // Driver controller commands
         /* Current plan for driver controls:
