@@ -198,6 +198,7 @@ public class SuperStructure extends SubsystemBase {
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
             Autos selectedAuto = auto.getSelectedAuto();
             if (!currentAutos.equals(selectedAuto)){
+                auto.getAutonomous(selectedAuto);
                 swerve.resetOdometry(auto.getAssumedPose());
                 currentAutos = selectedAuto;
             }
