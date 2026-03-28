@@ -227,7 +227,7 @@ public class DrivebaseConfig {
         return new DrivebaseConfig(moduleTypes, moduleConstants, width, length, wheelDiameter, 0);
     }
     
-    public static DrivebaseConfig getHybrid(boolean isSim) {
+    public static DrivebaseConfig getWhiplash(boolean isSim) {
         double width = Units.inchesToMeters(20);
         double length = Units.inchesToMeters(20);
         double wheelDiameter = Units.inchesToMeters(4);

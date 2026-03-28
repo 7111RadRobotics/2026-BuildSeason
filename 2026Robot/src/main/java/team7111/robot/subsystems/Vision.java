@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,10 @@ import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -45,6 +50,9 @@ public class Vision extends SubsystemBase{
 
     private List<PhotonTrackedTarget> targets = new ArrayList<>();
 
+    private AprilTagFieldLayout fieldLayout;
+    private PhotonPoseEstimator poseEstimator;
+
     // TODO: change variable names on actual robot
     /*public final Camera limelight = new Camera(
         "photonvision", 
@@ -63,6 +71,13 @@ public class Vision extends SubsystemBase{
 
     /** Constructor */
     public Vision(){
+        try {
+            fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+        } catch (UncheckedIOException e) {
+            throw new RuntimeException(e);
+        }
+        poseEstimator = new PhotonPoseEstimator(fieldLayout, Transform3d.kZero);
+        
         targets.add(new PhotonTrackedTarget());
 
         shooterCam = new Camera(
@@ -91,6 +106,7 @@ public class Vision extends SubsystemBase{
             shooterCam,
             climberCam,
         };
+        
     }
 
     public void periodic(){

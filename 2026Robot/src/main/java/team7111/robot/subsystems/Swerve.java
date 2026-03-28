@@ -1,5 +1,6 @@
 package team7111.robot.subsystems;
 
+import java.util.List;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -118,10 +119,11 @@ public class Swerve extends SubsystemBase {
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
 
         //Velocity kinematics object
-        kinematics = new SwerveDriveKinematics(modules[0].getOffset(),
-                                               modules[0].getOffset(),
-                                               modules[0].getOffset(),
-                                               modules[0].getOffset());
+        kinematics = SwerveConstants.kinematics;
+        //new SwerveDriveKinematics(modules[0].getOffset(),
+        //                                        modules[0].getOffset(),
+        //                                        modules[0].getOffset(),
+        //                                        modules[0].getOffset());
     }
 
     @Override 
@@ -308,6 +310,10 @@ public class Swerve extends SubsystemBase {
             ? getYaw()
             : pose.getRotation();
         swerveOdometry.addVisionMeasurement(new Pose2d(pose.getX(), pose.getY(), rotation), Timer.getFPGATimestamp());
+    }
+
+    public void displayPathPoses(List<Pose2d> poses){
+        field.getObject("Auto Path").setPoses(poses);
     }
 
     /** To be used by auto. Use the drive method during teleop. */

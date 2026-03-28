@@ -1,5 +1,6 @@
 package team7111.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.ModuleElement.DirectiveKind;
@@ -188,19 +189,33 @@ public class SuperStructure extends SubsystemBase {
         SmartDashboard.putNumber("phaseTime", 25.0 - phaseTimer.get());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose(0.1) == null);
-        Pose3d visionRobotPoseShooter = vision.getRobotPose(vision.shooterCam, 0.1);
+        final boolean useOneCamera = false; // determine whether true or false
+        boolean hasAppliedVisionMeasurement = false;
+        Pose3d visionRobotPoseShooter = vision.getRobotPose(vision.shooterCam, 0.15);
         Pose3d visionRobotPoseClimb = vision.getRobotPose(vision.climberCam, 0.1);
         matchTime = DriverStation.getMatchTime();
 
         if(visionRobotPoseClimb != null && RobotBase.isReal()){
             swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
+            hasAppliedVisionMeasurement = true;
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
-            swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
+            if(!useOneCamera && !hasAppliedVisionMeasurement)
+                swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
             Autos selectedAuto = auto.getSelectedAuto();
             if (!currentAutos.equals(selectedAuto)){
                 autoActions = auto.getAutonomous(selectedAuto);
                 swerve.resetOdometry(auto.getAssumedPose());
+                ArrayList<Pose2d> pathPoses = new ArrayList<>();
+                pathPoses.add(auto.getAssumedPose());
+                for (AutoAction action : autoActions) {
+                    if(action.isPath()){
+                        for (Waypoint waypoint : action.getAsPath().getWaypoints()) {
+                            pathPoses.add(waypoint.getPose());
+                        }
+                    }
+                }
+                swerve.displayPathPoses(pathPoses);
                 currentAutos = selectedAuto;
             }
         }

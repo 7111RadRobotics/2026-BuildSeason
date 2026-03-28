@@ -40,7 +40,7 @@ public class Constants {
     /** All swerve constants. */
     public static class SwerveConstants {
         /** Contains robot-specific drivebase constants */
-        public static final DrivebaseConfig drivebaseConfig = DrivebaseConfig.getHybrid(RobotBase.isSimulation());
+        public static final DrivebaseConfig drivebaseConfig = DrivebaseConfig.getWhiplash(RobotBase.isSimulation());
         
         /** Constants that apply to the whole drive train. */
         public static final double wheelBaseWidth = drivebaseConfig.width; // Width of the drivetrain measured from the middle of the wheels.
