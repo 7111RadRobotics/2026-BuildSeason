@@ -18,6 +18,7 @@ import org.photonvision.PhotonPoseEstimator;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -71,6 +72,8 @@ public class Vision extends SubsystemBase{
 
     /** Constructor */
     public Vision(){
+        CameraServer.startAutomaticCapture(1);
+
         try {
             fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
         } catch (UncheckedIOException e) {

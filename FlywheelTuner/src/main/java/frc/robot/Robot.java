@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -30,7 +32,7 @@ public class Robot extends TimedRobot {
 
     public boolean doesIncrement = true;
 
-    public double kS = 0.0001;
+    public double kS = 0.001;
     public double kV = 0.0;
     public double kP = 0.0;
 
@@ -45,6 +47,7 @@ public class Robot extends TimedRobot {
     
     public TalonFX motor1 = new TalonFX(1);
     public TalonFX motor2 = new TalonFX(2);
+    protected TalonFXConfiguration config = new TalonFXConfiguration().withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(20));
     public Follower motorFollow = new Follower(1, MotorAlignmentValue.Opposed);
 
     public XboxController xboxController = new XboxController(0);
@@ -56,7 +59,7 @@ public class Robot extends TimedRobot {
     
 
     public Robot() {
-        
+        motor1.getConfigurator().apply(config);
     }
 
     @Override

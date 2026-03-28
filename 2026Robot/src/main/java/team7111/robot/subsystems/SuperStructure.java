@@ -155,6 +155,8 @@ public class SuperStructure extends SubsystemBase {
                     hasData = false;
                 }
         }
+
+        double phaseLength = 25.0;
         
         if (DriverStation.isTeleopEnabled() && hasData) {
             if(DriverStation.getMatchTime() <= 130)
@@ -171,22 +173,27 @@ public class SuperStructure extends SubsystemBase {
             driverController.setRumble(RumbleType.kBothRumble, 0);
         }
         
-
-        if (phaseTimer.hasElapsed(25)) {
-             bHub = !bHub;
-             
-             phaseTimer.restart();
+        if(DriverStation.getMatchTime() >= 29.9 || DriverStation.getMatchTime() < 0){
+            if (phaseTimer.hasElapsed(25)) {
+                bHub = !bHub;
+                
+                phaseTimer.restart();
+            }
+        }else{
+            if(DriverStation.getAlliance().isPresent()){
+                bHub = DriverStation.getAlliance().get().equals(Alliance.Blue);
+            }
+            phaseLength = 30.0;
         }
-
 
         
         //Timer for the periodic
         long startTime = System.nanoTime();
         SmartDashboard.putString("SuperState", superState.name());
 
-        SmartDashboard.putBoolean("bHub", bHub);
+        SmartDashboard.putBoolean("Active Hub", bHub);
         SmartDashboard.putString("gameData", gameData);
-        SmartDashboard.putNumber("phaseTime", 25.0 - phaseTimer.get());
+        SmartDashboard.putNumber("Phase Time", phaseLength - phaseTimer.get());
 
         SmartDashboard.putBoolean("roboPoseIsNull", vision.getRobotPose(0.1) == null);
         final boolean useOneCamera = false; // determine whether true or false
