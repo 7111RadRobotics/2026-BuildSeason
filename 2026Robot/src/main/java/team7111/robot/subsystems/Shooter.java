@@ -62,8 +62,8 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.51, 0.005, 0.0), // 0.51
-        MechanismType.flywheel, 0.2, 0.095, 0, 0);//0.21, 0.19, 1.66, 0); //0.184
+        1, 20, false, false, new PIDController(0.0001, 0.0, 0.0), // 0.51
+        MechanismType.flywheel, 0.19, 0.115, 0, 0);//0.21, 0.19, 1.66, 0); //0.184
 
     private Motor hood;
     private Motor flywheels;
@@ -84,7 +84,7 @@ public class Shooter extends SubsystemBase {
         double hoodMOI = 0.0708190376784300761;
 
         hood = RobotBase.isReal()
-            ? new CTREMotor(18, new RelativeThroughBore(0, 1, true, 17.5, minHoodPos), hoodConfig)
+            ? new CTREMotor(18, new RelativeThroughBore(0, 1, true, 17.5, minHoodPos - 1.0), hoodConfig)
             : new ArmSimMotor(
                 null,
                 new SingleJointedArmSim(

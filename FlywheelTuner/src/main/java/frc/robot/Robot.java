@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.swerve.utility.WheelForceCalculator.Feedforwards;
 
@@ -32,33 +33,36 @@ public class Robot extends TimedRobot {
 
     public boolean doesIncrement = true;
 
-    public double kS = 0.001;
+    public double kS = 0.19;
     public double kV = 0.0;
     public double kP = 0.0;
 
     public double pidOutput = 0;
 
-    public double increments[] = {0.001, 0.01, 0.1, 1, 10};
+    public double increments[] = {0.0001, 0.001, 0.01, 0.1, 1, 10};
     public int index = 0;
 
     public SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV);
     public PIDController pid = new PIDController(kP, 0, 0);
 
     
-    public TalonFX motor1 = new TalonFX(1);
-    public TalonFX motor2 = new TalonFX(2);
+    public TalonFX motor1 = new TalonFX(16);
+    public TalonFX motor2 = new TalonFX(17);
     protected TalonFXConfiguration config = new TalonFXConfiguration().withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(20));
-    public Follower motorFollow = new Follower(1, MotorAlignmentValue.Opposed);
+
+    public Follower motorFollow = new Follower(16, MotorAlignmentValue.Opposed);
 
     public XboxController xboxController = new XboxController(0);
 
-    public VelocityVoltage rpm = new VelocityVoltage(1500);
+    private double rpmSetpoint = 1500;
 
     
 
     
 
     public Robot() {
+
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor1.getConfigurator().apply(config);
     }
 
@@ -82,11 +86,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-        
+        if (xboxController.getYButtonPressed()) {
+            motor1.getConfigurator().apply(config);
+        }
 
        
         if (xboxController.getRightBumperButtonPressed()) {
-             if (index >= 4) {
+             if (index >= 5) {
                 index = 0;
             } else {
                 index++;
@@ -115,7 +121,15 @@ public class Robot extends TimedRobot {
            }
         }
 
-
+        if (xboxController.getBButtonPressed()) {
+            if (rpmSetpoint == 1500) {
+                rpmSetpoint = 800;
+            } else if (rpmSetpoint == 800) {
+                rpmSetpoint = 3000;
+            } else if (rpmSetpoint == 3000) {
+                rpmSetpoint = 1500;
+            }
+        }
 
         if (xboxController.getPOV() == 0 && doesIncrement) {
 
@@ -150,22 +164,35 @@ public class Robot extends TimedRobot {
         ff.setKs(kS);
         ff.setKv(kV);
 
+        config.Slot0.kP = kP;
+        config.Slot0.kS = kS;
+        config.Slot0.kV = kV;
+
+
+
         
 
-        pidOutput = pid.calculate(motor1.getVelocity().getValueAsDouble() / 60, 1500) + ff.calculate(1500);
+        pidOutput = pid.calculate(motor1.getVelocity().getValueAsDouble() * 60, rpmSetpoint) + ff.calculate(rpmSetpoint);
 
-        motor1.setControl(new VelocityVoltage(pidOutput));
+        if(motor1.getVelocity().getValueAsDouble() * 60 - 500 > rpmSetpoint){
+            motor1.setVoltage(0);
+        }
+        motor1.setControl(new VelocityVoltage(rpmSetpoint / 60));
         motor2.setControl(motorFollow);
 
         SmartDashboard.putNumber("indexNum", index);
         SmartDashboard.putNumber("kP", kP);
         SmartDashboard.putNumber("kV", kV);
         SmartDashboard.putNumber("kS", kS);
+        SmartDashboard.putNumber("PIDOutput", pidOutput);
         SmartDashboard.putNumber("increment", increments[index]);
         SmartDashboard.putBoolean("changekS", tuneKs);
         SmartDashboard.putBoolean("changekV", tuneKv);
         SmartDashboard.putBoolean("changekP", tuneKp);
         SmartDashboard.putBoolean("willIncrement", doesIncrement);
+
+        SmartDashboard.putNumber("currRPM", motor1.getVelocity().getValueAsDouble() * 60);
+        SmartDashboard.putNumber("rpmSetpoint", rpmSetpoint);
     }
 
     @Override

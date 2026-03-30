@@ -120,17 +120,17 @@ public class Hopper extends SubsystemBase {
     // named differently to not overide a different method
     private void idleMode(){
         shooterIndexerSpeed = -0.1;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.36;
     }
 
     private void intake(){
         shooterIndexerSpeed = -0.25;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.36;
     }
 
     private void shoot(){
         shooterIndexerSpeed = 0.4;
-        spindexerSpeed = 0.26;
+        spindexerSpeed = 0.36;
     }
 
     private void stopped(){
