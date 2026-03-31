@@ -37,7 +37,7 @@ public class Hopper extends SubsystemBase {
     private HopperState currentState = HopperState.idle;
 
     private MotorConfig spindexerConfig = new MotorConfig(
-        1, 20, true, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+        1, 40, true, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
     private MotorConfig shooterIndexerConfig = new MotorConfig(
         1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0

@@ -34,8 +34,8 @@ public class Robot extends TimedRobot {
     public boolean doesIncrement = true;
 
     public double kS = 0.19;
-    public double kV = 0.0;
-    public double kP = 0.0;
+    public double kV = 0.115;
+    public double kP = 0.0001;
 
     public double pidOutput = 0;
 
@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
 
     public XboxController xboxController = new XboxController(0);
 
-    private double rpmSetpoint = 1500;
+    private double rpmSetpoint = 800;
 
     
 
@@ -122,12 +122,12 @@ public class Robot extends TimedRobot {
         }
 
         if (xboxController.getBButtonPressed()) {
-            if (rpmSetpoint == 1500) {
-                rpmSetpoint = 800;
-            } else if (rpmSetpoint == 800) {
+            if (rpmSetpoint == 800) {
                 rpmSetpoint = 3000;
             } else if (rpmSetpoint == 3000) {
-                rpmSetpoint = 1500;
+                rpmSetpoint = 5500;
+            } else if (rpmSetpoint == 5500) {
+                rpmSetpoint = 800;
             }
         }
 

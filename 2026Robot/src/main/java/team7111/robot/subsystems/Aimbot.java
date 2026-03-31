@@ -101,7 +101,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 4;
+    private final double RPMMult = 2.4;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -139,7 +139,7 @@ public class Aimbot extends SubsystemBase{
     public enum presetShotType {
         Trench,
         RegHubShot,
-        Pass,
+        Tower,
         Default,
         Outpost,
     }
@@ -263,7 +263,7 @@ public class Aimbot extends SubsystemBase{
     }
 
     public double getCalculatedSpeed() {
-        return this.calculatedSpeed + 100;
+        return this.calculatedSpeed;
     }
 
     public double getCalculatedDirection() {
@@ -482,16 +482,16 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 3500 / RPMMult;
-                calculatedAngle = 61;
+                calculatedSpeed = 3600 / RPMMult;
+                calculatedAngle = 70;
                 break;
             case RegHubShot:
                 calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 75);
-                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2800 / RPMMult);
+                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2300 / RPMMult);
                 break;
-            case Pass:
-                calculatedAngle = maxShooterAngle;
-                calculatedSpeed = shooterOptimalSpeed;
+            case Tower:
+                calculatedAngle = 71.75;
+                calculatedSpeed = 3400 / RPMMult;
                 break;
             case Default:
                 calculatedSpeed = 0 / RPMMult;
@@ -562,7 +562,7 @@ public class Aimbot extends SubsystemBase{
             return;
         }
 
-        final double g = 10;//9.81;
+        final double g = 9.81;//9.81;
 
         // Horizontal distance from shooter release to target
         double distanceToTarget = CamToTarget.getX();

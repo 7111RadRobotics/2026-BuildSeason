@@ -8,6 +8,7 @@ import javax.print.attribute.standard.RequestingUserName;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -243,6 +244,10 @@ public class SuperStructure extends SubsystemBase {
             //swerve.resetOdometry(new Pose2d(0, 0, swerve.getYaw()));
         }
 
+        if(driverController.getBackButtonPressed()) {
+            swerve.resetOdometry(new Pose2d(0.77, 0.779, Rotation2d.fromDegrees(45)));
+        }
+
         // move through trench button commented due to drivers request
         /*if(driverController.getLeftTriggerAxis() > 0.15 && !moveThroughTrench){
             moveThroughTrench = true;
@@ -294,7 +299,7 @@ public class SuperStructure extends SubsystemBase {
         }
 
         if(driverController.getLeftStickButtonPressed()) {
-            targeting.setPreset(presetShotType.Outpost);
+            targeting.setPreset(presetShotType.Tower);
             passing = true;
         } else if(driverController.getLeftStickButtonReleased()) {
             passing = false;
@@ -601,7 +606,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.followAimbot;
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        swerve.setSwerveState(SwerveState.snapAngle);
+        //swerve.setSwerveState(SwerveState.snapAngle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{

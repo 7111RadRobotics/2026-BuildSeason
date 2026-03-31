@@ -62,7 +62,7 @@ public class Shooter extends SubsystemBase {
         MechanismType.arm, 0.0, 0.0, 0, 0);
 
     private MotorConfig flywheelConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(0.0001, 0.0, 0.0), // 0.51
+        1, 40, false, false, new PIDController(0.0001, 0.0, 0.0), // 0.51
         MechanismType.flywheel, 0.19, 0.115, 0, 0);//0.21, 0.19, 1.66, 0); //0.184
 
     private Motor hood;
@@ -108,6 +108,8 @@ public class Shooter extends SubsystemBase {
         mechanism2d.getRoot("Shooter hood", 0.25, 0.5).append(hoodPositionLigament);
 
         Shuffleboard.getTab("Mechanisms").add("Shooter", mechanism2d);
+
+        flywheels.setSpeedLimits(6000, -6000, false);
     }
 
     public void periodic(){
@@ -154,7 +156,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isAtSpeedSetpoint(){
-        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(150);
+        boolean isAtSetpoint = flywheels.isAtVelocitySetpoint(50);
         return isAtSetpoint;
     }
 
