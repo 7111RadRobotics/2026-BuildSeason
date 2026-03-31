@@ -201,6 +201,7 @@ public class SuperStructure extends SubsystemBase {
         boolean hasAppliedVisionMeasurement = false;
         Pose3d visionRobotPoseShooter = vision.getRobotPose(vision.shooterCam, 0.15);
         Pose3d visionRobotPoseClimb = vision.getRobotPose(vision.climberCam, 0.1);
+        Pose3d bestVisionRobotPose = vision.getBestRobotPose(0.2);
         matchTime = DriverStation.getMatchTime();
 
         if(visionRobotPoseClimb != null && RobotBase.isReal()){
@@ -209,6 +210,8 @@ public class SuperStructure extends SubsystemBase {
         } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
             if(!useOneCamera && !hasAppliedVisionMeasurement)
                 swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
+        //if(bestVisionRobotPose != null){
+        //    swerve.addVisionMeasurement(bestVisionRobotPose.toPose2d(), true);
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
             Autos selectedAuto = auto.getSelectedAuto();
             if (!currentAutos.equals(selectedAuto)){

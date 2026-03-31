@@ -211,14 +211,46 @@ public class Vision extends SubsystemBase{
         return estPose;
     }
 
-    /** Gets the robot position from a specific camera*/
-    public Pose3d getRobotPose(Camera camera, double ambiguityThreshold) {
-        for(PhotonTrackedTarget target : camera.estRobotPose.targetsUsed){
-            if(target.poseAmbiguity > ambiguityThreshold){
-                return null;
+    public Pose3d getBestRobotPose(double ambiguityThreshold){
+        double[] bestAmbiguities = new double[cameraList.length];
+        for (int i = 0; i < cameraList.length; i++) {
+            bestAmbiguities[i] = 1.0;
+            Camera camera = cameraList[i];
+            if(camera.getLatestResult().hasTargets()){
+                for(PhotonTrackedTarget target : camera.estRobotPose.targetsUsed){
+                    if(target.poseAmbiguity < bestAmbiguities[i]){
+                        bestAmbiguities[i] = target.poseAmbiguity;
+                    }
+                }
             }
         }
+        Pose3d robotPose = null;
+        double bestAmbiguity = ambiguityThreshold;
+        for (int i = 0; i < bestAmbiguities.length; i++) {
+            if(bestAmbiguities[i] <= bestAmbiguity){
+                bestAmbiguity = bestAmbiguities[i];
+                robotPose = cameraList[i].estRobotPose.estimatedPose;
+            }
+        }
+
+        if(robotPose != null){
+            return robotPose;
+        }
+        return null;
+    }
+
+    /** Gets the robot position from a specific camera*/
+    public Pose3d getRobotPose(Camera camera, double ambiguityThreshold) {
         if (camera.getLatestResult().hasTargets()) {
+            double bestAmbiguity = 1.0;
+            for(PhotonTrackedTarget target : camera.estRobotPose.targetsUsed){
+                if(target.poseAmbiguity < bestAmbiguity){
+                    bestAmbiguity = target.poseAmbiguity;
+                }
+            }
+            if(bestAmbiguity > ambiguityThreshold){
+                return null;
+            }
             return camera.estRobotPose.estimatedPose;
         }
         return null;
