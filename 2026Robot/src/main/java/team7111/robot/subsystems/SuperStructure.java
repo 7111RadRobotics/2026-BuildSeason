@@ -93,7 +93,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean autoTargeting = true;
 
     private shotType currentShot = shotType.Transport;
-    private shotType scoringState = shotType.ShootOnTheMove;
+    private shotType scoringState = shotType.Parabolic;
 
     private String gameData;
     private boolean bHub = false;
@@ -221,9 +221,18 @@ public class SuperStructure extends SubsystemBase {
                 pathPoses.add(auto.getAssumedPose());
                 for (AutoAction action : autoActions) {
                     if(action.isPath()){
-                        for (Waypoint waypoint : action.getAsPath().getWaypoints()) {
+                        Path displayPath = action.getAsPath();
+                        if(DriverStation.getAlliance().isPresent()){
+                            if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+                                Path flippedPath = new Path(action.getAsPath().getWaypoints());
+                                flippedPath.flipPath(true, false);
+                                displayPath = flippedPath;
+                            }
+                        }
+                        for (Waypoint waypoint : displayPath.getWaypoints()) {
                             pathPoses.add(waypoint.getPose());
                         }
+                        displayPath.flipPath(false, false);
                     }
                 }
                 swerve.displayPathPoses(pathPoses);

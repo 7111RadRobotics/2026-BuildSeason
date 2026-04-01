@@ -31,10 +31,10 @@ public class Constants {
 
     public static class MechanismConstants {
         
-        public static final double maxHoodPos = 30;
+        public static final double maxHoodPos = 32;
         public static final double minHoodPos = 8;
-        public static final double maxHoodTraj = 90 - minHoodPos; // 82 //83
-        public static final double minHoodTraj = 90 - maxHoodPos; // 60 //59.038
+        public static final double maxHoodTraj = 90.0 - minHoodPos; // 82 //83
+        public static final double minHoodTraj = 90.0 - maxHoodPos; // 58 60 //59.038
     }
 
     /** All swerve constants. */

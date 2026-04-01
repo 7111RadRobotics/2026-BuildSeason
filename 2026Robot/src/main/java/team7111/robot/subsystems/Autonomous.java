@@ -47,7 +47,7 @@ public class Autonomous extends SubsystemBase {
     private SendableChooser<Autos> autoChooser = new SendableChooser<>();
     private SuperStructure superStructure;
 
-    private Pose2d assumedPose = new Pose2d(3.5, 4, Rotation2d.kZero);
+    private Pose2d assumedStartingPose = new Pose2d(3.5, 4, Rotation2d.kZero);
 
     private final Waypoint[] trenchLWaypoints = new Waypoint[]{
         new Waypoint(new Pose2d(3.8, 7.446, Rotation2d.fromDegrees(0)), balancedTransConstraints, balancedRotConstraints),
@@ -195,7 +195,7 @@ public class Autonomous extends SubsystemBase {
                 break;
             
             case lt_Bump:
-                assumedPose = new Pose2d(3.5, 5.65, Rotation2d.kZero);
+                assumedStartingPose = new Pose2d(3.5, 5.65, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -207,7 +207,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case rt_Bump:
-                assumedPose = new Pose2d(3.5, 2.5, Rotation2d.kZero);
+                assumedStartingPose = new Pose2d(3.5, 2.5, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -219,7 +219,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case lt_Trench:
-                assumedPose = new Pose2d(3.5, 7.5, Rotation2d.kZero);
+                assumedStartingPose = new Pose2d(3.5, 7.5, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -233,7 +233,7 @@ public class Autonomous extends SubsystemBase {
 
                 break;
             case rt_Trench:
-                assumedPose = new Pose2d(3.5, 0.65, Rotation2d.kZero);
+                assumedStartingPose = new Pose2d(3.5, 0.65, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
@@ -270,7 +270,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case shoot:
-                assumedPose = new Pose2d(3.5, 4, Rotation2d.kZero);
+                assumedStartingPose = new Pose2d(3.5, 4, Rotation2d.kZero);
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
@@ -309,7 +309,9 @@ public class Autonomous extends SubsystemBase {
         }
 
         if(DriverStation.getAlliance().isPresent()){
-            
+            if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+                assumedStartingPose = new Pose2d(16.5354 - assumedStartingPose.getX(), 8.001 - assumedStartingPose.getY(), Rotation2d.kZero);
+            }
         }
         return auto;
     }
@@ -392,13 +394,13 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(fastPoint(6.334, 3.071, 127.5));
                 waypoints.add(balancedPoint(5.86, 0.66, 90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
                 waypoints.add(slowPoint(3.94, 0.66, 90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
-                waypoints.add(balancedPoint(2.5, 0.66, 90));
+                //waypoints.add(balancedPoint(2.5, 0.66, 90));
                 break;
             case LSweepToTrench:
                 waypoints.add(fastPoint(6.334, 4.4, 63));
                 waypoints.add(balancedPoint(5.86, 7.209072, -90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
                 waypoints.add(slowPoint(3.94, 7.209072, -90).withTranslationConstraints(new WaypointConstraints(1.5, 0, 0.1)));
-                waypoints.add(balancedPoint(2.5, 7.209072, -90));
+                //waypoints.add(balancedPoint(2.5, 7.209072, -90));
                 break;
             case outpost:
                 waypoints.add(balancedPoint(1.5, 0.7, 90));
@@ -517,7 +519,7 @@ public class Autonomous extends SubsystemBase {
     }
 
     public Pose2d getAssumedPose(){
-        return assumedPose;
+        return assumedStartingPose;
     }
 
     private boolean timeDelay(int delay){
