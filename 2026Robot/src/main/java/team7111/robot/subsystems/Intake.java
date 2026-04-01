@@ -115,7 +115,8 @@ public class Intake extends SubsystemBase {
         
         flyWheel.setDutyCycle(flyWheelSpeed);
 
-        if (pivot.getPosition() >= pivotPos -1.5 && pivot.getPosition() <= pivotPos + 1.5) {
+        if ((pivot.getPosition() >= pivotPos -1.5 && pivot.getPosition() <= pivotPos + 1.5)
+          || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy) || currentState.equals(IntakeState.intake)))) {
             pivot.setVoltage(0);
         } else {
             /*if(pivot.getVelocity() > 30){

@@ -70,7 +70,7 @@ public class Aimbot extends SubsystemBase{
     private final double camToTargetHeightOffset = 2/3;
 
     /** Offset between rio yaw and direction the robot shoots */
-    private final double rioToShooterOffset = 5;
+    private final double rioToShooterOffset = -1.5;
 
     /** shooter wheel diameter, in meters */
     private final double shooterDiameter = Units.inchesToMeters(4);
@@ -94,9 +94,9 @@ public class Aimbot extends SubsystemBase{
     /** Offset from ground the ball leaves the shooter, in meters */
     private final double shooterHeightOffset = Units.inchesToMeters(20);
     /** Offset from the center of the robot to the shooter, in meters */
-    private final double shooterXOffset = -0.25;
+    private final double shooterXOffset = -0.191;
     /** Offset from the center of the robot to the shooter in meters */
-    private final double shooterYOffset = -0.1;
+    private final double shooterYOffset = -0.207;
     /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
     private final double shooterOptimalSpeed = 1500;
 
@@ -349,6 +349,7 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putBoolean("Is enabled", isEnabled);
         SmartDashboard.putBoolean("Is vision enabled", isUsingVision);
         SmartDashboard.putNumber("angle to target", degreeToTarget);
+        SmartDashboard.putString("ShotType", currentShotType.toString());
 
         if(!isEnabled) {
             calculatedAngle = lowestShooterAngle;
@@ -482,12 +483,12 @@ public class Aimbot extends SubsystemBase{
 
         switch (presetShot) {
             case Trench:
-                calculatedSpeed = 3600 / RPMMult;
-                calculatedAngle = 70;
+                calculatedSpeed = 2700 / RPMMult;
+                calculatedAngle = 65;
                 break;
             case RegHubShot:
-                calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 75);
-                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2300 / RPMMult);
+                calculatedAngle = SmartDashboard.getNumber("Shooter angle entry", 79);
+                calculatedSpeed = SmartDashboard.getNumber("Shooter speed entry", 2100 / RPMMult);
                 break;
             case Tower:
                 calculatedAngle = 71.75;

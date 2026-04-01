@@ -204,14 +204,14 @@ public class SuperStructure extends SubsystemBase {
         Pose3d bestVisionRobotPose = vision.getBestRobotPose(0.2);
         matchTime = DriverStation.getMatchTime();
 
-        if(visionRobotPoseClimb != null && RobotBase.isReal()){
-            swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
-            hasAppliedVisionMeasurement = true;
-        } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
-            if(!useOneCamera && !hasAppliedVisionMeasurement)
-                swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
-        //if(bestVisionRobotPose != null){
-        //    swerve.addVisionMeasurement(bestVisionRobotPose.toPose2d(), true);
+        // if(visionRobotPoseClimb != null && RobotBase.isReal()){
+        //     swerve.addVisionMeasurement(visionRobotPoseClimb.toPose2d(), true);
+        //     hasAppliedVisionMeasurement = true;
+        // } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
+        //     if(!useOneCamera && !hasAppliedVisionMeasurement)
+        //         swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
+        if(bestVisionRobotPose != null){
+            swerve.addVisionMeasurement(bestVisionRobotPose.toPose2d(), true);
         } else if(matchTime <= 0 && DriverStation.isDisabled()){
             Autos selectedAuto = auto.getSelectedAuto();
             if (!currentAutos.equals(selectedAuto)){
@@ -248,7 +248,7 @@ public class SuperStructure extends SubsystemBase {
         }
 
         if(driverController.getBackButtonPressed()) {
-            swerve.resetOdometry(new Pose2d(0.77, 0.779, Rotation2d.fromDegrees(45)));
+            swerve.resetOdometry(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));
         }
 
         // move through trench button commented due to drivers request
@@ -609,7 +609,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         ShooterState shooterState = ShooterState.followAimbot;
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        //swerve.setSwerveState(SwerveState.snapAngle);
+        swerve.setSwerveState(SwerveState.snapAngle);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{

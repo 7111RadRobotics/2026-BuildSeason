@@ -14,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -118,6 +119,10 @@ public class Swerve extends SubsystemBase {
         snapAnglePID = new PIDController(0.25, 0, 0.002);
         gamepieceAnglePID = new PIDController(0.01, 0, 0);
 
+        SmartDashboard.putNumber("SnapAngle P", 0.25);
+        SmartDashboard.putNumber("SnapAngle I", 0.0);
+        SmartDashboard.putNumber("SnapAngle D", 0.002);
+
         //Velocity kinematics object
         kinematics = SwerveConstants.kinematics;
         //new SwerveDriveKinematics(modules[0].getOffset(),
@@ -132,6 +137,10 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("Snap angle", snapAngleSetpoint);
 
         SmartDashboard.putNumber("Rotation", getYaw().getDegrees());
+
+        snapAnglePID.setP(SmartDashboard.getNumber("SnapAngle P", 0.25));
+        snapAnglePID.setI(SmartDashboard.getNumber("SnapAngle I", 0));
+        snapAnglePID.setD(SmartDashboard.getNumber("SnapAngle D", 0.002));
 
         gyro.update();
         swerveOdometry.update(getYaw(), getPositions());

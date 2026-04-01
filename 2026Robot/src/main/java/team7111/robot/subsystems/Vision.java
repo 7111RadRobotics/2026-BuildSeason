@@ -41,8 +41,8 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(Inches.of(-3.375).in(Meters), Inches.of(-2.75).in(Meters), Inches.of(20.75).in(Meters), new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
-        new Transform3d(Inches.of(-12.0).in(Meters), Inches.of(-11).in(Meters), Inches.of(8.0).in(Meters), new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(195).in(Radians))),
+        new Transform3d(-0.088, -0.0685, 0.4905, new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
+        new Transform3d(0.318, -0.264, 0.17, new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(195).in(Radians))),
     };
 
     //private final AHRS gyro;
@@ -72,7 +72,7 @@ public class Vision extends SubsystemBase{
 
     /** Constructor */
     public Vision(){
-        CameraServer.startAutomaticCapture(1);
+        CameraServer.startAutomaticCapture(0);
 
         try {
             fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);

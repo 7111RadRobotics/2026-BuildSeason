@@ -224,7 +224,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
-                auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
+                //auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -238,7 +238,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
-                auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
+                //auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -306,6 +306,10 @@ public class Autonomous extends SubsystemBase {
                 break;
             default:
                 break;
+        }
+
+        if(DriverStation.getAlliance().isPresent()){
+            
         }
         return auto;
     }

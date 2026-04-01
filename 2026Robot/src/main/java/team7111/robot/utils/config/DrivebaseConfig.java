@@ -230,7 +230,7 @@ public class DrivebaseConfig {
     public static DrivebaseConfig getWhiplash(boolean isSim) {
         double width = Units.inchesToMeters(20);
         double length = Units.inchesToMeters(20);
-        double wheelDiameter = Units.inchesToMeters(4);
+        double wheelDiameter = Units.inchesToMeters(4.25);
 
         double driveGearing = 6.72 / 1.0; 
         double angleGearing = 468.0 / 35.0;
