@@ -225,14 +225,14 @@ public class SuperStructure extends SubsystemBase {
                         if(DriverStation.getAlliance().isPresent()){
                             if(DriverStation.getAlliance().get().equals(Alliance.Red)){
                                 Path flippedPath = new Path(action.getAsPath().getWaypoints());
-                                flippedPath.flipPath(true, false);
+                                //flippedPath.flipPath(true, false);
                                 displayPath = flippedPath;
                             }
                         }
                         for (Waypoint waypoint : displayPath.getWaypoints()) {
                             pathPoses.add(waypoint.getPose());
                         }
-                        displayPath.flipPath(false, false);
+                        //displayPath.flipPath(false, false);
                     }
                 }
                 swerve.displayPathPoses(pathPoses);

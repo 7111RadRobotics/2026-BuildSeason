@@ -64,7 +64,7 @@ public class Intake extends SubsystemBase {
                                         MechanismType.arm, 0.3, 0, 0, 0.0);//2.44, 0.08, 0.52);
     private int pivotID = 12;
 
-    private MotorConfig flyWheelConfig = new MotorConfig(1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
+    private MotorConfig flyWheelConfig = new MotorConfig(1, 40, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0, 0, 0, 0);
     private int flywheelLeadID = 10;
     private int flywheelFollowID = 11;
 
@@ -88,7 +88,9 @@ public class Intake extends SubsystemBase {
 
         //TODO set REV motor ID to a real ID
         flyWheel = RobotBase.isReal()
-            ? new TwoMotors(new REVMotor(flywheelLeadID, null, flyWheelConfig), new REVMotor(flywheelFollowID, null, flyWheelConfig), flywheelLeadID, false)
+            ? new TwoMotors(
+                new REVMotor(flywheelLeadID, null, flyWheelConfig), 
+                new REVMotor(flywheelFollowID, null, flyWheelConfig), flywheelLeadID, false)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNEO(2), 0.01, flyWheelConfig.gearRatio), DCMotor.getNEO(2), 0.1),

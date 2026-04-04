@@ -7,6 +7,7 @@ import team7111.robot.utils.motor.Motor.MechanismType;
 import team7111.robot.utils.motor.MotorConfig;
 import team7111.robot.utils.motor.REVMotor;
 import team7111.robot.utils.motor.TwoMotors;
+import team7111.robot.Constants.MechanismConstants;
 import team7111.robot.utils.motor.CTREMotor;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -40,7 +41,7 @@ public class Hopper extends SubsystemBase {
         1, 40, true, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
     private MotorConfig shooterIndexerConfig = new MotorConfig(
-        1, 20, false, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+        1, 20, false, true, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
 
     private Motor spindexer;
@@ -48,6 +49,9 @@ public class Hopper extends SubsystemBase {
 
     private double spindexerSpeed = 0;
     private double shooterIndexerSpeed = 0;
+
+    private boolean isFollowingShooter = false;
+    private boolean isFollowerInverted = false;
 
     public Hopper() {
         spindexer = RobotBase.isReal()
@@ -77,7 +81,14 @@ public class Hopper extends SubsystemBase {
         }else if(shooterIndexer.getVelocity() < -30 && shooterIndexerSpeed > 0){
             shooterIndexer.setVoltage(0);
         }else*/
+        
+        if(!isFollowingShooter){
+            shooterIndexer.setFollower(false, MechanismConstants.shooterID, isFollowerInverted);
             shooterIndexer.setDutyCycle(shooterIndexerSpeed);
+        }else{
+            shooterIndexer.setFollower(true, MechanismConstants.shooterID, isFollowerInverted);
+        }
+        shooterIndexer.periodic();
 
         SmartDashboard.putNumber("Spindexer RPM", spindexer.getVelocity());
     }
@@ -119,27 +130,33 @@ public class Hopper extends SubsystemBase {
 
     // named differently to not overide a different method
     private void idleMode(){
-        shooterIndexerSpeed = -0.1;
-        spindexerSpeed = 0.36;
+        shooterIndexerSpeed = 0.0;
+        spindexerSpeed = 0.0;//0.36;
+        isFollowingShooter = false;
     }
 
     private void intake(){
-        shooterIndexerSpeed = -0.25;
-        spindexerSpeed = 0.36;
+        shooterIndexerSpeed = 0.0;
+        spindexerSpeed = 0.0;//0.36;
+        isFollowingShooter = false;
     }
 
     private void shoot(){
         shooterIndexerSpeed = 0.4;
         spindexerSpeed = 0.36;
+
+        isFollowingShooter = true;
     }
 
     private void stopped(){
         shooterIndexerSpeed = 0;
         spindexerSpeed = 0;
+        isFollowingShooter = false;
     }
 
     private void manual(){
         spindexerSpeed = manSpindexerSpeed;
+        isFollowingShooter = false;
     }
 
     /** Updates the manual speed setpoint in rpm */

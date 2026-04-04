@@ -35,6 +35,17 @@ public class Constants {
         public static final double minHoodPos = 8;
         public static final double maxHoodTraj = 90.0 - minHoodPos; // 82 //83
         public static final double minHoodTraj = 90.0 - maxHoodPos; // 58 60 //59.038
+
+        public static final int shooterID = 16;
+        public static final int shooterFollowerID = 17;
+        public static final int shooterHoodID = 18;
+
+        public static final int spindexerID = 14;
+        public static final int shooterIndexerID = 15;
+        
+        public static final int intakePivotID = 12;
+        public static final int intakeWheelsID = 10;
+        public static final int intakeWheelsFollowerID = 11;
     }
 
     /** All swerve constants. */

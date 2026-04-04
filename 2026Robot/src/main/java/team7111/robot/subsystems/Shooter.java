@@ -95,9 +95,9 @@ public class Shooter extends SubsystemBase {
         
         flywheels = RobotBase.isReal()
             ? new TwoMotors(
-                new CTREMotor(16, null, flywheelConfig), 
-                new CTREMotor(17, null, flywheelConfig),
-                16, true)
+                new CTREMotor(MechanismConstants.shooterID, null, flywheelConfig), 
+                new CTREMotor(MechanismConstants.shooterFollowerID, null, flywheelConfig),
+                MechanismConstants.shooterID, true)
             : new FlywheelSimMotor(
                 null, 
                 new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60(2), 0.01, 1), DCMotor.getKrakenX60(2), 0.1),
