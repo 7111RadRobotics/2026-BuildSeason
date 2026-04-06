@@ -12,6 +12,7 @@ public class FlywheelSimMotor implements Motor{
     private GenericEncoder encoder;
     private double velocitySetpoint = 0;
 
+
     public FlywheelSimMotor(GenericEncoder encoder, FlywheelSim flywheelSim, PIDController pid, SimpleMotorFeedforward ff){
         motor = flywheelSim;
         this.pid = pid;
@@ -77,6 +78,11 @@ public class FlywheelSimMotor implements Motor{
     @Override
     public double getVoltage() {
         return motor.getInputVoltage();
+    }
+
+    @Override
+    public double getCurrent() {
+        return motor.getCurrentDrawAmps();
     }
 
     @Override

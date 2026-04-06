@@ -21,6 +21,7 @@ public class ElevatorSimMotor implements Motor{
     private double velocityMPS = 0;
     private double positionMeters = 0;
     private double outputVoltage = 0;
+    private double outputCurrent = 0;
 
     public ElevatorSimMotor(GenericEncoder encoder, double gearRatio, PIDController pid, ElevatorFeedforward feedForward, ElevatorSim elevatorSim){
         this.encoder = encoder;
@@ -87,6 +88,10 @@ public class ElevatorSimMotor implements Motor{
 
     public double getVoltage(){
         return outputVoltage;
+    }
+
+    public double getCurrent(){
+        return outputCurrent;
     }
     public void setVoltage(double volts) {
         motor.setInputVoltage(volts);

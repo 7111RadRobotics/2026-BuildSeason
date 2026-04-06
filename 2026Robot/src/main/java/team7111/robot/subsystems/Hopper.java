@@ -30,12 +30,12 @@ public class Hopper extends SubsystemBase {
     public enum HopperState {
         intake,
         shoot,
-        idle,
+        unjam,
         stopped,
         manual,
     }
 
-    private HopperState currentState = HopperState.idle;
+    private HopperState currentState = HopperState.stopped;
 
     private MotorConfig spindexerConfig = new MotorConfig(
         1, 40, true, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
@@ -91,6 +91,7 @@ public class Hopper extends SubsystemBase {
         shooterIndexer.periodic();
 
         SmartDashboard.putNumber("Spindexer RPM", spindexer.getVelocity());
+        SmartDashboard.putString("Hopper State", currentState.toString());
     }
 
     public void simulationPeriodic(){
@@ -108,8 +109,8 @@ public class Hopper extends SubsystemBase {
      */
     private void manageState(){
         switch(currentState){
-            case idle:
-                idleMode();
+            case unjam:
+                unJam();
                 break;
             case intake:
                 intake();
@@ -129,7 +130,7 @@ public class Hopper extends SubsystemBase {
     }
 
     // named differently to not overide a different method
-    private void idleMode(){
+    private void unJam(){
         shooterIndexerSpeed = 0.0;
         spindexerSpeed = 0.0;//0.36;
         isFollowingShooter = false;
@@ -144,6 +145,10 @@ public class Hopper extends SubsystemBase {
     private void shoot(){
         shooterIndexerSpeed = 0.4;
         spindexerSpeed = 0.36;
+
+        if (spindexer.getCurrent() >= 40) {
+            currentState = HopperState.unjam;
+        }
 
         isFollowingShooter = true;
     }

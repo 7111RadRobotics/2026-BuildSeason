@@ -15,6 +15,7 @@ public class ArmSimMotor implements Motor {
     private ArmFeedforward feedforward;
     private double setpoint = 0;
     private double outputVoltage = 0;
+    private double outputCurrent = 0;
     
     public ArmSimMotor(GenericEncoder encoder, SingleJointedArmSim armSim, PIDController pid, ArmFeedforward feedforward){
         motor = armSim;
@@ -76,6 +77,10 @@ public class ArmSimMotor implements Motor {
 
     public double getVoltage(){
         return outputVoltage;
+    }
+    
+    public double getCurrent() {
+        return outputCurrent;
     }
 
     public void setVoltage(double volts){

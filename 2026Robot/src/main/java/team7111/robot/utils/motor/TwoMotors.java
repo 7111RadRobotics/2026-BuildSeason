@@ -82,6 +82,10 @@ public class TwoMotors implements Motor {
         return motor1.getVoltage();
     }
 
+    public double getCurrent(){
+        return motor1.getCurrent();
+    }
+
     public void setVoltage(double volts){
         motor1.setVoltage(volts);
         if(!useFollowing)

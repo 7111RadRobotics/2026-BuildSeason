@@ -125,6 +125,10 @@ public class CTREMotor implements Motor {
         return motor.getVelocity().getValueAsDouble() * 60 / gearRatio;
     }
     
+    public double getCurrent(){
+        return motor.getSupplyCurrent().getValueAsDouble();
+    }
+    
     public void setPositionReadout(double position){
         if(encoder != null){
             encoder.setPosition(Rotation2d.fromDegrees(position));

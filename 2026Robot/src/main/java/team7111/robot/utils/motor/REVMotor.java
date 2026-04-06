@@ -188,6 +188,10 @@ public class REVMotor implements Motor {
         return motor.getBusVoltage();
     }
 
+    public double getCurrent(){
+        return motor.getOutputCurrent();
+    }
+
     public void setVoltage(double volts){
         motor.setVoltage(volts);
     }

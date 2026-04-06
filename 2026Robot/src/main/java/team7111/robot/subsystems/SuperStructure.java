@@ -515,7 +515,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setShotType(shotType.Transport);
         
         intake.setState(IntakeState.deploy);
-        hopper.setState(HopperState.idle);
+        hopper.setState(HopperState.stopped);
 
         if(passing) {
             setSuperState(SuperState.preparePass);
@@ -553,7 +553,7 @@ public class SuperStructure extends SubsystemBase {
 
     private boolean preparePass() {
         targeting.setToggle(true);
-        hopper.setState(HopperState.idle);
+        hopper.setState(HopperState.stopped);
         if(moveThroughTrench){
             targeting.setShotType(shotType.Transport);
         }else{

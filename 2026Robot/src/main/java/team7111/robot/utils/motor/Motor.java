@@ -37,6 +37,8 @@ public interface Motor {
 
     public double getVelocity();
 
+    public double getCurrent();
+
     /**
      * Sets the motor position, overwriting the old variable.
      * @param position -Type "double", position for the motor in digrees.
