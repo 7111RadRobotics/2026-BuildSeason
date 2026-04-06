@@ -69,8 +69,8 @@ public class Autonomous extends SubsystemBase {
         new Pose2d(0.85, 1.16, Rotation2d.fromDegrees(38.5)),
     };
 
-    private final Pose2d lTrenchStartPose = new Pose2d(4.25, 7.5, Rotation2d.kZero);
-    private final Pose2d rTrenchStartPose = new Pose2d(4.25, 0.65, Rotation2d.kZero);
+    private final Pose2d lTrenchStartPose = new Pose2d(4.25, 7.5, Rotation2d.fromDegrees(-90));
+    private final Pose2d rTrenchStartPose = new Pose2d(4.25, 0.65, Rotation2d.fromDegrees(-90));
     private final Pose2d hubStartPose =     new Pose2d(4.25, 4, Rotation2d.kZero);
     //starting position abreviated. separated with "_"
     
