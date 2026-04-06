@@ -68,6 +68,10 @@ public class Autonomous extends SubsystemBase {
         new Pose2d(0.85, 7, Rotation2d.fromDegrees(-38.5)),
         new Pose2d(0.85, 1.16, Rotation2d.fromDegrees(38.5)),
     };
+
+    private final Pose2d lTrenchStartPose = new Pose2d(4.25, 7.5, Rotation2d.kZero);
+    private final Pose2d rTrenchStartPose = new Pose2d(4.25, 0.65, Rotation2d.kZero);
+    private final Pose2d hubStartPose =     new Pose2d(4.25, 4, Rotation2d.kZero);
     //starting position abreviated. separated with "_"
     
     /**
@@ -123,7 +127,8 @@ public class Autonomous extends SubsystemBase {
         RSweepToTrench,
         LSweepToTrench, 
 
-        hubMiddle,
+        hubMiddle, 
+        depotLTrench,
     }
 
     public Autonomous(Field zone){
@@ -177,54 +182,56 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(getPath(Paths.outpost)));
                 auto.add(new AutoAction(SuperState.deployed).withNoConditions());
                 auto.add(new AutoAction(getNearestHubScoringPath(hubPresetPoses[0])));
-                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.Trench);
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(10);
                 }));
                 break;
             
             case lt_TrenchDepot:
                 auto = getAutonomous(Autos.lt_Trench);
-                auto.add(new AutoAction(SuperState.intake));
-                auto.add(new AutoAction(getPath(Paths.depot)));
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
+                auto.add(new AutoAction(getPath(Paths.depotLTrench)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.RegHubShot);
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(10);
                 }));
                 break;
             
             case lt_Bump:
-                assumedStartingPose = new Pose2d(3.5, 5.65, Rotation2d.kZero);
+                assumedStartingPose = lTrenchStartPose;
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToBump)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
-                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
-                    superStructure.targeting.setPreset(presetShotType.RegHubShot);
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(10);
                 }));
                 break;
             case rt_Bump:
-                assumedStartingPose = new Pose2d(3.5, 2.5, Rotation2d.kZero);
+                assumedStartingPose = rTrenchStartPose;
                 auto.add(new AutoAction(SuperState.intake));
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
                 auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToBump)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
-                auto.add(new AutoAction(SuperState.preparePass).withAlternateCondition(() -> {
-                    superStructure.targeting.setShotType(shotType.Parabolic);;
+                auto.add(new AutoAction(SuperState.prepareHubShot));
+                auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
+                    superStructure.targeting.setShotType(shotType.Parabolic);
                     return timeDelay(10);
                 }));
                 break;
             case lt_Trench:
-                assumedStartingPose = new Pose2d(3.5, 7.5, Rotation2d.kZero);
-                auto.add(new AutoAction(SuperState.intake));
+                assumedStartingPose = lTrenchStartPose;
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.LNsweep)));
-                auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.LSweepToTrench)));
-                //auto.add(new AutoAction(getPath(Paths.hubSetpointL)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -233,12 +240,10 @@ public class Autonomous extends SubsystemBase {
 
                 break;
             case rt_Trench:
-                assumedStartingPose = new Pose2d(3.5, 0.65, Rotation2d.kZero);
-                auto.add(new AutoAction(SuperState.intake));
+                assumedStartingPose = rTrenchStartPose;
+                auto.add(new AutoAction(SuperState.intake).withNoConditions());
                 auto.add(new AutoAction(getPath(Paths.RNsweep)));
-                auto.add(new AutoAction(SuperState.deployed));
                 auto.add(new AutoAction(getPath(Paths.RSweepToTrench)));
-                //auto.add(new AutoAction(getPath(Paths.hubSetpointR)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
@@ -270,11 +275,12 @@ public class Autonomous extends SubsystemBase {
                 }));
                 break;
             case shoot:
-                assumedStartingPose = new Pose2d(3.5, 4, Rotation2d.kZero);
+                assumedStartingPose = hubStartPose;
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
             case shootDepot:
+                assumedStartingPose = hubStartPose;
                 auto.add(new AutoAction(SuperState.prepareHubShot).withAdditionalCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
                     return true;
@@ -287,6 +293,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 break;
             case shootOutpost:
+                assumedStartingPose = hubStartPose;
                 auto.add(new AutoAction(SuperState.prepareHubShot).withAdditionalCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
                     return true;
@@ -334,11 +341,11 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(balancedPoint(6, 0.625, 180));
                 break;
             case sideSwipeR:
-                waypoints.add(balancedPoint(5.985, 0.625, 90));
+                waypoints.add(balancedPoint(5.985, 0.96, 90));
                 waypoints.add(slowPoint(5.985, 3.3, 0));
                 break;
             case sideSwipeL:
-                waypoints.add(balancedPoint(5.985, 7.53, -90));
+                waypoints.add(balancedPoint(5.985, 7.09072, -90));
                 waypoints.add(slowPoint(5.985, 4.7, -180));
                 break;
             case hubSetpointRT:
@@ -374,12 +381,12 @@ public class Autonomous extends SubsystemBase {
                 break;
             case RNsweep:
                 waypoints.add(fastPoint(5.7, 0.68, -90));
-                waypoints.add(balancedPoint(7.7, 1.26, -20));
-                waypoints.add(slowPoint(7.6, 3.05, 0));
+                waypoints.add(balancedPoint(7.7, 1.26, 0));
+                waypoints.add(slowPoint(7.6, 3.5, 0));
                 break;
             case LNsweep:
                 waypoints.add(fastPoint(5.7, 7.389072, -90));
-                waypoints.add(balancedPoint(7.7, 6.809072, -130));
+                waypoints.add(balancedPoint(7.7, 6.809072, 180));
                 waypoints.add(slowPoint(7.6, 4.569072, 180));
                 break;
             case RSweepToBump:
@@ -392,15 +399,17 @@ public class Autonomous extends SubsystemBase {
                 break;
             case RSweepToTrench:
                 waypoints.add(fastPoint(6.334, 3.071, 127.5));
-                waypoints.add(balancedPoint(5.86, 0.66, 90));
-                waypoints.add(slowPoint(3.94, 0.66, 90));
-                //waypoints.add(balancedPoint(2.5, 0.66, 90));
+                waypoints.add(balancedPoint(5.86, 1.86, 179));
+                //waypoints.add(balancedPoint(5.86, 1.86, 90)); // uncomment if running into wall
+                waypoints.add(balancedPoint(5.86, 0.96, 90));
+                waypoints.add(balancedPoint(3.94, 0.96, 90));
                 break;
             case LSweepToTrench:
                 waypoints.add(fastPoint(6.334, 4.4, 63));
+                waypoints.add(balancedPoint(5.86, 6, 0));
+                //waypoints.add(balancedPoint(5.86, 6, -90)); // uncomment if running into wall
                 waypoints.add(balancedPoint(5.86, 7.09072, -90));
-                waypoints.add(slowPoint(3.94, 7.09072, -90));
-                //waypoints.add(balancedPoint(2.5, 7.209072, -90));
+                waypoints.add(balancedPoint(3.94, 7.09072, -90));
                 break;
             case outpost:
                 waypoints.add(balancedPoint(1.5, 0.7, 90));
@@ -408,6 +417,8 @@ public class Autonomous extends SubsystemBase {
                 break;
             case depot:
                 waypoints.add(balancedPoint(2.376, 4.03, 90));
+
+            case depotLTrench:
                 waypoints.add(balancedPoint(1.78, 5.78, 90));
                 waypoints.add(slowPoint(0.7, 5.85, 90));
                 break;
