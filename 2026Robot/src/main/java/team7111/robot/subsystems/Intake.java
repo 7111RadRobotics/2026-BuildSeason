@@ -24,6 +24,7 @@ import team7111.robot.utils.motor.FlywheelSimMotor;
 import team7111.robot.utils.motor.Motor.MechanismType;
 import team7111.robot.utils.motor.Motor;
 import team7111.robot.utils.motor.TwoMotors;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * This class is an example to how a subsystem looks and functions.
@@ -44,6 +45,7 @@ public class Intake extends SubsystemBase {
         deploy,
         intake,
         shoot,
+        gyrate,
         manual,
     }
 
@@ -71,6 +73,10 @@ public class Intake extends SubsystemBase {
     private Motor pivot;
 
     private Motor flyWheel;
+
+    private Timer timer = new Timer();
+    private Timer swapTimer = new Timer();
+    private boolean swapIntake = false;
 
     private IntakeState currentState = IntakeState.stow;
 
@@ -134,14 +140,26 @@ public class Intake extends SubsystemBase {
         pivot.periodic();
         intakeLigament.setAngle(-pivot.getPosition() + maxPivotPos);
 
+        if (currentState != IntakeState.gyrate) {
+            timer.stop();
+            timer.reset();
+            swapTimer.stop();
+            swapTimer.reset();
+          
+        }
+
         SmartDashboard.putNumber("intake pivot position", pivot.getPosition());
         SmartDashboard.putNumber("Intake Setpoint", pivotPos);
         SmartDashboard.putBoolean("Intake is at Setpoint", pivot.isAtSetpoint(20));
         SmartDashboard.putNumber("Intake Velocity", pivot.getVelocity());
         SmartDashboard.putNumber("Intake Voltage", pivot.getVoltage());
         SmartDashboard.putNumber("Intake Duty Cycle", pivot.getDutyCycle());
+        SmartDashboard.putString("Intake State", currentState.toString());
+        SmartDashboard.putNumber("Intake State Timer", timer.get());
+   
+        
     }
-
+ 
     public void simulationPeriodic(){}
 
     // The below methods are examples of retrieveable boolean values.
@@ -169,6 +187,9 @@ public class Intake extends SubsystemBase {
                 break;
             case shoot:
                 shoot();
+                break;
+            case gyrate:
+                gyrate();
                 break;
             case manual:
                 manual();
@@ -199,6 +220,33 @@ public class Intake extends SubsystemBase {
         flyWheelSpeed = 0;
     }
 
+    private void gyrate(){
+        
+        flyWheelSpeed = 0;
+
+
+        if (pivot.isAtSetpoint(2.5) || timeDelay(timer, 5)) {
+            swapIntake = true;
+            
+        } 
+
+        if (swapIntake) {
+            if (timeDelay(swapTimer, 0.5)) {
+            
+                if (pivotPos == maxPivotPos) {
+                    pivotPos = 50;
+                    swapIntake = false;
+                } else if (pivotPos == 50) {
+                    pivotPos = maxPivotPos;
+                    swapIntake = false;
+                } else {
+                    pivotPos = maxPivotPos;
+                    swapIntake = false;
+                }
+            }
+        }
+    }
+
     private void manual(){
         //System.out.println("Runs code for the manual state");
 
@@ -226,5 +274,15 @@ public class Intake extends SubsystemBase {
 
     public void setPosition(double pos){
         pivotPos = pos;
+    }
+
+    private boolean timeDelay(Timer timer, double delay){
+        timer.start();
+        if (timer.hasElapsed(delay)) {
+            timer.reset();
+            timer.stop();
+            return true;
+        }
+        return false;
     }
 }

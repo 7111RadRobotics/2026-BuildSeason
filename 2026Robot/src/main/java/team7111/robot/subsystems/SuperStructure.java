@@ -656,7 +656,7 @@ public class SuperStructure extends SubsystemBase {
             shooter.setState(ShooterState.followAimbot);
         }
         swerve.setSnapAngle(targeting.getCalculatedDirection());
-        intake.setState(IntakeState.shoot);
+        intake.setState(IntakeState.gyrate);
         hopper.setState(HopperState.shoot);
 
         if(intaking) {
