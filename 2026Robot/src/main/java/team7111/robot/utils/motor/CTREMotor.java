@@ -126,7 +126,8 @@ public class CTREMotor implements Motor {
     }
     
     public double getCurrent(){
-        return motor.getSupplyCurrent().getValueAsDouble();
+        
+        return motor.getStatorCurrent().getValueAsDouble();
     }
     
     public void setPositionReadout(double position){

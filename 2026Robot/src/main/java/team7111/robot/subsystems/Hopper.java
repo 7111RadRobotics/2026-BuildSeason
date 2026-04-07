@@ -13,6 +13,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,7 +42,7 @@ public class Hopper extends SubsystemBase {
         1, 40, true, false, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
     );
     private MotorConfig shooterIndexerConfig = new MotorConfig(
-        1, 20, false, true, new PIDController(1, 0, 0), MechanismType.flywheel, 0.001, 0, 0, 0
+        1, 20, false, true, new PIDController(0.007, 0, 0), MechanismType.flywheel, 0.208, 0.115, 0, 0
     );
 
     private Motor spindexer;
@@ -49,6 +50,10 @@ public class Hopper extends SubsystemBase {
 
     private double spindexerSpeed = 0;
     private double shooterIndexerSpeed = 0;
+
+    private double indexerSetpoint = 0;
+
+    private Timer timer = new Timer();
 
     private boolean isFollowingShooter = false;
     private boolean isFollowerInverted = false;
@@ -70,6 +75,8 @@ public class Hopper extends SubsystemBase {
                 shooterIndexerConfig.pid,
                 shooterIndexerConfig.simpleFF
             );
+
+            shooterIndexer.setSpeedLimits(6500, -6500, false);
     }
 
     public void periodic(){
@@ -86,12 +93,14 @@ public class Hopper extends SubsystemBase {
             shooterIndexer.setFollower(false, MechanismConstants.shooterID, isFollowerInverted);
             shooterIndexer.setDutyCycle(shooterIndexerSpeed);
         }else{
-            shooterIndexer.setFollower(true, MechanismConstants.shooterID, isFollowerInverted);
+            shooterIndexer.setVelocity(indexerSetpoint);
+            //shooterIndexer.setFollower(true, MechanismConstants.shooterID, isFollowerInverted);
         }
         shooterIndexer.periodic();
 
         SmartDashboard.putNumber("Spindexer RPM", spindexer.getVelocity());
         SmartDashboard.putString("Hopper State", currentState.toString());
+        SmartDashboard.putNumber("Spindexer Current", spindexer.getCurrent());
     }
 
     public void simulationPeriodic(){
@@ -132,8 +141,11 @@ public class Hopper extends SubsystemBase {
     // named differently to not overide a different method
     private void unJam(){
         shooterIndexerSpeed = 0.0;
-        spindexerSpeed = 0.0;//0.36;
-        isFollowingShooter = false;
+        //spindexerSpeed = -0.2;//0.36;
+        isFollowingShooter = true;
+        if (!timeDelay(timer, 1)) {
+                spindexerSpeed = -0.2;
+            } else {spindexerSpeed = 0;}
     }
 
     private void intake(){
@@ -143,12 +155,15 @@ public class Hopper extends SubsystemBase {
     }
 
     private void shoot(){
+
+        if (spindexer.getCurrent() >= 100) {
+            currentState = HopperState.unjam;
+            return;
+        }
         shooterIndexerSpeed = 0.4;
         spindexerSpeed = 0.36;
 
-        if (spindexer.getCurrent() >= 40) {
-            currentState = HopperState.unjam;
-        }
+        
 
         isFollowingShooter = true;
     }
@@ -184,5 +199,19 @@ public class Hopper extends SubsystemBase {
 
     public double getSpeed(){
         return spindexer.getDutyCycle();
+    }
+
+    public void giveShooterSpeed(double rpm){
+        indexerSetpoint = rpm * 1.9;
+    }
+
+    private boolean timeDelay(Timer timer, double delay){
+        timer.start();
+        if (timer.hasElapsed(delay)) {
+            timer.reset();
+            timer.stop();
+            return true;
+        }
+        return false;
     }
 }

@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
     private final double minPivotPos = 0;
 
     private MotorConfig pivotConfig = new MotorConfig(0.05, 40, false, true, 
-                                        new PIDController(0.35, 0.01, 0.00), 
+                                        new PIDController(0.35, 0.0, 0.001), 
                                         MechanismType.arm, 0.3, 0, 0, 0.0);//2.44, 0.08, 0.52);
     private int pivotID = 12;
 
@@ -123,17 +123,12 @@ public class Intake extends SubsystemBase {
         
         flyWheel.setDutyCycle(flyWheelSpeed);
 
+       
         if ((pivot.getPosition() >= pivotPos -1.5 && pivot.getPosition() <= pivotPos + 1.5)
           || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy) || currentState.equals(IntakeState.intake)))) {
             pivot.setVoltage(0);
         } else {
-            /*if(pivot.getVelocity() > 30){
-                //pivot.setVelocity(30);
-            }else if(pivot.getVelocity() < -30){
-                ///pivot.setVelocity(30);
-            }else{*/
-                pivot.setSetpoint(pivotPos, true);
-            //}
+            pivot.setSetpoint(pivotPos, true);
         }
         
         flyWheel.periodic();
@@ -222,26 +217,29 @@ public class Intake extends SubsystemBase {
 
     private void gyrate(){
         
-        flyWheelSpeed = 0;
+        
 
 
-        if (pivot.isAtSetpoint(2.5) || timeDelay(timer, 5)) {
+        if (pivot.isAtSetpoint(2.5) || timeDelay(timer, 2.5)) {
             swapIntake = true;
             
         } 
 
         if (swapIntake) {
-            if (timeDelay(swapTimer, 0.5)) {
+            if (timeDelay(swapTimer, 1)) {
             
                 if (pivotPos == maxPivotPos) {
                     pivotPos = 50;
                     swapIntake = false;
+                    flyWheelSpeed = 0;
                 } else if (pivotPos == 50) {
                     pivotPos = maxPivotPos;
                     swapIntake = false;
+                    flyWheelSpeed = -0.65;
                 } else {
                     pivotPos = maxPivotPos;
                     swapIntake = false;
+                    flyWheelSpeed = 0;
                 }
             }
         }

@@ -33,9 +33,9 @@ public class Robot extends TimedRobot {
 
     public boolean doesIncrement = true;
 
-    public double kS = 0.19;
-    public double kV = 0.115;
-    public double kP = 0.0001;
+    public double kS = 0.208;
+    public double kV = 0.0;
+    public double kP = 0.000;
 
     public double pidOutput = 0;
 
@@ -46,11 +46,10 @@ public class Robot extends TimedRobot {
     public PIDController pid = new PIDController(kP, 0, 0);
 
     
-    public TalonFX motor1 = new TalonFX(16);
-    public TalonFX motor2 = new TalonFX(17);
+    public TalonFX motor1 = new TalonFX(15);
+   
     protected TalonFXConfiguration config = new TalonFXConfiguration().withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(20));
 
-    public Follower motorFollow = new Follower(16, MotorAlignmentValue.Opposed);
 
     public XboxController xboxController = new XboxController(0);
 
@@ -62,7 +61,7 @@ public class Robot extends TimedRobot {
 
     public Robot() {
 
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         motor1.getConfigurator().apply(config);
     }
 
@@ -178,7 +177,7 @@ public class Robot extends TimedRobot {
             motor1.setVoltage(0);
         }
         motor1.setControl(new VelocityVoltage(rpmSetpoint / 60));
-        motor2.setControl(motorFollow);
+       
 
         SmartDashboard.putNumber("indexNum", index);
         SmartDashboard.putNumber("kP", kP);

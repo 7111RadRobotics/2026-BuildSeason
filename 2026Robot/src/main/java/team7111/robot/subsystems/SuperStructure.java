@@ -187,6 +187,7 @@ public class SuperStructure extends SubsystemBase {
             phaseLength = 30.0;
         }
 
+        hopper.giveShooterSpeed(targeting.getCalculatedSpeed());
         
         //Timer for the periodic
         long startTime = System.nanoTime();
@@ -584,7 +585,7 @@ public class SuperStructure extends SubsystemBase {
         targeting.setToggle(true);
         targeting.setShotType(shotType.Preset);
         shooter.setState(ShooterState.followAimbot);
-        intake.setState(IntakeState.shoot);
+        intake.setState(IntakeState.gyrate);
         hopper.setState(HopperState.shoot);
         if(intaking){
             setSuperState(SuperState.snowBlowerPass);

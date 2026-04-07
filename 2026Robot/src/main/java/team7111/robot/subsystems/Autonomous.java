@@ -387,29 +387,29 @@ public class Autonomous extends SubsystemBase {
             case LNsweep:
                 waypoints.add(fastPoint(5.7, 7.389072, -90));
                 waypoints.add(balancedPoint(7.7, 6.809072, 180));
-                waypoints.add(slowPoint(7.6, 4.569072, 180));
+                waypoints.add(slowPoint(7.6, 5.00569072, 180));
                 break;
             case RSweepToBump:
                 waypoints.add(fastPoint(6.3, 2.5, -135));
                 waypoints.add(balancedPoint(2.26, 2.46, -135));
                 break;
             case LSweepToBump:
-                waypoints.add(slowPoint(6.3, 5.669072, -135));
+                waypoints.add(slowPoint(6.3, 5.00669072, -135));
                 waypoints.add(balancedPoint(2.26, 5.689072, -135));
                 break;
             case RSweepToTrench:
                 waypoints.add(fastPoint(6.334, 3.071, 127.5));
                 waypoints.add(balancedPoint(5.86, 1.86, 179));
                 //waypoints.add(balancedPoint(5.86, 1.86, 90)); // uncomment if running into wall
-                waypoints.add(balancedPoint(5.86, 0.96, 90));
-                waypoints.add(balancedPoint(3.94, 0.96, 90));
+                waypoints.add(balancedPoint(5.86, 0.68, 90));
+                waypoints.add(balancedPoint(3.94, 0.68, 90));
                 break;
             case LSweepToTrench:
                 waypoints.add(fastPoint(6.334, 4.4, 63));
                 waypoints.add(balancedPoint(5.86, 6, 0));
                 //waypoints.add(balancedPoint(5.86, 6, -90)); // uncomment if running into wall
-                waypoints.add(balancedPoint(5.86, 7.09072, -90));
-                waypoints.add(balancedPoint(3.94, 7.09072, -90));
+                waypoints.add(balancedPoint(5.86, 7.389072, -90));
+                waypoints.add(balancedPoint(3.94, 7.389072, -90));
                 break;
             case outpost:
                 waypoints.add(balancedPoint(1.5, 0.7, 90));
