@@ -145,7 +145,9 @@ public class Hopper extends SubsystemBase {
         isFollowingShooter = true;
         if (!timeDelay(timer, 1)) {
                 spindexerSpeed = -0.2;
-            } else {spindexerSpeed = 0;}
+        } else {
+            spindexerSpeed = 0;
+        }
     }
 
     private void intake(){
@@ -158,6 +160,7 @@ public class Hopper extends SubsystemBase {
 
         if (spindexer.getCurrent() >= 100) {
             currentState = HopperState.unjam;
+            unJam();
             return;
         }
         shooterIndexerSpeed = 0.4;
