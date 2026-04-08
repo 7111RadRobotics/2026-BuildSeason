@@ -94,9 +94,9 @@ public class Aimbot extends SubsystemBase{
     /** Offset from ground the ball leaves the shooter, in meters */
     private final double shooterHeightOffset = Units.inchesToMeters(20);
     /** Offset from the center of the robot to the shooter, in meters */
-    private final double shooterXOffset = -0.191;
+    private final double shooterXOffset = 0.0;
     /** Offset from the center of the robot to the shooter in meters */
-    private final double shooterYOffset = 0.207;
+    private final double shooterYOffset = 0.0;//0.207;
     /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
     private final double shooterOptimalSpeed = 1500;
 

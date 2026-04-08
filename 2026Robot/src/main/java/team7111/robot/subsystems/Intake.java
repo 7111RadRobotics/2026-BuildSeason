@@ -52,6 +52,7 @@ public class Intake extends SubsystemBase {
     private double flyWheelSpeed = 0;
 
     private double pivotPos = 0;
+    private double oldPivotPos = 0;
 
     private double manualIntakeSpeed = 0;
 
@@ -76,7 +77,10 @@ public class Intake extends SubsystemBase {
 
     private Timer timer = new Timer();
     private Timer swapTimer = new Timer();
+    
     private boolean swapIntake = false;
+
+    private boolean intakeHasReachedSetpoint = false;
 
     private IntakeState currentState = IntakeState.stow;
 
@@ -123,13 +127,21 @@ public class Intake extends SubsystemBase {
         
         flyWheel.setDutyCycle(flyWheelSpeed);
 
-       
+        /*if(oldPivotPos != pivotPos) {
+                intakeHasReachedSetpoint = false;
+        }*/
         if ((pivot.getPosition() >= pivotPos -1.5 && pivot.getPosition() <= pivotPos + 1.5)
-          || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy) || currentState.equals(IntakeState.intake)))) {
-            pivot.setVoltage(0);
+          || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy)))) {
+            if(!currentState.equals(IntakeState.intake))
+                pivot.setVoltage(0);
+            intakeHasReachedSetpoint = true;
+            
+            
         } else {
             pivot.setSetpoint(pivotPos, true);
         }
+        //oldPivotPos = pivotPos;*/
+
         
         flyWheel.periodic();
         pivot.periodic();
@@ -198,21 +210,28 @@ public class Intake extends SubsystemBase {
         //System.out.println("Runs code for the stow state");
         pivotPos = minPivotPos;
         flyWheelSpeed = 0;
+
     }
 
     private void deploy(){
         pivotPos = maxPivotPos;
         flyWheelSpeed = 0;
+
     }
 
     private void intake(){
         pivotPos = maxPivotPos;
-        flyWheelSpeed = -0.65;
+        flyWheelSpeed = -0.7;
+
+        if(pivot.isAtSetpoint(2)){
+            pivot.setVoltage(-1);
+        }
     }
 
     private void shoot(){
         pivotPos = 50;
         flyWheelSpeed = 0;
+
     }
 
     private void gyrate(){
@@ -235,13 +254,14 @@ public class Intake extends SubsystemBase {
                 } else if (pivotPos == 50) {
                     pivotPos = maxPivotPos;
                     swapIntake = false;
-                    flyWheelSpeed = -0.65;
+                    flyWheelSpeed = -0.7;
                 } else {
                     pivotPos = maxPivotPos;
                     swapIntake = false;
                     flyWheelSpeed = 0;
                 }
             }
+
         }
     }
 
@@ -272,6 +292,7 @@ public class Intake extends SubsystemBase {
 
     public void setPosition(double pos){
         pivotPos = pos;
+
     }
 
     private boolean timeDelay(Timer timer, double delay){

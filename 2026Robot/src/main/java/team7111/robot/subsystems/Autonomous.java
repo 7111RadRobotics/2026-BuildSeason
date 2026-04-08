@@ -38,8 +38,8 @@ public class Autonomous extends SubsystemBase {
     private WaypointConstraints fastTransConstraints = new WaypointConstraints(8, 2, 0.5);
     private WaypointConstraints fastRotConstraints = new WaypointConstraints(720, 0, 90);
     
-    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(5, 0, 0.2);
-    private WaypointConstraints balancedRotConstraints = new WaypointConstraints(720, 0, 1);
+    private WaypointConstraints balancedTransConstraints = new WaypointConstraints(3, 0, 0.2);
+    private WaypointConstraints balancedRotConstraints = new WaypointConstraints(270, 0, 5);
 
     private WaypointConstraints slowTransConstraints = new WaypointConstraints(1, 0, 0.2);
     private WaypointConstraints slowRotConstraints = new WaypointConstraints(180, 0, 0.8);
@@ -235,7 +235,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
-                    return timeDelay(10);
+                    return timeDelay(15);
                 }));
 
                 break;
@@ -247,7 +247,7 @@ public class Autonomous extends SubsystemBase {
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> {
                     superStructure.targeting.setShotType(shotType.Parabolic);
-                    return timeDelay(10);
+                    return timeDelay(15);
                 }));
                 break;
             case lt_TrenchTrench:
@@ -380,12 +380,12 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(trenchRWaypoints[1]);
                 break;
             case RNsweep:
-                waypoints.add(fastPoint(5.7, 0.68, -90));
+                waypoints.add(fastPoint(6.1, 0.68, -90));
                 waypoints.add(balancedPoint(7.7, 1.26, 0));
                 waypoints.add(slowPoint(7.6, 3.5, 0));
                 break;
             case LNsweep:
-                waypoints.add(fastPoint(5.7, 7.389072, -90));
+                waypoints.add(fastPoint(6.1, 7.389072, -90));
                 waypoints.add(balancedPoint(7.7, 6.809072, 180));
                 waypoints.add(slowPoint(7.6, 5.00569072, 180));
                 break;

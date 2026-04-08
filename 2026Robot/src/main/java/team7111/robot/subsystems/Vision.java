@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -41,8 +42,8 @@ public class Vision extends SubsystemBase{
      * Add new cameras by extending the array
      */
     private final Transform3d cameraPositionsToCenter[] = {
-        new Transform3d(0.35, 0.0685, 0.4905, new Rotation3d(0, Degrees.of(25).in(Radians), 0)),
-        new Transform3d(-0.588, -0.6, 0.17, new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(-165).in(Radians))),
+        new Transform3d(Units.inchesToMeters(-3.538), Units.inchesToMeters(2.714), Units.inchesToMeters(19.197), new Rotation3d(Degrees.of(180).in(Radians), Degrees.of(25).in(Radians), 0)),
+        new Transform3d(Units.inchesToMeters(-12.527), Units.inchesToMeters(10.395), Units.inchesToMeters(6.575), new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(-165).in(Radians) )),
     };
 
     //private final AHRS gyro;

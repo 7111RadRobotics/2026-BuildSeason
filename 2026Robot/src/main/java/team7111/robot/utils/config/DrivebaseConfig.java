@@ -237,7 +237,7 @@ public class DrivebaseConfig {
         double driveMOI = 0.25;
         double angleMOI = 0.001;
         int driveCurrentLimit = 40;
-        int angleCurrentLimit = 20;
+        int angleCurrentLimit = 40;
         boolean driveInversion = false;
         boolean angleInversion = true;
         boolean driveBrakeMode = true;
