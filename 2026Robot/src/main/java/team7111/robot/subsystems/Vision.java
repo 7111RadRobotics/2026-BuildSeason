@@ -43,7 +43,7 @@ public class Vision extends SubsystemBase{
      */
     private final Transform3d cameraPositionsToCenter[] = {
         new Transform3d(Units.inchesToMeters(-3.538), Units.inchesToMeters(2.714), Units.inchesToMeters(19.197), new Rotation3d(Degrees.of(180).in(Radians), Degrees.of(25).in(Radians), 0)),
-        new Transform3d(Units.inchesToMeters(-12.527), Units.inchesToMeters(10.395), Units.inchesToMeters(6.575), new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(-165).in(Radians) )),
+        new Transform3d(Units.inchesToMeters(-12.527), Units.inchesToMeters(-10.395), Units.inchesToMeters(6.575), new Rotation3d(0, Degrees.of(15).in(Radians), Degrees.of(-165).in(Radians) )),
     };
 
     //private final AHRS gyro;
@@ -87,14 +87,14 @@ public class Vision extends SubsystemBase{
         shooterCam = new Camera(
             "OV9281_4", 
             cameraPositionsToCenter[0], 
-            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR), 
             this
         );
 
         climberCam = new Camera(
             "OV9281_3 (1)", 
             cameraPositionsToCenter[1], 
-            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.AVERAGE_BEST_TARGETS), 
+            new EstimatedRobotPose(estPose3d, 0.0, targets, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR), 
             this
         );
 

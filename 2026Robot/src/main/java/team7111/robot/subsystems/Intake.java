@@ -130,10 +130,14 @@ public class Intake extends SubsystemBase {
         /*if(oldPivotPos != pivotPos) {
                 intakeHasReachedSetpoint = false;
         }*/
-        if ((pivot.getPosition() >= pivotPos -1.5 && pivot.getPosition() <= pivotPos + 1.5)
-          || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy)))) {
-            if(!currentState.equals(IntakeState.intake))
+        if ((pivot.getPosition() >= pivotPos -2.5 && pivot.getPosition() <= pivotPos + 2.5)
+          || (pivot.getPosition() > maxPivotPos - 2.0 && (currentState.equals(IntakeState.deploy) || currentState.equals(IntakeState.intake)))) {
+            if(!currentState.equals(IntakeState.intake)){
                 pivot.setVoltage(0);
+            }else{
+                pivot.setVoltage(1.0);
+            }
+                
             intakeHasReachedSetpoint = true;
             
             
@@ -173,7 +177,8 @@ public class Intake extends SubsystemBase {
     // These can be checked in SuperStructure to determine a SuperState
     // or change a state/value in another subsystem.
     public boolean isAtSetpoint(){
-        boolean isAtSetpoint = true; // would be true if mechanisms were at/near their setpoints.
+        boolean isAtSetpoint = pivot.isAtSetpoint(2); // would be true if mechanisms were at/near their setpoints.
+        
         return isAtSetpoint;
     }
 
@@ -210,7 +215,9 @@ public class Intake extends SubsystemBase {
         //System.out.println("Runs code for the stow state");
         pivotPos = minPivotPos;
         flyWheelSpeed = 0;
-
+        if(pivot.getPosition() <= pivotPos + 2.5){
+            pivot.setVoltage(0);
+        }
     }
 
     private void deploy(){
@@ -224,7 +231,7 @@ public class Intake extends SubsystemBase {
         flyWheelSpeed = -0.7;
 
         if(pivot.isAtSetpoint(2)){
-            pivot.setVoltage(-1);
+            //pivot.setVoltage(-1);
         }
     }
 
@@ -239,7 +246,7 @@ public class Intake extends SubsystemBase {
         
 
 
-        if (pivot.isAtSetpoint(2.5) || timeDelay(timer, 2.5)) {
+        if (pivot.isAtSetpoint(2.5) || timeDelay(timer, 1.5)) {
             swapIntake = true;
             
         } 

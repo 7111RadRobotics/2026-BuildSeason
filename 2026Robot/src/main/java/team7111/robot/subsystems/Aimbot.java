@@ -96,7 +96,7 @@ public class Aimbot extends SubsystemBase{
     /** Offset from the center of the robot to the shooter, in meters */
     private final double shooterXOffset = 0.0;
     /** Offset from the center of the robot to the shooter in meters */
-    private final double shooterYOffset = 0.0;//0.207;
+    private double shooterYOffset = 0.15;
     /** Optimal rpm of the shooter wheel for max distance with continuous fire, in rotations per minute */
     private final double shooterOptimalSpeed = 1500;
 
@@ -231,7 +231,7 @@ public class Aimbot extends SubsystemBase{
 
         resetTarget();
 
-
+        
     }
 
     /** Sets suppliers if not able to be given when aimbot class is initilized */
@@ -350,6 +350,12 @@ public class Aimbot extends SubsystemBase{
         SmartDashboard.putBoolean("Is vision enabled", isUsingVision);
         SmartDashboard.putNumber("angle to target", degreeToTarget);
         SmartDashboard.putString("ShotType", currentShotType.toString());
+
+        if(DriverStation.getAlliance().isPresent()){
+            if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
+                shooterYOffset = -0.15;
+            }
+        }
 
         if(!isEnabled) {
             calculatedAngle = lowestShooterAngle;
@@ -569,7 +575,7 @@ public class Aimbot extends SubsystemBase{
         double distanceToTarget = CamToTarget.getX();
 
         // Vertical target height relative to shooter release
-        double heightDifference = CamToTarget.getZ() + 0.3;
+        double heightDifference = CamToTarget.getZ() + 0.2;
 
         //The distance to lip is half a meter from the target
         double distanceToLip = distanceToTarget - 0.5;
