@@ -164,7 +164,7 @@ public class Hopper extends SubsystemBase {
             return;
         }
         shooterIndexerSpeed = 0.4;
-        spindexerSpeed = 0.36;
+        spindexerSpeed = 0.51;
 
         
 

@@ -71,7 +71,7 @@ public class Autonomous extends SubsystemBase {
 
     private final Pose2d lTrenchStartPose = new Pose2d(4.25, 7.5, Rotation2d.fromDegrees(-90));
     private final Pose2d rTrenchStartPose = new Pose2d(4.25, 0.65, Rotation2d.fromDegrees(-90));
-    private final Pose2d hubStartPose =     new Pose2d(4.25, 4, Rotation2d.kZero);
+    private final Pose2d hubStartPose =     new Pose2d(3.75, 4, Rotation2d.kZero);
     //starting position abreviated. separated with "_"
     
     /**
@@ -132,13 +132,20 @@ public class Autonomous extends SubsystemBase {
     }
 
     public Autonomous(Field zone){
+        Autos defaultAuto;
         for (Autos auto : Autos.values()) {
             autoChooser.addOption(auto.name(), auto);
         }
-        autoChooser.setDefaultOption(Autos.shoot.name(), Autos.shoot);
+        defaultAuto = Autos.shoot;
+        //defaultAuto = Autos.lt_Trench;
+        //defaultAuto = Autos.rt_Trench;
+        //defaultAuto = Autos.shootDepot;
+        
+        autoChooser.setDefaultOption(defaultAuto.name(), defaultAuto);
         this.zone = zone;
         
         Shuffleboard.getTab("Autonomous").add("AutoChooser", autoChooser);
+        Shuffleboard.getTab("Autonomous").addString("Selected Auto", () -> getSelectedAuto().name());
 
         hubPublisher.accept(hubPresetPoses);
 
@@ -287,7 +294,7 @@ public class Autonomous extends SubsystemBase {
                 }));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
                 auto.add(new AutoAction(SuperState.intake));
-                auto.add(new AutoAction(getPath(Paths.depot)));
+                auto.add(new AutoAction(getPath(Paths.depot)).withOptionalCondition(() -> timeDelay(5)));
                 auto.add(new AutoAction(getPath(Paths.hubSetpointM)));
                 auto.add(new AutoAction(SuperState.prepareHubShot));
                 auto.add(new AutoAction(SuperState.score).withAlternateCondition(() -> timeDelay(5)));
@@ -398,15 +405,17 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(balancedPoint(2.26, 5.689072, -135));
                 break;
             case RSweepToTrench:
-                waypoints.add(fastPoint(6.334, 3.071, 127.5));
-                waypoints.add(balancedPoint(5.86, 1.86, 179));
+                //waypoints.add(fastPoint(6.334, 3.071, 127.5)); // temp uncomment
+                //waypoints.add(balancedPoint(5.86, 1.86, 179)); // temp uncomment
+
                 //waypoints.add(balancedPoint(5.86, 1.86, 90)); // uncomment if running into wall
                 waypoints.add(balancedPoint(5.86, 0.68, 90));
                 waypoints.add(balancedPoint(3.94, 0.68, 90));
                 break;
             case LSweepToTrench:
-                waypoints.add(fastPoint(6.334, 4.4, 63));
-                waypoints.add(balancedPoint(5.86, 6, 0));
+                //waypoints.add(fastPoint(6.334, 4.4, 63)); // temp uncomment
+                //waypoints.add(balancedPoint(5.86, 6, 0)); // temp uncomment
+
                 //waypoints.add(balancedPoint(5.86, 6, -90)); // uncomment if running into wall
                 waypoints.add(balancedPoint(5.86, 7.389072, -90));
                 waypoints.add(balancedPoint(3.94, 7.389072, -90));
@@ -416,7 +425,7 @@ public class Autonomous extends SubsystemBase {
                 waypoints.add(slowPoint(0.76, 0.7, 90));
                 break;
             case depot:
-                waypoints.add(balancedPoint(2.376, 4.03, 90));
+                waypoints.add(balancedPoint(2.376, 4.03, 0));
 
             case depotLTrench:
                 waypoints.add(balancedPoint(1.78, 5.78, 90));

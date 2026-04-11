@@ -84,6 +84,7 @@ public class SuperStructure extends SubsystemBase {
     private boolean orientWithBump = false;
     private boolean useObjectDetection = false;
     private boolean defaultDrive = true;
+    private boolean useXWheels = false;
     
     private boolean intaking = false;
     private boolean scoring = false;
@@ -211,13 +212,18 @@ public class SuperStructure extends SubsystemBase {
         // } else if(visionRobotPoseShooter != null && RobotBase.isReal()){
         //     if(!useOneCamera && !hasAppliedVisionMeasurement)
         //         swerve.addVisionMeasurement(visionRobotPoseShooter.toPose2d(), true);
+        boolean useAssumedPose = true;
         if(bestVisionRobotPose != null){
+            useAssumedPose = false;
             swerve.addVisionMeasurement(bestVisionRobotPose.toPose2d(), true);
-        } else if(matchTime <= 0 && DriverStation.isDisabled()){
+        }
+
+        if((matchTime <= 0 && DriverStation.isDisabled()) || driverController.getYButtonPressed()){
             Autos selectedAuto = auto.getSelectedAuto();
-            if (!currentAutos.equals(selectedAuto)){
+            if (!currentAutos.equals(selectedAuto) || driverController.getYButtonPressed()){
                 autoActions = auto.getAutonomous(selectedAuto);
-                swerve.resetOdometry(auto.getAssumedPose());
+                if(useAssumedPose)
+                    swerve.resetOdometry(auto.getAssumedPose());
                 ArrayList<Pose2d> pathPoses = new ArrayList<>();
                 pathPoses.add(auto.getAssumedPose());
                 for (AutoAction action : autoActions) {
@@ -240,6 +246,7 @@ public class SuperStructure extends SubsystemBase {
                 currentAutos = selectedAuto;
             }
         }
+        SmartDashboard.putString("SuperStructure Auto", currentAutos.name());
 
         // Driver controller commands
         /* Current plan for driver controls:
@@ -274,11 +281,16 @@ public class SuperStructure extends SubsystemBase {
         stow = driverController.getBButton();
 
         if(driverController.getLeftBumperButtonPressed()) {
-            intaking = true;
-            useObjectDetection = true;
+            //intaking = true;
+            //useObjectDetection = true;
+            useXWheels = true;
         } else if(driverController.getLeftBumperButtonReleased()) {
-            intaking = false;
-            useObjectDetection = false;
+            //intaking = false;
+            //useObjectDetection = false;
+            useXWheels = false;
+            if(superState == SuperState.score || superState == SuperState.snowBlowerScore || superState == SuperState.prepareHubShot){
+                swerve.setSwerveState(SwerveState.snapAngle);
+            }
         }
 
         if(driverController.getLeftTriggerAxis() > 0.1 && !intaking) {
@@ -300,6 +312,7 @@ public class SuperStructure extends SubsystemBase {
 
         if(driverController.getRightTriggerAxis() > 0.1 && !scoring) {
             scoring = true;
+            
         }else if(driverController.getRightTriggerAxis() <= 0.1 && scoring){
             scoring = false;
         }
@@ -376,6 +389,10 @@ public class SuperStructure extends SubsystemBase {
         hasAcheivedState = manageSuperState(superState);
 
         //Overrides any states for hopper and intake manual
+
+        if(useXWheels){
+            swerve.setSwerveState(SwerveState.x);
+        }
 
         if(operatorController.getPOV() != -1) {
             hopper.setState(HopperState.manual);

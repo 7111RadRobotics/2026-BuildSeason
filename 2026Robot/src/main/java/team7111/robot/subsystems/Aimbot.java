@@ -101,7 +101,7 @@ public class Aimbot extends SubsystemBase{
     private final double shooterOptimalSpeed = 1500;
 
     /** Extra multiplier to account for losses from drag, rpm loss from ball, ect */
-    private final double RPMMult = 1.6;
+    private final double RPMMult = 1.65;
 
     /** How far from horizontal the camera is, in degrees */
     private double cameraAngleOffset = 0.0;
@@ -575,7 +575,7 @@ public class Aimbot extends SubsystemBase{
         double distanceToTarget = CamToTarget.getX();
 
         // Vertical target height relative to shooter release
-        double heightDifference = CamToTarget.getZ() + 0.2;
+        double heightDifference = CamToTarget.getZ() + 0.15;
 
         //The distance to lip is half a meter from the target
         double distanceToLip = distanceToTarget - 0.5;

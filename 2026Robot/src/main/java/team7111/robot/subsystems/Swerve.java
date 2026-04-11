@@ -84,6 +84,7 @@ public class Swerve extends SubsystemBase {
         runPath,
         manual,
         stationary,
+        x,
         snapAngle,
         bumpAlign,
         followGamePiece
@@ -213,6 +214,15 @@ public class Swerve extends SubsystemBase {
                 break;
             case stationary:
                 manual(0, 0, 0, false, false, false);
+                break;
+            case x:
+                SwerveModuleState[] states = new SwerveModuleState[]{
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(135)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(-135)),
+                };
+                setModuleStates(states);
                 break;
             case snapAngle:
                 // Optimize code

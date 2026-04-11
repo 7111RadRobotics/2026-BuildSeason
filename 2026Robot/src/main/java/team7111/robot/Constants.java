@@ -78,7 +78,7 @@ public class Constants {
         
         /** Swerve constraints. */
         public static final double maxDriveVelocity = 7.5;
-        public static final double maxAngularVelocity = 7;
+        public static final double maxAngularVelocity = 9;
         public static final double sensitivity = 1;
 
         /** 
