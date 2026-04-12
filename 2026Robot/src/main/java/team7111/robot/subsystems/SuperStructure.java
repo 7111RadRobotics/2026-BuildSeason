@@ -434,9 +434,9 @@ public class SuperStructure extends SubsystemBase {
                         }
                     }
                     if((swerve.getPose().getY() >= Units.inchesToMeters(317.69/2) && autoTargeting) || (!autoTargeting && operatorController.getLeftBumperButton())) {
-                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() + Units.inchesToMeters(307.69) / 4, corner.getZ(), null));
                     } else {
-                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(317.69) / 4, corner.getZ(), null));
+                        targeting.setCustomTarget(new Pose3d(corner.getX(), corner.getY() - Units.inchesToMeters(307.69) / 4, corner.getZ(), null));
                     }
                 }
             }
